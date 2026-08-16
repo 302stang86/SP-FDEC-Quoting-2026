@@ -1,0 +1,2839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FDEC Quoting &amp; Proposal Suite 2026</title>
+<style>
+  :root{
+    --navy:#182635; --red:#b3202c; --line:#d9dde2; --page:#eef0f3;
+    --muted:#9fb0c2;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--page);
+    font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    display:flex; flex-direction:column; height:100vh;
+  }
+  .suitebar{
+    background:var(--navy); color:#fff; flex:none;
+    border-bottom:4px solid var(--red);
+    display:flex; align-items:stretch; gap:0;
+    padding:0 14px;
+  }
+  .suitebar .brand{
+    display:flex; flex-direction:column; justify-content:center;
+    padding:10px 18px 10px 8px; margin-right:auto;
+  }
+  .suitebar .brand b{font-size:15px; letter-spacing:.04em}
+  .suitebar .brand span{font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-top:2px}
+  .suitebar nav{display:flex; align-items:stretch}
+  .suitebar button{
+    font:inherit; font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+    background:transparent; color:var(--muted); border:none; cursor:pointer;
+    padding:0 22px; border-bottom:4px solid transparent; margin-bottom:-4px;
+    transition:color .12s, border-color .12s;
+  }
+  .suitebar button:hover{color:#fff}
+  .suitebar button.active{color:#fff; border-bottom-color:var(--red)}
+  .suitebar button.export{
+    align-self:center; margin:0 4px 0 18px; padding:8px 16px;
+    border:1px solid #a9d5a2; border-bottom:1px solid #a9d5a2;
+    border-radius:6px; background:#e3f4e1; color:#1f5a2b;
+    text-transform:none; letter-spacing:.02em; font-size:12.5px;
+  }
+  .suitebar button.export:hover{background:#d3ecd0; color:#1f5a2b; border-color:#8cc684}
+  .suitebar button.export:disabled{opacity:.6; cursor:default}
+  .suitebar button.signout{
+    align-self:center; margin:0 0 0 4px; padding:8px 14px;
+    border:1px solid #3a5670; border-radius:6px; background:#22384d; color:#dfe7ef;
+    text-transform:none; letter-spacing:.02em; font-size:12.5px;
+  }
+  .suitebar button.signout:hover{background:#2b445e; color:#fff}
+  .views{flex:1; position:relative; min-height:0}
+  .views iframe{
+    position:absolute; inset:0; width:100%; height:100%;
+    border:none; background:var(--page);
+  }
+  .views iframe[hidden]{display:none}
+  @media(max-width:560px){
+    .suitebar .brand span{display:none}
+    .suitebar button{padding:0 14px}
+  }
+
+  /* ---------------- Auth gate ---------------- */
+  #authGate{
+    position:fixed; inset:0; z-index:1000;
+    background:linear-gradient(160deg,#182635 0%,#22384d 60%,#31506d 100%);
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  #authGate[hidden]{display:none}
+  .auth-card{
+    width:100%; max-width:400px; background:#fff; border-radius:12px;
+    box-shadow:0 18px 50px rgba(0,0,0,.35); overflow:hidden;
+  }
+  .auth-head{
+    background:var(--navy); color:#fff; padding:20px 24px 16px;
+    border-bottom:4px solid var(--red);
+  }
+  .auth-head b{display:block; font-size:16px; letter-spacing:.03em}
+  .auth-head span{display:block; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:4px}
+  .auth-tabs{display:flex; border-bottom:1px solid var(--line)}
+  .auth-tabs button{
+    flex:1; font:inherit; font-size:13px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    background:#f4f6f8; color:#7c8896; border:none; cursor:pointer; padding:12px 0;
+    border-bottom:3px solid transparent;
+  }
+  .auth-tabs button.active{background:#fff; color:var(--navy); border-bottom-color:var(--red)}
+  .auth-body{padding:22px 24px 24px}
+  .auth-body[hidden]{display:none}
+  .auth-field{display:block; margin-bottom:14px}
+  .auth-field label{display:block; font-size:12px; font-weight:600; color:#5a6673; margin-bottom:5px; letter-spacing:.02em}
+  .auth-field input{
+    width:100%; font:inherit; font-size:14px; padding:9px 11px;
+    border:1px solid var(--line); border-radius:6px; background:#fcfcfd;
+  }
+  .auth-field input:focus{border-color:var(--red); outline:none; background:#fff}
+  .auth-row{display:flex; align-items:center; gap:8px; margin:2px 0 16px; font-size:13px; color:#5a6673}
+  .auth-row input{width:15px; height:15px; accent-color:var(--red)}
+  .auth-btn{
+    width:100%; font:inherit; font-size:14px; font-weight:700; letter-spacing:.03em;
+    background:var(--red); color:#fff; border:none; border-radius:6px;
+    padding:11px 0; cursor:pointer;
+  }
+  .auth-btn:hover{background:#8f1a23}
+  .auth-btn:disabled{opacity:.5; cursor:default}
+  .auth-msg{font-size:12.5px; margin-top:12px; min-height:16px; line-height:1.4}
+  .auth-msg.err{color:var(--red)}
+  .auth-msg.ok{color:#1f7a3d}
+  /* password strength meter */
+  .pw-meter{margin:-4px 0 6px}
+  .pw-bars{display:flex; gap:5px; margin-bottom:5px}
+  .pw-bars span{flex:1; height:5px; border-radius:3px; background:#e3e6ea; transition:background .15s}
+  .pw-bars.weak   span:nth-child(1){background:#d64545}
+  .pw-bars.medium span:nth-child(1),
+  .pw-bars.medium span:nth-child(2){background:#e0a53a}
+  .pw-bars.strong span{background:#2f9e51}
+  .pw-label{font-size:11.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase}
+  .pw-label.weak{color:#d64545}
+  .pw-label.medium{color:#c98a1e}
+  .pw-label.strong{color:#2f9e51}
+  .pw-rules{list-style:none; margin:8px 0 4px; padding:0; font-size:11.5px; color:#8a94a0}
+  .pw-rules li{margin:3px 0; padding-left:18px; position:relative}
+  .pw-rules li::before{content:"\2022"; position:absolute; left:4px; color:#c2c8d0}
+  .pw-rules li.met{color:#2f9e51}
+  .pw-rules li.met::before{content:"\2713"; left:2px; color:#2f9e51; font-weight:700}
+  .auth-foot{font-size:10.5px; color:#9aa4af; text-align:center; padding:0 24px 18px}
+</style>
+</head>
+<body>
+
+<div id="authGate">
+  <div class="auth-card">
+    <div class="auth-head">
+      <b>Fire Defense Equipment Company, Inc.</b>
+      <span>Quoting &amp; Proposal Suite &middot; Secure Access</span>
+    </div>
+    <div class="auth-tabs">
+      <button id="authTabLogin" class="active" type="button" onclick="authShow('login')">Sign In</button>
+      <button id="authTabReg" type="button" onclick="authShow('register')">Register</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="authLogin" class="auth-body">
+      <label class="auth-field">
+        <label>Username</label>
+        <input id="loginUser" type="text" autocomplete="username" placeholder="Your username">
+      </label>
+      <label class="auth-field">
+        <label>Password</label>
+        <input id="loginPass" type="password" autocomplete="current-password" placeholder="Your password">
+      </label>
+      <div class="auth-row">
+        <input id="loginRemember" type="checkbox">
+        <label for="loginRemember" style="margin:0; font-weight:400; cursor:pointer">Keep me signed in on this device</label>
+      </div>
+      <button id="loginBtn" class="auth-btn" type="button" onclick="doLogin()">Sign In</button>
+      <div id="loginMsg" class="auth-msg"></div>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="authRegister" class="auth-body" hidden>
+      <label class="auth-field">
+        <label>Username</label>
+        <input id="regUser" type="text" autocomplete="username" placeholder="Choose a username">
+      </label>
+      <label class="auth-field">
+        <label>Password</label>
+        <input id="regPass" type="password" autocomplete="new-password" placeholder="Create a password" oninput="onRegPassInput()">
+      </label>
+      <div class="pw-meter">
+        <div class="pw-bars" id="pwBars"><span></span><span></span><span></span></div>
+        <div class="pw-label" id="pwLabel">&nbsp;</div>
+        <ul class="pw-rules" id="pwRules">
+          <li data-rule="len">8–12 characters</li>
+          <li data-rule="upper">1 capital letter</li>
+          <li data-rule="lower">1 alphabetical (lowercase) letter</li>
+          <li data-rule="num">1 number</li>
+          <li data-rule="special">1 special character</li>
+        </ul>
+      </div>
+      <label class="auth-field">
+        <label>Confirm Password</label>
+        <input id="regPass2" type="password" autocomplete="new-password" placeholder="Re-enter password" oninput="onRegPassInput()">
+      </label>
+      <button id="regBtn" class="auth-btn" type="button" onclick="doRegister()">Create Account</button>
+      <div id="regMsg" class="auth-msg"></div>
+    </div>
+
+    <div class="auth-foot">Accounts are stored only in this browser on this device.</div>
+  </div>
+</div>
+
+<div class="suitebar">
+  <div class="brand">
+    <b>Fire Defense Equipment Company, Inc.</b>
+    <span>Sprinkler Department &middot; Quoting &amp; Proposal Suite &middot; 2026</span>
+  </div>
+  <nav>
+    <button id="tab-quote" class="active" type="button" onclick="showView('quote')">Quoting Template</button>
+    <button id="tab-proposal" type="button" onclick="showView('proposal')">Repair Verbiage</button>
+    <button id="btn-export" class="export" type="button" onclick="exportFullPackage()" title="Combined PDF of both pages, plus the Word proposal">Export Full Package</button>
+    <button id="btn-signout" class="signout" type="button" onclick="doSignOut()" title="Sign out">Sign Out</button>
+  </nav>
+</div>
+
+<div class="views">
+  <iframe id="view-quote" title="FDEC Quoting Template"></iframe>
+  <iframe id="view-proposal" title="FDEC Proposal Builder" hidden></iframe>
+</div>
+
+<script type="text/html" id="src-quote"><!DOCTYPE html>
+<!-- saved from url=(0061)file:///C:/Users/mitch/Downloads/FDEC_Quoting_Template_2.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FDEC 2026 Quoting Template</title>
+<style>
+  :root{
+    --ink:#20262d; --steel:#5b6572; --line:#d9dde2; --card:#ffffff;
+    --page:#eef0f3; --red:#b3202c; --navy:#182635; --soft:#f6f7f9;
+    --good:#1c6e3c;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--page); color:var(--ink);
+    font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    font-variant-numeric:tabular-nums; padding-bottom:84px;
+  }
+  header.top{
+    background:var(--navy); color:#fff; padding:18px 22px;
+    border-bottom:4px solid var(--red);
+  }
+  header.top h1{margin:0; font-size:19px; letter-spacing:.04em}
+  header.top .sub{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#9fb0c2; margin-top:3px}
+  header.top .topflex{display:flex; align-items:flex-end; gap:16px; max-width:1080px; margin:0 auto}
+  header.top .credit{margin-left:auto; text-align:right; font-size:11px; letter-spacing:.08em; color:#9fb0c2; line-height:1.5; white-space:nowrap}
+  .wrap{max-width:1080px; margin:0 auto; padding:18px 14px}
+  .jobbar{display:grid; grid-template-columns:2fr 1fr 1fr; gap:12px; margin-bottom:16px}
+  .jobbar label{display:block; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--steel); margin-bottom:4px}
+  .jobbar input{width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:6px; font-size:15px; background:var(--card)}
+  details.card{
+    background:var(--card); border:1px solid var(--line); border-radius:8px;
+    margin-bottom:14px; overflow:hidden;
+  }
+  details.card>summary{
+    list-style:none; cursor:pointer; padding:12px 16px; user-select:none;
+    display:flex; align-items:baseline; gap:10px; border-left:4px solid var(--red);
+    font-weight:700; font-size:14px; letter-spacing:.06em; text-transform:uppercase;
+  }
+  details.card>summary::-webkit-details-marker{display:none}
+  details.card>summary .sect-total{margin-left:auto; font-weight:700; color:var(--steel); font-size:14px; text-transform:none; letter-spacing:0}
+  details.card[open]>summary{border-bottom:1px solid var(--line)}
+  .body{padding:14px 16px}
+  h3.sub{margin:14px 0 6px; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--steel)}
+  h3.sub:first-child{margin-top:0}
+  table{width:100%; border-collapse:collapse; font-size:14px}
+  th{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--steel); text-align:left; padding:6px 8px; border-bottom:1px solid var(--line)}
+  td{padding:5px 8px; border-bottom:1px solid #edeff2}
+  tr:last-child td{border-bottom:none}
+  td.num, th.num{text-align:right; white-space:nowrap}
+  input.qty, input.rate{
+    width:78px; padding:6px 8px; border:1px solid var(--line); border-radius:5px;
+    text-align:right; font-size:14px; font-variant-numeric:tabular-nums;
+  }
+  input.qty:focus, input.rate:focus, .jobbar input:focus, textarea:focus, select:focus, input.wide:focus{outline:2px solid var(--red); outline-offset:1px; border-color:var(--red)}
+  input.wide{width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:5px; font-size:14px}
+  input.money{width:110px}
+  .hint{font-size:12px; color:var(--steel); margin:6px 0 0}
+  .cols2{display:grid; grid-template-columns:1fr 1fr; gap:0 28px}
+  @media(max-width:760px){
+    .cols2{grid-template-columns:1fr}
+    .jobbar{grid-template-columns:1fr}
+  }
+  button{
+    font:inherit; border:1px solid var(--line); background:var(--soft); color:var(--ink);
+    border-radius:6px; padding:7px 14px; cursor:pointer;
+  }
+  button:hover{border-color:var(--steel)}
+  button.primary{background:var(--red); border-color:var(--red); color:#fff; font-weight:600}
+  button.small{padding:4px 10px; font-size:13px}
+  button.apply-mp{
+    font-weight:700;
+    background:#e3f4e1;
+    border-color:#a9d5a2;
+    color:#1f5a2b;
+  }
+  button.apply-mp:hover{ background:#d3ecd0; border-color:#8cc684; }
+  textarea{
+    width:100%; min-height:72px; padding:8px 10px; border:1px solid var(--line);
+    border-radius:6px; font:inherit; resize:vertical;
+  }
+  select{padding:6px 8px; border:1px solid var(--line); border-radius:5px; font:inherit; background:#fff}
+  .listrow{display:flex; gap:8px; margin-bottom:6px; align-items:center}
+  .listrow input{flex:1}
+  .listrow button{flex:none}
+  /* summary table */
+  #summaryTable td, #summaryTable th{padding:6px 8px}
+  #summaryTable tr.grand td{border-top:2px solid var(--ink); font-weight:700; font-size:18px}
+  #summaryTable tr.profit td{color:var(--good); border-top-width:1px}
+  /* Alternating stripes on itemized line rows: white / light gray / light blue */
+  #summaryTable tr.lineitem:nth-child(3n+1) td{background:#ffffff}
+  #summaryTable tr.lineitem:nth-child(3n+2) td{background:#f3f4f6}
+  #summaryTable tr.lineitem:nth-child(3n)   td{background:#e8f0fb}
+  /* Customer Total column (4th) bold across the whole table */
+  #summaryTable td:nth-child(4),
+  #summaryTable th:nth-child(4){font-weight:700}
+  .totbar{
+    position:fixed; left:0; right:0; bottom:0; background:var(--navy); color:#fff;
+    display:flex; gap:26px; align-items:center; padding:12px 22px; font-size:14px;
+    border-top:3px solid var(--red); z-index:50; flex-wrap:wrap;
+  }
+  .totbar .lab{font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#9fb0c2; display:block}
+  .totbar .val{font-size:18px; font-weight:700}
+  .totbar .val.big{font-size:22px}
+  .totbar .val.profit{color:#5fd48b}
+  .totbar .grow{margin-left:auto; display:flex; gap:8px}
+  .selected-list{columns:2; column-gap:28px; font-size:14px; padding-left:20px; margin:6px 0}
+  .selected-list li{break-inside:avoid; margin-bottom:2px}
+  @media(max-width:760px){.selected-list{columns:1}}
+  .empty{color:var(--steel); font-style:italic; font-size:14px}
+  .mkgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(215px,1fr)); gap:10px 12px}
+  .mk-item{
+    display:flex; align-items:center; gap:8px; font-size:14px;
+    border:1px solid var(--line); border-radius:6px;
+    padding:8px 10px; background:#fcfcfd;
+  }
+  .mk-item label{
+    flex:1; font-size:11.5px; letter-spacing:.03em; text-transform:uppercase;
+    color:var(--steel); line-height:1.25; font-weight:600;
+    border-right:1px solid var(--line); padding-right:8px; margin-right:2px;
+  }
+  .mk-item input{width:58px; text-align:right; flex:none}
+  .ratetable{max-width:480px; margin-bottom:4px}
+  .ratetable input{width:92px}
+  select.lvl{padding:5px 6px; font-size:13px}
+  .mp-note{font-size:13px; color:var(--steel)}
+  /* print */
+  @media print{
+    body{background:#fff; padding-bottom:0; font-size:12px}
+    header.top{-webkit-print-color-adjust:exact; print-color-adjust:exact}
+    .totbar, .noprint, button{display:none !important}
+    details.card{break-inside:avoid; border:none; border-top:2px solid var(--ink); border-radius:0}
+    details.card>summary{border-left:none; padding-left:0}
+    .body{padding-left:0; padding-right:0}
+    input, textarea, select{border:none !important; padding:0 !important}
+    tr.print-hide{display:none}
+  }
+</style>
+</head>
+<body>
+
+<script type="application/json" id="draftState"><\/script>
+<header class="top">
+  <div class="topflex">
+    <div>
+      <h1>Fire Defense Equipment Company, Inc.</h1>
+      <div class="sub">Sprinkler Department · 2026 Quoting Template</div>
+    </div>
+    <div class="credit">Mitch Peebles<br>V4.5 · 2026</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="jobbar">
+    <div><label for="jobName">Job Name</label><input id="jobName" data-save=""></div>
+    <div><label for="quoteNo">Quote Number</label><input id="quoteNo" data-save=""></div>
+    <div><label for="quoteDate">Date</label><input id="quoteDate" type="date" data-save=""></div>
+  </div>
+
+  <!-- MARKUPS -->
+  <details class="card" id="sec-markups">
+    <summary>Markups &amp; Rates</summary>
+    <div class="body">
+      <h3 class="sub">Hourly Rates by Technician Level</h3>
+      <table class="ratetable"><thead>
+        <tr><th>Class</th><th class="num">Level 1</th><th class="num">Level 2</th><th class="num">Level 3</th></tr>
+      </thead><tbody id="rateTable"></tbody></table>
+      <p class="hint" style="margin-bottom:14px">Labor lines start at Level 2 (book rates). Every rate in this template is editable.</p>
+      <h3 class="sub">Markups</h3>
+      <div class="mkgrid">
+        <div class="mk-item"><label>Vendor-quoted material markup</label><input class="qty mk" data-key="material" type="number" min="0" step="1" value="110">%</div>
+        <div class="mk-item"><label>Misc material markup</label><input class="qty mk" data-key="miscmat" type="number" min="0" step="1" value="110">%</div>
+        <div class="mk-item"><label>Sales tax (MI)</label><input class="qty mk" data-key="tax" type="number" min="0" step="0.1" value="6">%</div>
+        <div class="mk-item"><label>Sample testing</label><input class="qty mk" data-key="samples" type="number" min="0" step="1" value="20">%</div>
+        <div class="mk-item"><label>Subcontractor quotes</label><input class="qty mk" data-key="subq" type="number" min="0" step="1" value="15">%</div>
+        <div class="mk-item"><label>Outside rental</label><input class="qty mk" data-key="rentalq" type="number" min="0" step="1" value="20">%</div>
+        <div class="mk-item"><label>Backflow</label><input class="qty mk" data-key="backflow" type="number" min="0" step="1" value="20">%</div>
+        <div class="mk-item"><label>Fire pump</label><input class="qty mk" data-key="firepump" type="number" min="0" step="1" value="20">%</div>
+        <div class="mk-item"><label>Equipment fees</label><input class="qty mk" data-key="eqfees" type="number" min="0" step="1" value="60">%</div>
+        <div class="mk-item"><label>Hotel</label><input class="qty mk" data-key="hotel" type="number" min="0" step="1" value="50">%</div>
+        <div class="mk-item"><label>Other expense</label><input class="qty mk" data-key="other" type="number" min="0" step="1" value="50">%</div>
+        <div class="mk-item"><label>Permit fees</label><input class="qty mk" data-key="permit" type="number" min="0" step="1" value="10">%</div>
+        <div class="mk-item"><label>Downpayment</label><input class="qty mk" data-key="down" type="number" min="0" step="1" value="30">%</div>
+      </div>
+      <p class="hint">These percentages apply across the whole quote. Labor, transportation, per diem, FDEC lift rental, and ITM material always bill at cost.</p>
+    </div>
+  </details>
+
+  <!-- MANPOWER -->
+  <details class="card" open="" id="sec-manpower">
+    <summary>Manpower Breakdown</summary>
+    <div class="body">
+      <table id="mpTable"><thead>
+        <tr><th style="width:30%">Task / Phase</th><th>Dept</th><th class="num">Technicians</th><th class="num">Hours Each</th><th>Rate Class</th><th class="num">Total Hours</th><th class="num">Trips</th><th class="noprint"></th></tr>
+      </thead><tbody id="mpRows"></tbody></table>
+      <button class="small noprint" style="margin-top:8px" type="button" onclick="addMpRow()">+ Add task</button>
+      <div style="margin-top:12px; display:flex; gap:20px; flex-wrap:wrap; align-items:center">
+        <span class="mp-note">ST: <b id="mpST">0</b> hrs &nbsp;·&nbsp; OT: <b id="mpOT">0</b> hrs &nbsp;·&nbsp; DT: <b id="mpDT">0</b> hrs &nbsp;·&nbsp; Admin: <b id="mpAD">0</b> hrs &nbsp;·&nbsp; Total: <b id="mpTot">0</b> hrs</span>
+        <span class="mp-note">Transportation: <b id="mpSPtrips">0</b> SP truck trip(s) &nbsp;·&nbsp; <b id="mpALtrips">0</b> AL truck trip(s)</span>
+        <button class="small noprint apply-mp" type="button" onclick="applyManpower()">Apply to Labor &amp; Transportation</button>
+      </div>
+      <div style="margin-top:6px">
+        <span class="hint">Trips = technicians × (hours each ÷ 8, rounded up) — one truck per technician per day. Sprinkler tasks book the SP truck, fire alarm tasks the AL truck; admin hours generate no trips. Editing manpower updates the transportation quantities automatically; you can still adjust them by hand afterward.</span>
+      </div>
+    </div>
+  </details>
+
+  <!-- LABOR -->
+  <details class="card" open="" id="sec-labor">
+    <summary>Labor <span class="sect-total" data-sect="labor"></span></summary>
+    <div class="body">
+      <div class="cols2">
+        <div>
+          <h3 class="sub">Sprinkler</h3>
+          <table><thead><tr><th>Class</th><th>Level</th><th class="num">Rate</th><th class="num">Hours</th><th class="num">Total</th></tr></thead>
+            <tbody id="laborSP"></tbody></table>
+          <h3 class="sub">Associated Shop (Sprinkler)</h3>
+          <table><thead><tr><th>Class</th><th>Level</th><th class="num">Rate</th><th class="num">Hours</th><th class="num">Total</th></tr></thead>
+            <tbody id="laborShop"></tbody></table>
+        </div>
+        <div>
+          <h3 class="sub">Fire Alarm</h3>
+          <table><thead><tr><th>Class</th><th>Level</th><th class="num">Rate</th><th class="num">Hours</th><th class="num">Total</th></tr></thead>
+            <tbody id="laborFA"></tbody></table>
+          <p class="hint">Labor bills at cost — no markup applied. Shop hours roll into the sprinkler labor lines on the summary.</p>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- TRANSPORTATION -->
+  <details class="card" id="sec-transport">
+    <summary>Transportation &amp; Travel <span class="sect-total" data-sect="transport"></span></summary>
+    <div class="body">
+      <div class="cols2">
+        <div>
+          <h3 class="sub">Trucks</h3>
+          <table><thead><tr><th>Item</th><th class="num">Rate</th><th class="num">Qty</th><th class="num">Total</th></tr></thead>
+            <tbody id="trucks"></tbody></table>
+        </div>
+        <div>
+          <h3 class="sub">Per Diem &amp; Hotel</h3>
+          <table><thead><tr><th>Item</th><th class="num">Rate</th><th class="num">Qty</th><th class="num">Total</th></tr></thead>
+            <tbody id="perdiem"></tbody></table>
+          <table style="margin-top:6px"><tbody>
+            <tr><td>Hotel (actual cost)</td><td class="num" style="color:var(--steel)">+<span class="mklbl" data-mk="hotel">50</span>%</td>
+                <td class="num"><input class="qty money" type="number" min="0" step="0.01" id="hotelCost" data-save=""></td>
+                <td class="num" id="hotelOut">$0.00</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- EQUIPMENT RENTAL -->
+  <details class="card" id="sec-rental">
+    <summary>Equipment Rental <span class="sect-total" data-sect="rental"></span></summary>
+    <div class="body">
+      <div class="cols2">
+        <div>
+          <h3 class="sub">FDEC Lift &amp; Equipment (billed at cost)</h3>
+          <table><thead><tr><th>Item</th><th class="num">Rate</th><th class="num">Qty</th><th class="num">Total</th></tr></thead>
+            <tbody id="fdecRental"></tbody></table>
+        </div>
+        <div>
+          <h3 class="sub">Outside Rental Quotes (+<span class="mklbl" data-mk="rentalq">20</span>%)</h3>
+          <div id="rentalQuotes"></div>
+          <button class="small noprint" type="button" onclick="addMoneyRow(&#39;rentalQuotes&#39;,&#39;Rental vendor&#39;)">+ Add rental quote</button>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- MATERIALS -->
+  <details class="card" id="sec-material">
+    <summary>Materials <span class="sect-total" data-sect="material"></span></summary>
+    <div class="body">
+      <h3 class="sub">Vendor Quotes (marked up with material)</h3>
+      <div id="vendorQuotes"></div>
+      <button class="small noprint" type="button" onclick="addMoneyRow(&#39;vendorQuotes&#39;,&#39;Vendor&#39;)">+ Add vendor quote</button>
+
+      <h3 class="sub">Itemized Material</h3>
+      <table><thead><tr><th>Item</th><th class="num">Unit Cost</th><th class="num">Qty</th><th class="num">Total</th></tr></thead>
+        <tbody id="materialItems"></tbody></table>
+      <button class="small noprint" style="margin-top:8px" type="button" onclick="addCustomMaterial()">+ Add item</button>
+      <p class="hint">Misc material uses the Misc material markup; vendor quotes use the Vendor-quoted material markup. Sales tax calculates on the customer material total.</p>
+    </div>
+  </details>
+
+  <!-- FDEC EQUIPMENT FEES -->
+  <details class="card" id="sec-eqfees">
+    <summary>FDEC Equipment Fees <span class="sect-total" data-sect="eqfees"></span></summary>
+    <div class="body">
+      <table><thead><tr><th>Equipment</th><th class="num">Fee</th><th class="num">Qty</th><th class="num">Total</th></tr></thead>
+        <tbody id="eqFees"></tbody></table>
+      <p class="hint">Customer price = cost plus the equipment fee markup.</p>
+    </div>
+  </details>
+
+  <!-- ITM MATERIALS -->
+  <details class="card" id="sec-itm">
+    <summary>ITM Materials <span class="sect-total" data-sect="itm"></span></summary>
+    <div class="body">
+      <div class="cols2">
+        <div>
+          <h3 class="sub">Sprinkler ITM</h3>
+          <table><thead><tr><th>Item</th><th class="num">Rate</th><th class="num">Qty</th><th class="num">Total</th></tr></thead>
+            <tbody id="itmSP"></tbody></table>
+        </div>
+        <div>
+          <h3 class="sub">Alarm ITM</h3>
+          <table><thead><tr><th>Item</th><th class="num">Rate</th><th class="num">Qty</th><th class="num">Total</th></tr></thead>
+            <tbody id="itmAL"></tbody></table>
+        </div>
+      </div>
+      <p class="hint">ITM material (including IROL) bills at cost; sales tax is added on the tax line.</p>
+    </div>
+  </details>
+
+  <!-- TESTING & SUBCONTRACTOR -->
+  <details class="card" id="sec-testing">
+    <summary>Testing &amp; Subcontractor <span class="sect-total" data-sect="testing"></span></summary>
+    <div class="body">
+      <div class="cols2">
+        <div>
+          <h3 class="sub">Backflow (+<span class="mklbl" data-mk="backflow">20</span>%)</h3>
+          <table><thead><tr><th>Item</th><th class="num">Rate</th><th class="num">Qty</th><th class="num">Total</th></tr></thead>
+            <tbody id="backflow"></tbody></table>
+          <h3 class="sub">Sample Testing (+<span class="mklbl" data-mk="samples">20</span>%)</h3>
+          <table><thead><tr><th>Item</th><th class="num">Rate</th><th class="num">Qty</th><th class="num">Total</th></tr></thead>
+            <tbody id="sampleTest"></tbody></table>
+        </div>
+        <div>
+          <h3 class="sub">Fire Pump (+<span class="mklbl" data-mk="firepump">20</span>%)</h3>
+          <table><thead><tr><th>Item</th><th class="num">Rate</th><th class="num">Qty</th><th class="num">Total</th></tr></thead>
+            <tbody id="firePump"></tbody></table>
+          <h3 class="sub">Subcontractor Quotes (+<span class="mklbl" data-mk="subq">15</span>%)</h3>
+          <div id="subQuotes"></div>
+          <button class="small noprint" type="button" onclick="addMoneyRow(&#39;subQuotes&#39;,&#39;Subcontractor&#39;)">+ Add subcontractor</button>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- OTHER -->
+  <details class="card" id="sec-other">
+    <summary>Other Expenses <span class="sect-total" data-sect="other"></span></summary>
+    <div class="body">
+      <table><tbody>
+        <tr><td>Other expense (cost)</td><td class="num" style="color:var(--steel)">+<span class="mklbl" data-mk="other">50</span>%</td>
+            <td class="num"><input class="qty money" type="number" min="0" step="0.01" id="otherCost" data-save=""></td>
+            <td class="num" id="otherOut">$0.00</td></tr>
+        <tr><td>Permit fees (cost)</td><td class="num" style="color:var(--steel)">+<span class="mklbl" data-mk="permit">10</span>%</td>
+            <td class="num"><input class="qty money" type="number" min="0" step="0.01" id="permitCost" data-save=""></td>
+            <td class="num" id="permitOut">$0.00</td></tr>
+      </tbody></table>
+    </div>
+  </details>
+
+  <!-- SELECTED MATERIALS -->
+  <details class="card" open="" id="sec-selected">
+    <summary>Selected Materials &amp; Equipment</summary>
+    <div class="body">
+      <p class="hint" style="margin:0 0 8px">Builds automatically from every quantity entered above.</p>
+      <div id="selectedOut"><p class="empty">No materials or equipment selected yet.</p></div>
+    </div>
+  </details>
+
+  <!-- SUMMARY -->
+  <details class="card" open="" id="sec-summary">
+    <summary>Quote Summary</summary>
+    <div class="body">
+      <h3 class="sub">Purchase Orders</h3>
+      <table id="poTable"><thead>
+        <tr><th style="width:26%">PO Number</th><th>Description</th><th class="noprint"></th></tr>
+      </thead><tbody id="poRows"></tbody></table>
+      <button class="small noprint" style="margin:8px 0 4px" type="button" onclick="addPoRow()">+ Add PO</button>
+
+      <h3 class="sub" style="margin-top:16px">Totals</h3>
+      <table id="summaryTable">
+        <thead><tr><th>Line</th><th class="num">Our Cost</th><th class="num">Markup</th><th class="num">Customer Total</th></tr></thead>
+        <tbody id="summaryBody"><tr><td colspan="4" class="empty">Nothing quoted yet — enter hours or quantities above.</td></tr><tr class="grand"><td>Grand totals</td><td class="num">$0.00</td>
+      <td class="num"></td><td class="num">$0.00</td></tr><tr class="grand profit"><td>Potential profit</td><td class="num"></td>
+      <td class="num"></td><td class="num">$0.00</td></tr><tr class="grand"><td>Tax (material + ITM at 6%)</td><td class="num"></td>
+      <td class="num"></td><td class="num">$0.00</td></tr><tr class="grand"><td>Downpayment (30%)</td><td class="num"></td>
+      <td class="num"></td><td class="num">$0.00</td></tr></tbody>
+      </table>
+    </div>
+  </details>
+
+</div>
+
+<div class="totbar noprint">
+  <div><span class="lab">Our Cost</span><span class="val" id="barCost">$0.00</span></div>
+  <div><span class="lab">Customer Total</span><span class="val big" id="barCust">$0.00</span></div>
+  <div><span class="lab">Potential Profit</span><span class="val profit" id="barProfit">$0.00</span></div>
+  <div><span class="lab">Tax (MI <span class="mklbl" data-mk="tax">6</span>%)</span><span class="val" id="barTax">$0.00</span></div>
+  <div><span class="lab">Downpayment (<span class="mklbl" data-mk="down">30</span>%)</span><span class="val" id="barDown">$0.00</span></div>
+  <div class="grow">
+    <button type="button" onclick="saveDraft()">Save Draft</button>
+    <button type="button" onclick="document.getElementById('draftFile').click()">Load Draft</button>
+    <button type="button" onclick="savePDF()">Save as PDF</button>
+    <button class="primary" type="button" onclick="window.print()">Print</button>
+    <input type="file" id="draftFile" accept=".html,text/html" style="display:none" onchange="loadDraftFile(this)">
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ================= RATE DATA (2026 Quoting Book) ================= */
+const RATE_DEFAULTS = {
+  ST: {1:138.00, 2:124.20, 3:110.40},
+  OT: {1:186.30, 2:167.67, 3:149.04},
+  DT: {1:235.98, 2:212.38, 3:188.78},
+  AD: {1:124.20, 2:124.20, 3:124.20}
+};
+const CLASS_NAMES = { ST:'Straight time', OT:'Overtime', DT:'Double time', AD:'Admin' };
+function rateFor(lvl, cls){
+  const el = document.querySelector(`input.hr[data-lvl="${lvl}"][data-cls="${cls}"]`);
+  const v = el ? parseFloat(el.value) : NaN;
+  return isFinite(v) && v >= 0 ? v : RATE_DEFAULTS[cls][lvl] || RATE_DEFAULTS[cls][2];
+}
+
+
+const EQ_FEES = [
+  ['Hydro pump',30],['Priming pump',15],['Sump pump pit drain kit',50],['Shop vac/pump',25],
+  ['FDEC flushing kit 1-1/2"',20],['FDEC flushing kit 2-1/2"',30],['M300',60],
+  ['In-air groover',30],['Engine hoist',30],['Scope',20],['Palm abby testing',20],
+  ['Foam kit (incl. funnel and clean-up)',35],['3-stage extension ladder',30],
+  ["22' extension ladder",25],['Visqueen per sheet — small',5],['Visqueen per sheet — large',10],
+  ['Pallet jack 6K#',20],['M18 groover',60],['M18 threader',60],['Gloves',10],
+  ['Pilot clamp',20],['Air compressor',25],['PAE pit per man/daily',75],
+  ['Personal gas detector',20],['Lockout equipment',10],['PPE',15],['Rags',10]
+];
+
+const TRUCKS = [['SP truck',85],['AL truck',85],['Box truck',175]];
+const PERDIEM = [['Per diem — drive',64],['Per diem — day',74]];
+const FDEC_RENTAL = [['Lift rental',600],['Daily',200],['Weekly (5 day)',1000]];
+const ITM = ['Annual wet','Annual dry','Annual antifreeze','Annual preaction','Annual deluge',
+  'Annual foam','Annual standpipe','Annual pit','Annual water storage tank'];
+const ITM_SP = ITM.concat(['IROL']);
+const ITM_DEFAULT = {'Annual wet':20.7,'Annual dry':20.7,'IROL':33.12};
+const BACKFLOW = [['1st backflow',150],['Additional backflow',110]];
+const FIREPUMP = [
+  ['Weekly/monthly churn test',240],['Annual fire pump test (1 technician)',370],
+  ['Annual fire pump test (2 technicians)',545],['Annual diesel maintenance w/o flow test',1418],
+  ['Annual diesel maintenance with flow test',1538],['Hydrant flow test (2 technicians)',470],
+  ['Standard travel or mechanical time on site',120],['Emergency service / overtime rate',180],
+  ['Sundays &amp; holidays',240]
+];
+const SAMPLES = [['Sprinkler sample testing',80],['Foam sample testing',300],['Dry barrel sample testing',105]];
+
+/* ================= HELPERS ================= */
+const $ = id => document.getElementById(id);
+const money = n => '$' + (Math.round(n*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const num = el => { const v = parseFloat(el && el.value); return isFinite(v) && v > 0 ? v : 0; };
+
+function qtyRow(tbody, group, i, name, rate, rateEditable){
+  const tr = document.createElement('tr');
+  const rateCell = rateEditable
+    ? `<input class="rate" type="number" min="0" step="0.01" data-g="${group}" data-i="${i}" data-f="rate" value="${rate||''}" placeholder="rate">`
+    : money(rate);
+  tr.innerHTML = `<td>${name}</td><td class="num">${rateCell}</td>
+    <td class="num"><input class="qty" type="number" min="0" step="1" data-g="${group}" data-i="${i}" data-f="qty"></td>
+    <td class="num rowtot">$0.00</td>`;
+  tbody.appendChild(tr);
+}
+
+function buildQtyTable(tbodyId, group, items, rateEditable){
+  const tb = $(tbodyId);
+  items.forEach((it, i) => {
+    const [name, rate] = Array.isArray(it) ? it : [it, ITM_DEFAULT[it] || ''];
+    qtyRow(tb, group, i, name, rate, rateEditable);
+  });
+}
+
+function addMoneyRow(containerId, placeholder, name, val){
+  const div = document.createElement('div');
+  div.className = 'listrow';
+  div.innerHTML = `<input class="wide moneyname" placeholder="${placeholder}" value="${name||''}">
+    <input class="qty money moneyval" type="number" min="0" step="0.01" value="${val||''}" placeholder="0.00">
+    <button class="small noprint" type="button" onclick="this.parentNode.remove(); recalc()">&times;</button>`;
+  $(containerId).appendChild(div);
+}
+
+function addMpRow(d){
+  d = d || {};
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td><input class="wide mp-task" value="${(d.task||'').replace(/"/g,'&quot;')}"></td>
+    <td><select class="mp-dept">
+      <option value="SP">Sprinkler</option><option value="FA">Fire Alarm</option></select></td>
+    <td class="num"><input class="qty mp-tech" type="number" min="0" step="1" value="${d.tech||''}"></td>
+    <td class="num"><input class="qty mp-hrs" type="number" min="0" step="0.5" value="${d.hrs||''}"></td>
+    <td><select class="mp-class">
+      <option value="ST">Straight Time</option><option value="OT">Overtime</option>
+      <option value="DT">Double Time</option><option value="AD">Admin</option></select></td>
+    <td class="num mp-total">0</td>
+    <td class="num mp-trips">0</td>
+    <td class="noprint"><button class="small" type="button" onclick="this.closest('tr').remove(); mpChanged()">&times;</button></td>`;
+  $('mpRows').appendChild(tr);
+  if (d.cls) tr.querySelector('.mp-class').value = d.cls;
+  if (d.dept) tr.querySelector('.mp-dept').value = d.dept;
+}
+
+function addPoRow(no, desc){
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td><input class="wide po-no" placeholder="PO #" value="${(no||'').replace(/"/g,'&quot;')}"></td>
+    <td><input class="wide po-desc" placeholder="Description" value="${(desc||'').replace(/"/g,'&quot;')}"></td>
+    <td class="noprint"><button class="small" type="button" onclick="this.closest('tr').remove()">&times;</button></td>`;
+  $('poRows').appendChild(tr);
+}
+
+function addCustomMaterial(name, price, qty){
+  const tb = $('materialItems');
+  const tr = document.createElement('tr');
+  tr.className = 'custom-mat';
+  tr.innerHTML = `<td><input class="wide cm-name" placeholder="Item" value="${(name||'').replace(/"/g,'&quot;')}"></td>
+    <td class="num"><input class="rate cm-price" type="number" min="0" step="0.01" value="${price||''}" placeholder="cost"></td>
+    <td class="num"><input class="qty cm-qty" type="number" min="0" step="1" value="${qty||''}"></td>
+    <td class="num rowtot">$0.00</td>`;
+  tb.appendChild(tr);
+}
+
+/* ================= BUILD ================= */
+(function(){
+  const tb = $('rateTable');
+  ['ST','OT','DT','AD'].forEach(cls => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${CLASS_NAMES[cls]}</td>` + [1,2,3].map(l =>
+      `<td class="num"><input class="rate hr" type="number" min="0" step="0.01" data-lvl="${l}" data-cls="${cls}" value="${RATE_DEFAULTS[cls][l]}"></td>`
+    ).join('');
+    tb.appendChild(tr);
+  });
+})();
+buildQtyTable('trucks','trucks',TRUCKS,true);
+buildQtyTable('perdiem','perdiem',PERDIEM,true);
+buildQtyTable('fdecRental','fdecRental',FDEC_RENTAL,true);
+buildQtyTable('eqFees','eqFees',EQ_FEES,true);
+buildQtyTable('itmSP','itmSP',ITM_SP,true);
+buildQtyTable('itmAL','itmAL',ITM,true);
+buildQtyTable('backflow','backflow',BACKFLOW,true);
+buildQtyTable('firePump','firePump',FIREPUMP,true);
+buildQtyTable('sampleTest','sampleTest',SAMPLES,true);
+
+function laborRows(tbodyId, prefix, classes){
+  const tb = $(tbodyId);
+  classes.forEach(c => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${c[1]}</td>
+      <td><select class="lvl" id="${prefix}${c[0]}Lvl" data-save>
+        <option value="1">Lvl 1</option><option value="2" selected>Lvl 2</option><option value="3">Lvl 3</option>
+      </select></td>
+      <td class="num ratecell">${money(RATE_DEFAULTS[c[0]][2])}</td>
+      <td class="num"><input class="qty" type="number" min="0" step="0.5" id="${prefix}${c[0]}"></td>
+      <td class="num rowtot">$0.00</td>`;
+    tb.appendChild(tr);
+  });
+}
+laborRows('laborSP','sp',[['ST','Straight time'],['OT','Overtime'],['DT','Double time'],['AD','Admin hours']]);
+laborRows('laborShop','shop',[['ST','Straight time'],['OT','Overtime'],['DT','Double time']]);
+laborRows('laborFA','fa',[['ST','Straight time'],['OT','Overtime'],['DT','Double time']]);
+
+for (let i=0;i<6;i++) addCustomMaterial();
+for (let i=0;i<2;i++) addPoRow();
+addMoneyRow('vendorQuotes','Vendor','Galloup');
+addMoneyRow('vendorQuotes','Vendor','Viking');
+addMoneyRow('vendorQuotes','Vendor','Macomb');
+addMoneyRow('rentalQuotes','Rental vendor','United Rentals');
+addMoneyRow('subQuotes','Subcontractor','Guardian Automatic');
+addMoneyRow('subQuotes','Subcontractor','VFP');
+for (let i=0;i<3;i++) addMpRow();
+
+/* ================= CALC ================= */
+function markups(){
+  const P = {};
+  document.querySelectorAll('input.mk').forEach(el => {
+    const v = parseFloat(el.value);
+    P[el.dataset.key] = isFinite(v) && v >= 0 ? v/100 : 0;
+  });
+  document.querySelectorAll('.mklbl').forEach(el => {
+    el.textContent = (P[el.dataset.mk]*100).toLocaleString('en-US',{maximumFractionDigits:2});
+  });
+  return P;
+}
+const fmtPct = f => (f*100).toLocaleString('en-US',{maximumFractionDigits:2}) + '%';
+function sumGroup(group, fixedRates){
+  let cost = 0;
+  document.querySelectorAll(`input[data-g="${group}"][data-f="qty"]`).forEach(inp => {
+    const tr = inp.closest('tr');
+    const rateInp = tr.querySelector('input[data-f="rate"]');
+    const rate = rateInp ? num(rateInp) : fixedRates[inp.dataset.i][1];
+    const line = num(inp) * rate;
+    tr.querySelector('.rowtot').textContent = money(line);
+    cost += line;
+  });
+  return cost;
+}
+function sumMoneyRows(containerId){
+  let t = 0;
+  $(containerId).querySelectorAll('.moneyval').forEach(i => t += num(i));
+  return t;
+}
+
+function recalc(ev){
+  const P = markups();
+  /* edits in the manpower section flow straight into transportation */
+  if (ev && ev.target && ev.target.closest && ev.target.closest('#sec-manpower')){
+    syncTrucksFromMp();
+  }
+  /* labor */
+  const laborLine = (id, key) => {
+    const inp = $(id);
+    const tr = inp.closest('tr');
+    const rate = rateFor($(id + 'Lvl').value, key);
+    tr.querySelector('.ratecell').textContent = money(rate);
+    const line = num(inp) * rate;
+    tr.querySelector('.rowtot').textContent = money(line);
+    return line;
+  };
+  const spST = laborLine('spST','ST') + laborLine('shopST','ST') + laborLine('spAD','AD');
+  const spOT = laborLine('spOT','OT') + laborLine('shopOT','OT');
+  const spDT = laborLine('spDT','DT') + laborLine('shopDT','DT');
+  const faST = laborLine('faST','ST'), faOT = laborLine('faOT','OT'), faDT = laborLine('faDT','DT');
+
+  /* qty groups */
+  const truckCosts = [];
+  document.querySelectorAll('input[data-g="trucks"][data-f="qty"]').forEach(inp => {
+    const tr = inp.closest('tr');
+    const line = num(inp) * num(tr.querySelector('input[data-f="rate"]'));
+    tr.querySelector('.rowtot').textContent = money(line);
+    truckCosts[inp.dataset.i] = line;
+  });
+  const perdiemCost = sumGroup('perdiem', PERDIEM);
+  const fdecRentalCost = sumGroup('fdecRental', FDEC_RENTAL);
+  const eqFeesCost = sumGroup('eqFees', EQ_FEES);
+  const itmCost = sumGroup('itmSP', null) + sumGroup('itmAL', null);
+  const backflowCost = sumGroup('backflow', BACKFLOW);
+  const firePumpCost = sumGroup('firePump', FIREPUMP);
+  const sampleCost = sumGroup('sampleTest', SAMPLES);
+
+  /* materials */
+  let matItemCost = 0;
+  document.querySelectorAll('#materialItems tr.custom-mat').forEach(tr => {
+    const line = num(tr.querySelector('.cm-price')) * num(tr.querySelector('.cm-qty'));
+    tr.querySelector('.rowtot').textContent = money(line);
+    matItemCost += line;
+  });
+  const vendorCost = sumMoneyRows('vendorQuotes');
+  const materialCost = matItemCost + vendorCost; /* total material cost (for section subtotal/tax base) */
+  const rentalQuoteCost = sumMoneyRows('rentalQuotes');
+  const subQuoteCost = sumMoneyRows('subQuotes');
+  const hotelCost = num($('hotelCost'));
+  const otherCost = num($('otherCost')), permitCost = num($('permitCost'));
+  $('hotelOut').textContent = money(hotelCost*(1+P.hotel));
+  $('otherOut').textContent = money(otherCost*(1+P.other));
+  $('permitOut').textContent = money(permitCost*(1+P.permit));
+
+  /* summary lines: [label, cost, markup, customer] */
+  const lines = [
+    ['(SP) ST labor', spST, null, spST],
+    ['(SP) OT labor', spOT, null, spOT],
+    ['(SP) DT labor', spDT, null, spDT],
+    ['(FA) ST labor', faST, null, faST],
+    ['(FA) OT labor', faOT, null, faOT],
+    ['(FA) DT labor', faDT, null, faDT],
+    ['Subcontractor testing (samples)', sampleCost, fmtPct(P.samples), sampleCost*(1+P.samples)],
+    ['Subcontractor quotes', subQuoteCost, fmtPct(P.subq), subQuoteCost*(1+P.subq)],
+    ['Equipment rental (outside)', rentalQuoteCost, fmtPct(P.rentalq), rentalQuoteCost*(1+P.rentalq)],
+    ['Backflow testing', backflowCost, fmtPct(P.backflow), backflowCost*(1+P.backflow)],
+    ['Fire pump testing', firePumpCost, fmtPct(P.firepump), firePumpCost*(1+P.firepump)],
+    ['(SP) transportation', truckCosts[0]||0, null, truckCosts[0]||0],
+    ['(FA) transportation', truckCosts[1]||0, null, truckCosts[1]||0],
+    ['Box truck', truckCosts[2]||0, null, truckCosts[2]||0],
+    ['Misc material', matItemCost, fmtPct(P.miscmat), matItemCost*(1+P.miscmat)],
+    ['Vendor-quoted material', vendorCost, fmtPct(P.material), vendorCost*(1+P.material)],
+    ['FDEC lift & equipment rental', fdecRentalCost, null, fdecRentalCost],
+    ['FDEC equipment fees', eqFeesCost, fmtPct(P.eqfees), eqFeesCost*(1+P.eqfees)],
+    ['Hotel', hotelCost, fmtPct(P.hotel), hotelCost*(1+P.hotel)],
+    ['Per diem', perdiemCost, null, perdiemCost],
+    ['ITM material (incl. IROL)', itmCost, null, itmCost],
+    ['Other expense', otherCost, fmtPct(P.other), otherCost*(1+P.other)],
+    ['Permit fees', permitCost, fmtPct(P.permit), permitCost*(1+P.permit)],
+  ];
+
+  const grandCost = lines.reduce((a,l)=>a+l[1],0);
+  const grandCust = lines.reduce((a,l)=>a+l[3],0);
+  const custMaterial = matItemCost*(1+P.miscmat) + vendorCost*(1+P.material);
+  const tax = custMaterial*P.tax + itmCost*P.tax;
+  const down = grandCust*P.down;
+  const profit = grandCust - grandCost;
+
+  const tb = $('summaryBody');
+  tb.innerHTML = '';
+  let shown = 0;
+  lines.forEach(l => {
+    if (!l[1] && !l[3]) return;
+    shown++;
+    const tr = document.createElement('tr');
+    tr.className = 'lineitem';
+    tr.innerHTML = `<td>${l[0]}</td><td class="num">${money(l[1])}</td>
+      <td class="num">${l[2]||'—'}</td><td class="num">${money(l[3])}</td>`;
+    tb.appendChild(tr);
+  });
+  if (!shown){
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td colspan="4" class="empty">Nothing quoted yet — enter hours or quantities above.</td>';
+    tb.appendChild(tr);
+  }
+  [['Grand totals', grandCost, '', grandCust, 'grand'],
+   ['Potential profit' + (grandCust ? ' (' + fmtPct(profit/grandCust) + ' margin)' : ''), '', '', profit, 'grand profit'],
+   ['Tax (material + ITM at ' + fmtPct(P.tax) + ')', '', '', tax, 'grand'],
+   ['Downpayment (' + fmtPct(P.down) + ')', '', '', down, 'grand']].forEach(l => {
+    const tr = document.createElement('tr');
+    tr.className = l[4];
+    tr.innerHTML = `<td>${l[0]}</td><td class="num">${l[1]===''?'':money(l[1])}</td>
+      <td class="num"></td><td class="num">${money(l[3])}</td>`;
+    tb.appendChild(tr);
+  });
+
+  $('barCost').textContent = money(grandCost);
+  $('barCust').textContent = money(grandCust);
+  $('barProfit').textContent = money(profit);
+  $('barTax').textContent = money(tax);
+  $('barDown').textContent = money(down);
+
+  /* Broadcast the down payment total to the suite shell so the proposal
+     tab can auto-fill its down payment note. Silent no-op when opened
+     as a standalone file (no parent frame). */
+  try {
+    if (window.parent && window.parent !== window){
+      window.parent.postMessage({ fdec: true, type: 'downpayment', value: down, display: money(down) }, '*');
+    }
+  } catch(_){}
+
+  /* section subtotals (customer) */
+  const sect = {
+    labor: spST+spOT+spDT+faST+faOT+faDT,
+    transport: (truckCosts[0]||0)+(truckCosts[1]||0)+(truckCosts[2]||0)+perdiemCost+hotelCost*(1+P.hotel),
+    rental: fdecRentalCost + rentalQuoteCost*(1+P.rentalq),
+    material: matItemCost*(1+P.miscmat) + vendorCost*(1+P.material),
+    eqfees: eqFeesCost*(1+P.eqfees),
+    itm: itmCost,
+    testing: sampleCost*(1+P.samples) + subQuoteCost*(1+P.subq) + backflowCost*(1+P.backflow) + firePumpCost*(1+P.firepump),
+    other: otherCost*(1+P.other) + permitCost*(1+P.permit)
+  };
+  document.querySelectorAll('.sect-total').forEach(el => {
+    const v = sect[el.dataset.sect];
+    el.textContent = v ? money(v) : '';
+  });
+
+  /* manpower */
+  const mp = {ST:0, OT:0, DT:0, AD:0};
+  const trips = mpTrips();
+  document.querySelectorAll('#mpRows tr').forEach(tr => {
+    const hrs = num(tr.querySelector('.mp-tech')) * num(tr.querySelector('.mp-hrs'));
+    tr.querySelector('.mp-total').textContent = hrs || 0;
+    tr.querySelector('.mp-trips').textContent = rowTrips(tr);
+    mp[tr.querySelector('.mp-class').value] += hrs;
+  });
+  $('mpST').textContent = mp.ST; $('mpOT').textContent = mp.OT;
+  $('mpDT').textContent = mp.DT; $('mpAD').textContent = mp.AD;
+  $('mpTot').textContent = mp.ST+mp.OT+mp.DT+mp.AD;
+  $('mpSPtrips').textContent = trips.SP; $('mpALtrips').textContent = trips.FA;
+
+  buildSelected();
+}
+
+/* ================= SELECTED MATERIALS & EQUIPMENT ================= */
+function collectSelected(){
+  const mats = [], equip = [];
+  document.querySelectorAll('#materialItems tr.custom-mat').forEach(tr => {
+    const q = num(tr.querySelector('.cm-qty')), n = tr.querySelector('.cm-name').value.trim();
+    if (q && n) mats.push([n, q]);
+  });
+  document.querySelectorAll('input[data-g="eqFees"][data-f="qty"]').forEach(inp => {
+    const q = num(inp); if (q) equip.push([EQ_FEES[inp.dataset.i][0], q]);
+  });
+  document.querySelectorAll('input[data-g="fdecRental"][data-f="qty"]').forEach(inp => {
+    const q = num(inp); if (q) equip.push(['FDEC ' + FDEC_RENTAL[inp.dataset.i][0].toLowerCase(), q]);
+  });
+  return {mats, equip};
+}
+
+function buildSelected(){
+  const {mats, equip} = collectSelected();
+  const out = $('selectedOut');
+  if (!mats.length && !equip.length){
+    out.innerHTML = '<p class="empty">No materials or equipment selected yet.</p>';
+    return;
+  }
+  let html = '';
+  if (mats.length){
+    html += '<h3 class="sub">Materials</h3><ul class="selected-list">' +
+      mats.map(m => `<li>(${m[1]}) ${m[0]}</li>`).join('') + '</ul>';
+  }
+  if (equip.length){
+    html += '<h3 class="sub">Equipment</h3><ul class="selected-list">' +
+      equip.map(m => `<li>(${m[1]}) ${m[0]}</li>`).join('') + '</ul>';
+  }
+  out.innerHTML = html;
+}
+
+/* ================= ACTIONS ================= */
+function rowTrips(tr){
+  if (tr.querySelector('.mp-class').value === 'AD') return 0;
+  const hrs = num(tr.querySelector('.mp-hrs'));
+  const techs = num(tr.querySelector('.mp-tech'));
+  if (!hrs || !techs) return 0;
+  return techs * Math.ceil(hrs / 8);
+}
+function mpTrips(){
+  const trips = { SP:0, FA:0 };
+  document.querySelectorAll('#mpRows tr').forEach(tr => {
+    trips[tr.querySelector('.mp-dept').value] += rowTrips(tr);
+  });
+  return trips;
+}
+function syncTrucksFromMp(){
+  const t = mpTrips();
+  document.querySelector('input[data-g="trucks"][data-i="0"][data-f="qty"]').value = t.SP || '';
+  document.querySelector('input[data-g="trucks"][data-i="1"][data-f="qty"]').value = t.FA || '';
+}
+function mpChanged(){ syncTrucksFromMp(); recalc(); }
+
+function applyManpower(){
+  const mp = { SP:{ST:0,OT:0,DT:0,AD:0}, FA:{ST:0,OT:0,DT:0,AD:0} };
+  document.querySelectorAll('#mpRows tr').forEach(tr => {
+    const hrs = num(tr.querySelector('.mp-tech')) * num(tr.querySelector('.mp-hrs'));
+    mp[tr.querySelector('.mp-dept').value][tr.querySelector('.mp-class').value] += hrs;
+  });
+  $('spST').value = mp.SP.ST || ''; $('spOT').value = mp.SP.OT || '';
+  $('spDT').value = mp.SP.DT || '';
+  $('spAD').value = (mp.SP.AD + mp.FA.AD) || '';  /* admin hours book to the sprinkler admin line */
+  $('faST').value = mp.FA.ST || ''; $('faOT').value = mp.FA.OT || '';
+  $('faDT').value = mp.FA.DT || '';
+  syncTrucksFromMp();
+  recalc();
+}
+
+function savePDF(){
+  const old = document.title;
+  const name = ['FDEC_Quote', $('quoteNo').value.trim(), $('jobName').value.trim()]
+    .filter(Boolean).join('_').replace(/[^\w-]+/g,'_');
+  document.title = name;
+  window.print();
+  setTimeout(() => { document.title = old; }, 500);
+}
+
+/* ================= DRAFT SAVE / LOAD ================= */
+/* Captures the full quote state so it can be reopened and edited later.
+   A saved draft is a self-contained copy of this tool with the state
+   embedded in the #draftState block, which auto-loads when opened. */
+
+function collectDraft(){
+  const d = { meta:{ app:'FDEC Quoting Template', author:'Mitch Peebles', version:'V4.0', savedAt:new Date().toISOString() },
+              fields:{}, dynamic:{ material:[], vendorQuotes:[], rentalQuotes:[], subQuotes:[], po:[], mp:[] } };
+
+  /* All simple inputs & selects that carry a value, keyed where possible. */
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    if (el.type === 'file' || el.type === 'button') return;
+    /* Skip dynamic-row controls — captured separately below. */
+    if (el.closest('#materialItems') || el.closest('#vendorQuotes') || el.closest('#rentalQuotes') ||
+        el.closest('#subQuotes') || el.closest('#poRows') || el.closest('#mpRows')) return;
+    const key = el.id ||
+      (el.dataset && el.dataset.g != null ? `g:${el.dataset.g}:${el.dataset.i}:${el.dataset.f}` : '') ||
+      (el.dataset && el.dataset.key ? `mk:${el.dataset.key}` : '') ||
+      (el.dataset && el.dataset.lvl ? `rate:${el.dataset.cls}:${el.dataset.lvl}` : '');
+    if (!key) return;
+    d.fields[key] = el.value;
+  });
+
+  /* Itemized (misc) material rows */
+  document.querySelectorAll('#materialItems tr.custom-mat').forEach(tr => {
+    d.dynamic.material.push({
+      name: tr.querySelector('.cm-name').value,
+      price: tr.querySelector('.cm-price').value,
+      qty: tr.querySelector('.cm-qty').value
+    });
+  });
+  /* Money-row groups */
+  const grabMoney = id => [...document.querySelectorAll(`#${id} .listrow`)].map(r => ({
+    name: r.querySelector('.moneyname').value, val: r.querySelector('.moneyval').value
+  }));
+  d.dynamic.vendorQuotes = grabMoney('vendorQuotes');
+  d.dynamic.rentalQuotes = grabMoney('rentalQuotes');
+  d.dynamic.subQuotes   = grabMoney('subQuotes');
+  /* PO rows */
+  document.querySelectorAll('#poRows tr').forEach(tr => {
+    d.dynamic.po.push({ no: tr.querySelector('.po-no').value, desc: tr.querySelector('.po-desc').value });
+  });
+  /* Manpower rows */
+  document.querySelectorAll('#mpRows tr').forEach(tr => {
+    d.dynamic.mp.push({
+      task: tr.querySelector('.mp-task').value,
+      dept: tr.querySelector('.mp-dept').value,
+      tech: tr.querySelector('.mp-tech').value,
+      hrs:  tr.querySelector('.mp-hrs').value,
+      cls:  tr.querySelector('.mp-class').value
+    });
+  });
+  return d;
+}
+
+function applyDraft(d){
+  if (!d || !d.fields) return;
+  /* Rebuild dynamic rows to match the saved counts. */
+  const clear = sel => { const c = document.querySelector(sel); if (c) c.innerHTML = ''; };
+
+  clear('#materialItems');
+  (d.dynamic.material || []).forEach(m => addCustomMaterial(m.name, m.price, m.qty));
+  if (!d.dynamic.material || !d.dynamic.material.length) for (let i=0;i<6;i++) addCustomMaterial();
+
+  clear('#vendorQuotes');
+  (d.dynamic.vendorQuotes || []).forEach(v => addMoneyRow('vendorQuotes','Vendor', v.name, v.val));
+  clear('#rentalQuotes');
+  (d.dynamic.rentalQuotes || []).forEach(v => addMoneyRow('rentalQuotes','Rental vendor', v.name, v.val));
+  clear('#subQuotes');
+  (d.dynamic.subQuotes || []).forEach(v => addMoneyRow('subQuotes','Subcontractor', v.name, v.val));
+
+  clear('#poRows');
+  (d.dynamic.po || []).forEach(p => addPoRow(p.no, p.desc));
+  if (!d.dynamic.po || !d.dynamic.po.length) for (let i=0;i<2;i++) addPoRow();
+
+  clear('#mpRows');
+  (d.dynamic.mp || []).forEach(m => addMpRow(m));
+  if (!d.dynamic.mp || !d.dynamic.mp.length) for (let i=0;i<3;i++) addMpRow();
+
+  /* Restore simple field values by the same keys used in collectDraft. */
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    if (el.type === 'file' || el.type === 'button') return;
+    if (el.closest('#materialItems') || el.closest('#vendorQuotes') || el.closest('#rentalQuotes') ||
+        el.closest('#subQuotes') || el.closest('#poRows') || el.closest('#mpRows')) return;
+    const key = el.id ||
+      (el.dataset && el.dataset.g != null ? `g:${el.dataset.g}:${el.dataset.i}:${el.dataset.f}` : '') ||
+      (el.dataset && el.dataset.key ? `mk:${el.dataset.key}` : '') ||
+      (el.dataset && el.dataset.lvl ? `rate:${el.dataset.cls}:${el.dataset.lvl}` : '');
+    if (key && key in d.fields) el.value = d.fields[key];
+  });
+
+  recalc();
+  setStatus(`Draft loaded${d.meta && d.meta.savedAt ? ' (saved ' + new Date(d.meta.savedAt).toLocaleString() + ')' : ''}.`);
+}
+
+function setStatus(msg){
+  let bar = document.getElementById('draftStatus');
+  if (!bar){
+    bar = document.createElement('div');
+    bar.id = 'draftStatus';
+    bar.className = 'noprint';
+    bar.style.cssText = 'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:#1b1f24;color:#fff;padding:8px 16px;border-radius:6px;font-size:13px;z-index:9999;box-shadow:0 2px 10px rgba(0,0,0,.25);opacity:0;transition:opacity .2s';
+    document.body.appendChild(bar);
+  }
+  bar.textContent = msg;
+  bar.style.opacity = '1';
+  clearTimeout(bar._t);
+  bar._t = setTimeout(() => { bar.style.opacity = '0'; }, 3200);
+}
+
+function saveDraft(){
+  const draft = collectDraft();
+  const json = JSON.stringify(draft);
+  /* Embed the state into a fresh copy of this document so it reopens ready to edit. */
+  const clone = document.documentElement.cloneNode(true);
+  const holder = clone.querySelector('#draftState');
+  if (holder) holder.textContent = json;
+  /* Strip any transient status bar from the clone. */
+  const s = clone.querySelector('#draftStatus'); if (s) s.remove();
+  const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+
+  const name = ['FDEC_Quote_DRAFT', $('quoteNo').value.trim(), $('jobName').value.trim()]
+    .filter(Boolean).join('_').replace(/[^\w-]+/g,'_') || 'FDEC_Quote_DRAFT';
+  const blob = new Blob([html], { type:'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name + '.html';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  setStatus('Draft saved — reopen this file to keep editing.');
+}
+
+function loadDraftFile(input){
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    let data = null;
+    /* Accept either a saved draft HTML (with #draftState) or a raw JSON export. */
+    const text = e.target.result;
+    try {
+      const doc = new DOMParser().parseFromString(text, 'text/html');
+      const blk = doc.querySelector('#draftState');
+      if (blk && blk.textContent.trim()) data = JSON.parse(blk.textContent);
+    } catch(_){}
+    if (!data){ try { data = JSON.parse(text); } catch(_){} }
+    if (!data){ setStatus('Could not read a draft from that file.'); input.value=''; return; }
+    applyDraft(data);
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+/* Auto-load an embedded draft if this file was opened as a saved draft. */
+(function(){
+  const blk = document.getElementById('draftState');
+  if (blk && blk.textContent.trim()){
+    try { applyDraft(JSON.parse(blk.textContent)); } catch(_){}
+  }
+})();
+
+document.body.addEventListener('input', recalc);
+document.body.addEventListener('change', recalc);
+recalc();
+
+/* Re-broadcast the down payment when the suite shell asks (e.g. when the
+   Proposal tab is opened), so the note stays in sync even if the proposal
+   frame loaded after the last edit. */
+window.addEventListener('message', function(e){
+  const d = e && e.data;
+  if (!d || d.fdec !== true) return;
+  if (d.type === 'request-sync'){ recalc(); return; }
+  if (d.type === 'get-quote-html'){
+    let html = "", css = "", err = null;
+    try {
+      recalc(); // make sure the summary reflects current inputs
+      // Collect this document's own styles.
+      css = Array.from(document.querySelectorAll('style')).map(s => s.textContent).join('\n');
+      // Clone the printable content and inline current form values so they
+      // survive serialization (typed values aren't in the HTML otherwise).
+      const wrap = document.createElement('div');
+      ['header.top', 'div.wrap'].forEach(sel => {
+        const src = document.querySelector(sel);
+        if (src) wrap.appendChild(src.cloneNode(true));
+      });
+      // Inline values for inputs/selects/textareas by matching against live DOM.
+      const liveInputs = document.querySelectorAll('input,select,textarea');
+      const cloneInputs = wrap.querySelectorAll('input,select,textarea');
+      cloneInputs.forEach((c, i) => {
+        const live = liveInputs[i];
+        if (!live) return;
+        if (c.tagName === 'SELECT'){
+          const idx = live.selectedIndex;
+          if (c.options[idx]) c.options[idx].setAttribute('selected','selected');
+        } else if (c.tagName === 'TEXTAREA'){
+          c.textContent = live.value;
+        } else {
+          c.setAttribute('value', live.value);
+        }
+      });
+      // Remove interactive-only elements from the clone.
+      wrap.querySelectorAll('.noprint, button, .totbar').forEach(el => el.remove());
+      // For the exported PDF, keep ONLY the Selected Materials & Equipment
+      // and Quote Summary sections. Remove all other collapsible sections
+      // so their titles don't clutter the printout, and force the two we
+      // keep to be open.
+      var KEEP = { 'sec-selected':1, 'sec-summary':1 };
+      wrap.querySelectorAll('details').forEach(function(el){
+        if (KEEP[el.id]){ el.setAttribute('open','open'); }
+        else { el.remove(); }
+      });
+      html = wrap.innerHTML;
+    } catch(ex){ err = String(ex && ex.message || ex); }
+    if (window.parent && window.parent !== window){
+      window.parent.postMessage({
+        fdec:true, type:'quote-html', reqId:d.reqId, html:html, css:css, error:err
+      }, '*');
+    }
+  }
+});
+<\/script>
+
+
+</body></html></script>
+<script type="text/html" id="src-proposal"><!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FDEC Proposal Builder V2.0</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"><\/script>
+<style>
+  :root{
+    --ink:#20262d;
+    --paper:#eef0f3;
+    --panel:#ffffff;
+    --line:#d9dde2;
+    --red:#b3202c;
+    --red-dark:#8f1a23;
+    --navy:#182635;
+    --soft:#f6f7f9;
+    --steel:#5b6572;
+    --muted:#7c8896;
+    --check:#b3202c;
+    --radius:6px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    font-size:15px;
+    line-height:1.45;
+  }
+  header{
+    background:var(--navy);
+    color:#fff;
+    padding:16px 22px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+    border-bottom:4px solid var(--red);
+  }
+  header h1{font-size:20px;font-weight:700;letter-spacing:.3px}
+  header h1 span{color:#9fb0c2;font-weight:400}
+  header .sub{font-size:12.5px;color:#9fb0c2;text-transform:uppercase;letter-spacing:1.2px}
+  main{max-width:1060px;margin:0 auto;padding:22px 18px 120px}
+
+  section.card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    margin-bottom:18px;
+    overflow:hidden;
+  }
+  .card-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:12px 16px;
+    background:var(--soft);
+    border-bottom:1px solid var(--line);
+    border-left:4px solid var(--red);
+    flex-wrap:wrap;
+  }
+  .card-head h2{
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:1.1px;
+    color:var(--red);
+  }
+  .card-head .hint{font-size:12.5px;color:var(--muted)}
+  .card-body{padding:14px 16px}
+
+  /* Job info grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+  label.field{display:block;font-size:12.5px;font-weight:600;color:var(--steel)}
+  label.field input, label.field textarea{
+    display:block;width:100%;margin-top:4px;
+    font:inherit;font-size:14.5px;font-weight:400;
+    padding:8px 10px;border:1px solid var(--line);border-radius:4px;background:#fff;
+  }
+  label.field textarea{resize:vertical;min-height:60px}
+  input:focus, textarea:focus{outline:2px solid var(--red);outline-offset:1px;border-color:var(--red)}
+
+  /* Item rows */
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .toolbar input[type="search"]{
+    font:inherit;font-size:13.5px;padding:6px 9px;border:1px solid var(--line);
+    border-radius:4px;width:210px;background:#fff;
+  }
+  ul.items{list-style:none}
+  li.item{
+    display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;
+    padding:8px 6px;border-bottom:1px dashed var(--line);
+  }
+  li.item:last-child{border-bottom:none}
+  li.item input[type="checkbox"]{
+    width:18px;height:18px;margin-top:5px;accent-color:var(--check);flex-shrink:0;cursor:pointer;
+  }
+  li.item textarea{
+    flex:1;font:inherit;font-size:14.5px;line-height:1.4;
+    border:1px solid transparent;border-radius:4px;background:transparent;
+    padding:4px 6px;resize:none;overflow:hidden;
+  }
+  li.item textarea:hover{border-color:var(--line);background:#fff}
+  li.item textarea:focus{border-color:var(--red);background:#fff}
+  li.item.unchecked textarea{color:#9aa0a8}
+  li.item .del{
+    border:none;background:none;color:#b9bec5;cursor:pointer;font-size:16px;
+    margin-top:4px;line-height:1;flex-shrink:0;padding:2px 4px;border-radius:3px;
+  }
+  li.item .del:hover{color:var(--red);background:#f6e7e6}
+
+  /* Sub-items (optional subcategory under a selected scope item) */
+  ul.subs{
+    list-style:none;flex-basis:100%;
+    margin:4px 0 2px 28px;padding:4px 0 2px 10px;
+    border-left:2px solid var(--line);
+  }
+  li.sub{display:flex;gap:8px;align-items:flex-start;padding:4px 2px}
+  li.sub input[type="checkbox"]{
+    width:15px;height:15px;margin-top:4px;accent-color:var(--steel);flex-shrink:0;cursor:pointer;
+  }
+  li.sub textarea{
+    flex:1;font:inherit;font-size:13.5px;line-height:1.4;color:var(--steel);
+    border:1px solid transparent;border-radius:4px;background:transparent;
+    padding:3px 6px;resize:none;overflow:hidden;
+  }
+  li.sub textarea:hover{border-color:var(--line);background:#fff}
+  li.sub textarea:focus{border-color:var(--red);background:#fff}
+  li.sub.unchecked textarea{color:#9aa0a8}
+  li.sub .del{
+    border:none;background:none;color:#b9bec5;cursor:pointer;font-size:14px;
+    margin-top:3px;line-height:1;flex-shrink:0;padding:2px 4px;border-radius:3px;
+  }
+  li.sub .del:hover{color:var(--red);background:#f6e7e6}
+  button.addsub{
+    font:inherit;font-size:12px;font-weight:600;
+    margin:2px 0 2px 2px;padding:3px 8px;border-radius:4px;cursor:pointer;
+    border:1px dashed var(--line);background:none;color:var(--muted);
+  }
+  button.addsub:hover{border-color:var(--red);color:var(--red)}
+
+  button.small{
+    font:inherit;font-size:13px;font-weight:600;
+    padding:6px 12px;border-radius:4px;cursor:pointer;
+    border:1px solid var(--line);background:#fff;color:var(--steel);
+  }
+  button.small:hover{border-color:var(--red);color:var(--red)}
+  .selcount{font-size:12.5px;color:var(--muted);white-space:nowrap}
+
+  /* Combined Including/Excluding controls */
+  .legend{font-size:12.5px;color:var(--muted);margin:0 0 10px 2px}
+  .seg{
+    display:inline-flex;flex-shrink:0;margin-top:2px;
+    border:1px solid var(--line);border-radius:4px;overflow:hidden;
+  }
+  .seg button{
+    font:inherit;font-size:11.5px;font-weight:700;letter-spacing:.4px;
+    padding:5px 9px;border:none;background:#fff;color:#9aa0a8;cursor:pointer;
+    border-right:1px solid var(--line);
+  }
+  .seg button:last-child{border-right:none}
+  .seg button.on-inc{background:#1a7a3c;color:#fff}
+  .seg button.on-exc{background:var(--red);color:#fff}
+  .seg button.on-off{background:var(--steel);color:#fff}
+  li.item.omitted textarea{color:#9aa0a8;text-decoration:line-through}
+
+  /* Footer action bar */
+  .actionbar{
+    position:fixed;left:0;right:0;bottom:0;
+    background:#fff;border-top:1px solid var(--line);
+    box-shadow:0 -3px 14px rgba(0,0,0,.08);
+    padding:12px 18px;
+    display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;
+    z-index:10;
+  }
+  button.primary{
+    font:inherit;font-size:15px;font-weight:700;
+    background:var(--red);color:#fff;border:none;border-radius:5px;
+    padding:12px 26px;cursor:pointer;letter-spacing:.2px;
+  }
+  button.primary:hover{background:var(--red-dark)}
+  button.secondary{
+    font:inherit;font-size:14px;font-weight:600;
+    background:#fff;color:var(--steel);border:1.5px solid var(--steel);
+    border-radius:5px;padding:11px 20px;cursor:pointer;
+  }
+  button.secondary:hover{border-color:var(--red);color:var(--red)}
+  #status{font-size:13px;color:var(--muted);min-width:160px;text-align:center}
+  #status.ok{color:#1a7a3c;font-weight:600}
+
+  @media (max-width:640px){
+    .toolbar input[type="search"]{width:100%}
+    main{padding-bottom:150px}
+  }
+</style>
+</head>
+<body><script type="application/json" id="savedState">{"meta":{"app":"FDEC Proposal Builder","author":"Mitch Peebles","version":"2.0","savedAt":"2026-07-20T14:59:21.202Z"},"job":{"customer":"","address":"","quote":"","date":"2026-07-20","intro":"Fire Defense Equipment Co. is pleased to present this quotation to perform the following fire sprinkler work at the above-referenced location:"},"sections":{"scope":[{"text":"Perform the 5-year internal pipe inspection on one (1) wet fire sprinkler riser.","checked":false,"subs":[{"text":"Provide a written internal condition assessment report.","checked":false}]},{"text":"Perform the 5-year internal pipe inspection on one (1) antifreeze fire sprinkler riser.","checked":false,"subs":[{"text":"Provide a written internal condition assessment report.","checked":false}]},{"text":"Perform the 5-year internal pipe inspection on one (1) pre-action fire sprinkler riser.","checked":false,"subs":[{"text":"Provide a written internal condition assessment report.","checked":false},{"text":"Rebuild the pre-action valve with a manufacturer's rebuild kit.","checked":false}]},{"text":"Perform the 5-year internal pipe inspection on one (1) dry fire sprinkler riser.","checked":false,"subs":[{"text":"Provide a written internal condition assessment report.","checked":false},{"text":"Rebuild the dry valve with a manufacturer's rebuild kit.","checked":false}]},{"text":"Perform the 5-year internal pipe inspection per NFPA 25 on four (4) fire sprinkler risers: one (1) wet, one (1) dry, one (1) pre-action, and one (1) antifreeze.","checked":false,"subs":[{"text":"Provide a written internal condition assessment report.","checked":false},{"text":"Rebuild the dry valve with a manufacturer's rebuild kit.","checked":false},{"text":"Rebuild the pre-action valve with a manufacturer's rebuild kit.","checked":false}]},{"text":"Perform the 5-Year Internal Inspection of the fire department connection (FDC) check valve.","checked":false,"subs":[{"text":"Provide a written internal condition assessment report.","checked":false}]},{"text":"Perform the 5-Year Hydrostatic Test on the FDC pipe between the fire department connection and the FDC check valve.","checked":false,"subs":[{"text":"Includes the replacement of the automatic ball drip.","checked":false},{"text":"Includes the replacement of FDC breakaway caps.","checked":false},{"text":"Includes the replacement of all material removed for testing purposes.","checked":false}]},{"text":"Replace the system pressure gauge(s) and associated 3-way valves.","checked":false,"subs":[]},{"text":"Perform the Dry Valve 3-Year Full Trip testing.","checked":false,"subs":[{"text":"Rebuild the dry valve with a manufacturer's rebuild kit.","checked":false},{"text":"Provide a written internal condition assessment report.","checked":false}]},{"text":"Return 2–4 weeks later to drain any residual water from the drum drip and low-point drains.","checked":false,"subs":[]},{"text":"Install the proper sprinklers, wrench, and equipment list in the spare head cabinet.","checked":false,"subs":[]},{"text":"Survey to install the proper sprinklers, wrench, and equipment list in the spare head cabinet.","checked":false,"subs":[]},{"text":"Replace approximately ( ) painted sprinklers.","checked":false,"subs":[{"text":"","checked":false}]},{"text":"Clean approximately ( ) loaded sprinklers.","checked":false,"subs":[]},{"text":"Replace approximately ( ) missing escutcheons.","checked":false,"subs":[{"text":"all viking","checked":true}]},{"text":"Replace approximately ( ) missing painted concealed sprinkler cover plates.","checked":false,"subs":[]},{"text":"Install the proper missing system signage.","checked":false,"subs":[]},{"text":"Perform 10-Year sample testing on four (4) dry barrel sprinklers, including replacement of the four (4) sample sprinklers with new sprinklers, per NFPA 25. Where one sprinkler within a representative sample fails to meet the test requirement, all sprinklers within the area represented by that sample shall be replaced.","checked":false,"subs":[]},{"text":"Replace ( ) dry barrel sprinklers in lieu of 10-Year sample testing, per NFPA 25. Replacement is more cost-effective than testing.","checked":false,"subs":[]},{"text":"Perform 25-Year sample testing on four (4) quick-response sprinklers, including replacement of the four (4) sample sprinklers with new sprinklers, per NFPA 25. Where one sprinkler within a representative sample fails to meet the test requirement, all sprinklers within the area represented by that sample shall be replaced.","checked":false,"subs":[]},{"text":"Perform the 50-Year sample testing on four (4) 50-year-old sprinklers, including replacement of the four (4) sample sprinklers with new sprinklers, per NFPA 25. Where one sprinkler within a representative sample fails to meet the test requirement, all sprinklers within the area represented by that sample shall be replaced.","checked":false,"subs":[]},{"text":"Replace approximately one (1) quick-response sprinkler in lieu of performing the 20-Year sample testing, per NFPA 25. Replacement is more cost-effective than testing.","checked":false,"subs":[]},{"text":"Install an Inspector's Test Valve (ITV) on the system — none currently installed ","checked":false,"subs":[]}],"notes":[{"text":"When replacing sprinklers in drywall or decorative ceilings, access holes may need to be cut in the ceiling. Patching of any access holes is the customer's responsibility and is not included in this quotation.","checked":false},{"text":"The location of the FDC check valve is not currently known. It will be serviced if accessible. If it is not accessible, it will not be serviced unless access can be arranged.","checked":false},{"text":"The customer is responsible for maintaining a Fire Watch while the fire sprinkler system is shut down.","checked":false},{"text":"The customer must clear the Riser Room prior to the start of work.","checked":false},{"text":"The customer is responsible for providing a scissor or boom lift at no cost to Fire Defense Equipment Co. The lift must be dedicated to our crew continuously from 8:00 a.m. to 4:30 p.m.","checked":false},{"text":"This price is based on the customer providing a scissor or boom lift at no cost. The lift must be dedicated to our crew continuously from 8:00 a.m. to 4:30 p.m.","checked":false},{"text":"Wiring of the control valve supervisory switches is to be performed by the customer's alarm contractor and is not included in this quotation.","checked":false},{"text":"The dry riser 5-Year Internal Assessment and FDC Hydrostatic Test may only be performed when the ambient temperature is consistently above 40°F. If additional work requires the wet riser to be drained, all work will be scheduled for Spring 2026 when conditions permit.","checked":false},{"text":"This price is based on the customer providing a licensed electrician to wire the new pump and controller. Electrical work is not included in this quotation.","checked":false},{"text":"This price is based on the customer providing a licensed electrician to wire the new air compressor. Electrical work is not included in this quotation.","checked":false},{"text":"The FDC Hydrostatic Test may only be performed when the outside temperature is consistently above 40°F; therefore, all work on this quotation will be scheduled for Spring/Summer 2027.","checked":false},{"text":"The FDC Hydrostatic Test may only be performed when the outside temperature is consistently above 40°F and will be scheduled accordingly.","checked":false},{"text":"This work has been quoted as subcontracted to Guardian Automatic Sprinkler Corporation under the direct supervision of Fire Defense Equipment Co.","checked":false},{"text":"A down payment of $____________ is required prior to scheduling or commencing work.","checked":false},{"text":"Due to fluctuating material costs and delivery lead times, materials will be ordered upon approval of this quotation and invoiced upon receipt.","checked":false}],"quals":[{"text":"Unless otherwise noted, all work will be performed during normal business hours (Monday–Friday, 7:00 a.m. to 5:00 p.m.), excluding holidays.","checked":true},{"text":"This quotation is not a design review to determine whether the building or equipment is properly protected or whether the system was installed correctly. If verification of proper protection or installation is required, a complete building and system survey can be performed at an additional cost.","checked":true},{"text":"During hydrostatic testing, Fire Defense Equipment Co. is not responsible for any damages resulting from leaking or burst pipe or fittings on existing system components. Any required repair or replacement will be invoiced at additional cost.","checked":true},{"text":"Existing fittings must be disassembled to perform the 5-year internal pipe inspection. Fire Defense Equipment Co. is not responsible for, and this quotation does not include, replacement of existing pipe or fittings that leak following reassembly due to age or condition.","checked":true}],"resp":[{"text":"Ensuring all areas of fire protection work are accessible and clear of stock, furniture, or any materials that may hinder installation","checked":true},{"text":"Providing timely access to all locked rooms, if applicable","checked":true},{"text":"Ensuring the proper operation of the building's fire alarm system and contacting the fire alarm monitoring company and fire department, if applicable","checked":true},{"text":"Mitigating any safety hazards caused by drained system water that may freeze on walkways or parking lots during freezing weather conditions","checked":true}],"billing":[{"text":"Billing terms: Net 10 days with approved credit.","checked":true},{"text":"A 3% fee will be applied to all credit card transactions.","checked":true},{"text":"Billing will be invoiced monthly based on the percentage of work completed.","checked":true},{"text":"Payment is due by the 15th of the month following the month invoiced, or net 30.","checked":true},{"text":"Contractor terms are subject to review by Fire Defense Equipment Co. Additional terms and conditions may apply.","checked":true},{"text":"This quotation is valid for 30 days from the date of issue.","checked":true}],"incexc":[{"text":"Labor","mode":"inc"},{"text":"Materials","mode":"inc"},{"text":"Clean-environment draining procedures","mode":"inc"},{"text":"Fabrication and installation","mode":"inc"},{"text":"Freight and cartage of equipment and materials to the site","mode":"inc"},{"text":"Scaffolding","mode":"exc"},{"text":"Overtime labor, second-shift premium, or prevailing wage rates","mode":"exc"},{"text":"Any other labor or materials not listed above","mode":"exc"},{"text":"Repair or replacement of any materials that fail 5-Year internal testing or investigation","mode":"exc"},{"text":"Painting or pipe identification","mode":"exc"},{"text":"Cutting, repairing, replacing, fireproofing, or painting any ceiling or wall materials","mode":"exc"},{"text":"Fire Watch","mode":"exc"},{"text":"Fire alarm system testing, repair, or materials","mode":"exc"},{"text":"Electrical materials or labor","mode":"exc"},{"text":"Wiring of supervisory switches","mode":"exc"},{"text":"Annual backflow preventer testing","mode":"exc"},{"text":"Submittal drawings","mode":"exc"},{"text":"Plan review and permit fees (cost plus 10%), if required","mode":"exc"},{"text":"Pressure testing","mode":"exc"},{"text":"Scissor or boom lift","mode":"exc"},{"text":"System design","mode":"exc"},{"text":"Michigan sales tax","mode":"exc"},{"text":"IROL ","mode":"exc"}]}}<\/script>
+
+<header>
+  <h1>Repair Verbiage <span>· Sprinkler &amp; Fire Alarm Division</span></h1>
+  <div class="sub">ServiceTrade quotation generator &nbsp;·&nbsp; <span id="metaLine">V2.0 · Mitch Peebles</span></div>
+</header>
+
+<main>
+
+  <!-- JOB INFO -->
+  <section class="card">
+    <div class="card-head"><h2>Job Information</h2><span class="hint">Appears at the top of the proposal</span></div>
+    <div class="card-body">
+      <div class="grid">
+        <label class="field">Customer / Facility
+          <input type="text" id="jobCustomer" placeholder="e.g., BIRDI — Plymouth, MI">
+        </label>
+        <label class="field">Quote Number
+          <input type="text" id="jobQuote" placeholder="e.g., Q-2026-0143">
+        </label>
+        <label class="field">Date
+          <input type="date" id="jobDate">
+        </label>
+      </div>
+      <div style="margin-top:12px">
+        <label class="field">Introduction Paragraph
+          <textarea id="jobIntro">Fire Defense Equipment Co. is pleased to present this quotation to perform the following fire sprinkler work at the above-referenced location:</textarea>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCOPE -->
+  <section class="card" id="sec-scope">
+    <div class="card-head">
+      <h2>Scope of Work</h2>
+      <div class="toolbar">
+        <input type="search" placeholder="Filter scope items…" data-filter="scope">
+        <button class="small" data-add="scope">+ Add Custom Item</button>
+        <span class="selcount" data-count="scope">0 selected</span>
+      </div>
+    </div>
+    <div class="card-body"><ul class="items" id="list-scope"></ul></div>
+  </section>
+
+  <!-- NOTES -->
+  <section class="card" id="sec-notes">
+    <div class="card-head">
+      <h2>Notes</h2>
+      <div class="toolbar">
+        <input type="search" placeholder="Filter notes…" data-filter="notes">
+        <button class="small" data-add="notes">+ Add Custom Note</button>
+        <span class="selcount" data-count="notes">0 selected</span>
+      </div>
+    </div>
+    <div class="card-body"><ul class="items" id="list-notes"></ul></div>
+  </section>
+
+  <!-- INCLUDING / EXCLUDING (combined) -->
+  <section class="card" id="sec-incexc">
+    <div class="card-head">
+      <h2>Including / Excluding</h2>
+      <div class="toolbar">
+        <button class="small" data-add="incexc">+ Add Item</button>
+        <span class="selcount" data-count="incexc">5 included · 18 excluded</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="legend">Mark each item <strong>INCL</strong> (included), <strong>EXCL</strong> (excluded), or <strong>—</strong> (leave off the proposal). The document builds separate INCLUDING and EXCLUDING lists automatically.</p>
+      <ul class="items" id="list-incexc"></ul>
+    </div>
+  </section>
+  <!-- QUALIFICATIONS -->
+  <section class="card" id="sec-quals">
+    <div class="card-head">
+      <h2>Qualifications</h2>
+      <div class="toolbar">
+        <button class="small" data-add="quals">+ Add Qualification</button>
+        <span class="selcount" data-count="quals">4 selected</span>
+      </div>
+    </div>
+    <div class="card-body"><ul class="items" id="list-quals"></ul></div>
+  </section>
+
+  <!-- CUSTOMER RESPONSIBILITIES -->
+  <section class="card" id="sec-resp">
+    <div class="card-head">
+      <h2>Customer Responsibilities</h2>
+      <div class="toolbar">
+        <button class="small" data-add="resp">+ Add Item</button>
+        <span class="selcount" data-count="resp">4 selected</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="legend">Checked items appear as bullets under “The customer is responsible for the following:”</p>
+      <ul class="items" id="list-resp"></ul>
+    </div>
+  </section>
+
+  <!-- BILLING & PAYMENT TERMS -->
+  <section class="card" id="sec-billing">
+    <div class="card-head">
+      <h2>Billing &amp; Payment Terms</h2>
+      <div class="toolbar">
+        <button class="small" data-add="billing">+ Add Term</button>
+        <span class="selcount" data-count="billing">6 selected</span>
+      </div>
+    </div>
+    <div class="card-body"><ul class="items" id="list-billing"></ul></div>
+  </section>
+
+  <!-- CLOSING -->
+  <section class="card" id="sec-closing">
+    <div class="card-head">
+      <h2>Closing</h2>
+      <div class="toolbar">
+        <button class="small" data-add="closing">+ Add Line</button>
+        <span class="selcount" data-count="closing">0 selected</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="legend">Checked closing lines appear at the very end of the proposal, before the signature block below.</p>
+      <ul class="items" id="list-closing"></ul>
+      <label class="field" style="margin-top:12px">Signature Block
+        <textarea id="jobSignature" rows="6" style="min-height:120px">Mitchell Peebles
+Cell (248) 797-4488
+Office (248) 549-8113
+Mp1@firedefense.com</textarea>
+      </label>
+    </div>
+  </section>
+
+</main>
+
+<div class="actionbar">
+  <button class="primary" id="btnWord">Generate Word Proposal (.docx)</button>
+  <button class="secondary" id="btnCopy">Copy as Plain Text</button>
+  <button class="secondary" id="btnSave">Save Draft (.html)</button>
+  <span id="status" class=""></span>
+</div>
+
+<script>
+/* ============================================================
+   APP METADATA — version increases by 0.5 with each revision
+   ============================================================ */
+const APP_META = {
+  author: "Mitch Peebles",
+  version: "2.0"
+};
+
+/* ============================================================
+   VERBIAGE LIBRARY — edit freely; app numbers/letters items
+   automatically based on what is checked at generation time.
+   ============================================================ */
+
+const LIBRARY = {
+  /* Scope entries may be a plain string, or an object with optional default
+     sub-items:  { text: "...", subs: ["...", "..."] }
+     Sub-items appear (unchecked) beneath the item once it is selected. */
+  scope: [
+    { text: "Perform the 5-year internal pipe inspection on one (1) wet fire sprinkler riser.",
+      subs: [
+        "Flush the system if obstructing foreign material is found, on a time-and-material basis.",
+        "Provide a written internal condition assessment report."
+      ] },
+    "Perform the 5-year internal pipe inspection on one (1) antifreeze fire sprinkler riser.",
+    "Perform the 5-year internal pipe inspection on one (1) pre-action fire sprinkler riser.",
+    { text: "Perform the 5-year internal pipe inspection on one (1) dry fire sprinkler riser.",
+      subs: [
+        "Flush the system if obstructing foreign material is found, on a time-and-material basis.",
+        "Provide a written internal condition assessment report."
+      ] },
+    "Perform the 5-year internal pipe inspection per NFPA 25 on four (4) fire sprinkler risers: one (1) wet, one (1) dry, one (1) pre-action, and one (1) antifreeze.",
+    "Perform the 5-Year Internal Inspection of the fire department connection (FDC) check valve.",
+    "Perform the 5-Year Hydrostatic Test on the FDC pipe between the fire department connection and the FDC check valve.",
+    "Replace the system pressure gauge(s) and associated 3-way valves.",
+    { text: "Perform the Dry Valve 3-Year Full Trip testing.",
+      subs: [ "Rebuild the dry valve with a manufacturer's rebuild kit." ] },
+    "Return 2–4 weeks later to drain any residual water from the drum drip and low-point drains.",
+    "Install the proper sprinklers, wrench, and equipment list in the spare head cabinet.",
+    "Survey to install the proper sprinklers, wrench, and equipment list in the spare head cabinet.",
+    "Replace approximately ( ) painted sprinklers.",
+    "Clean approximately ( ) loaded sprinklers.",
+    "Replace approximately ( ) missing escutcheons.",
+    "Replace approximately ( ) missing painted concealed sprinkler cover plates.",
+    "Install the proper missing system signage.",
+    "Perform 10-Year sample testing on four (4) dry barrel sprinklers, including replacement of the four (4) sample sprinklers with new sprinklers, per NFPA 25 (2017 Edition), Sections 5.3.1.1.1.6 and 5.3.1.2. Per Section 5.3.1.3: where one sprinkler within a representative sample fails to meet the test requirement, all sprinklers within the area represented by that sample shall be replaced.",
+    "Replace ( ) dry barrel sprinklers in lieu of 10-Year sample testing, per NFPA 25 (2017 Edition), Sections 5.3.1.1.1.6 and 5.3.1.2. Replacement is more cost-effective than testing.",
+    "Perform 20-Year sample testing on four (4) quick-response sprinklers, including replacement of the four (4) sample sprinklers with new sprinklers, per NFPA 25 (2017 Edition), Sections 5.3.1.1.1.3 and 5.3.1.2. Per Section 5.3.1.3: where one sprinkler within a representative sample fails to meet the test requirement, all sprinklers within the area represented by that sample shall be replaced.",
+    "Perform the 50-Year sample testing on four (4) 50-year-old sprinklers, including replacement of the four (4) sample sprinklers with new sprinklers, per NFPA 25 (2017 Edition), Sections 5.3.1.1.1 and 5.3.1.2. Per Section 5.3.1.3: where one sprinkler within a representative sample fails to meet the test requirement, all sprinklers within the area represented by that sample shall be replaced.",
+    "Replace approximately one (1) quick-response sprinkler in lieu of performing the 20-Year sample testing, per NFPA 25 (2017 Edition), Sections 5.3.1.1.1.3 and 5.3.1.2. Replacement is more cost-effective than testing.",
+    "Install an Inspector's Test Valve (ITV) on the system — none currently installed — per NFPA 13 (2010 Edition), Section 8.17.4.2.1."
+  ],
+  notes: [
+    "When replacing sprinklers in drywall or decorative ceilings, access holes may need to be cut in the ceiling. Patching of any access holes is the customer's responsibility and is not included in this quotation.",
+    "The location of the FDC check valve is not currently known. It will be serviced if accessible. If it is not accessible, it will not be serviced unless access can be arranged.",
+    "The customer is responsible for maintaining a Fire Watch while the fire sprinkler system is shut down.",
+    "The customer must clear the Riser Room prior to the start of work.",
+    "The customer is responsible for providing a scissor or boom lift at no cost to Fire Defense Equipment Co. The lift must be dedicated to our crew continuously from 8:00 a.m. to 4:30 p.m.",
+    "This price is based on the customer providing a scissor or boom lift at no cost. The lift must be dedicated to our crew continuously from 8:00 a.m. to 4:30 p.m.",
+    "Wiring of the control valve supervisory switches is to be performed by the customer's alarm contractor and is not included in this quotation.",
+    "The dry riser 5-Year Internal Assessment and FDC Hydrostatic Test may only be performed when the ambient temperature is consistently above 40°F. If additional work requires the wet riser to be drained, all work will be scheduled for Spring 2026 when conditions permit.",
+    "This price is based on the customer providing a licensed electrician to wire the new pump and controller. Electrical work is not included in this quotation.",
+    "This price is based on the customer providing a licensed electrician to wire the new air compressor. Electrical work is not included in this quotation.",
+    "The FDC Hydrostatic Test may only be performed when the outside temperature is consistently above 40°F; therefore, all work on this quotation will be scheduled for Spring/Summer 2027.",
+    "The FDC Hydrostatic Test may only be performed when the outside temperature is consistently above 40°F and will be scheduled accordingly.",
+    "This work has been quoted as subcontracted to Guardian Automatic Sprinkler Corporation under the direct supervision of Fire Defense Equipment Co.",
+    "A down payment of $____________ is required prior to scheduling or commencing work.",
+    "Due to fluctuating material costs and delivery lead times, materials will be ordered upon approval of this quotation and invoiced upon receipt."
+  ],
+  quals: [
+    "Unless otherwise noted, all work will be performed during normal business hours (Monday\u2013Friday, 7:00 a.m. to 5:00 p.m.), excluding holidays.",
+    "This quotation is not a design review to determine whether the building or equipment is properly protected or whether the system was installed correctly. If verification of proper protection or installation is required, a complete building and system survey can be performed at an additional cost.",
+    "During hydrostatic testing, Fire Defense Equipment Co. is not responsible for any damages resulting from leaking or burst pipe or fittings on existing system components. Any required repair or replacement will be invoiced at additional cost.",
+    "Existing fittings must be disassembled to perform the 5-year internal pipe inspection. Fire Defense Equipment Co. is not responsible for, and this quotation does not include, replacement of existing pipe or fittings that leak following reassembly due to age or condition."
+  ],
+  resp: [
+    "Ensuring all areas of fire protection work are accessible and clear of stock, furniture, or any materials that may hinder installation",
+    "Providing timely access to all locked rooms, if applicable",
+    "Ensuring the proper operation of the building's fire alarm system and contacting the fire alarm monitoring company and fire department, if applicable",
+    "Mitigating any safety hazards caused by drained system water that may freeze on walkways or parking lots during freezing weather conditions"
+  ],
+  billing: [
+    "Billing terms: Net 10 days with approved credit.",
+    "A 3% fee will be applied to all credit card transactions.",
+    "Billing will be invoiced monthly based on the percentage of work completed.",
+    "Payment is due by the 15th of the month following the month invoiced, or net 30.",
+    "Contractor terms are subject to review by Fire Defense Equipment Co. Additional terms and conditions may apply.",
+    "This quotation is valid for 30 days from the date of issue."
+  ],
+  closing: [
+    "Thank you for the opportunity to provide this quotation to correct the deficiencies identified during the last annual fire sprinkler inspection.",
+    "Thank you for the opportunity to provide this quotation for the requested fire protection services at your facility.",
+    "Please don't hesitate to contact me should you have any questions, or if you would like to schedule an on-site consultation to review this proposal."
+  ],
+  incexc: [
+    // mode: "inc" = included, "exc" = excluded, "off" = left off the proposal
+    { text: "Labor", mode: "inc" },
+    { text: "Materials", mode: "inc" },
+    { text: "Clean-environment draining procedures", mode: "inc" },
+    { text: "Fabrication and installation", mode: "inc" },
+    { text: "Freight and cartage of equipment and materials to the site", mode: "inc" },
+    { text: "Scaffolding", mode: "inc" },
+    { text: "Overtime labor, second-shift premium, or prevailing wage rates", mode: "exc" },
+    { text: "Any other labor or materials not listed above", mode: "exc" },
+    { text: "Repair or replacement of any materials that fail 5-Year internal testing or investigation", mode: "exc" },
+    { text: "Painting or pipe identification", mode: "exc" },
+    { text: "Cutting, repairing, replacing, fireproofing, or painting any ceiling or wall materials", mode: "exc" },
+    { text: "Fire Watch", mode: "exc" },
+    { text: "Fire alarm system testing, repair, or materials", mode: "exc" },
+    { text: "Electrical materials or labor", mode: "exc" },
+    { text: "Wiring of supervisory switches", mode: "exc" },
+    { text: "Annual backflow preventer testing", mode: "exc" },
+    { text: "Submittal drawings", mode: "exc" },
+    { text: "Plan review and permit fees (cost plus 10%), if required", mode: "exc" },
+    { text: "Pressure testing", mode: "exc" },
+    { text: "Scissor or boom lift", mode: "exc" },
+    { text: "System design", mode: "exc" },
+    { text: "Michigan sales tax", mode: "exc" }
+  ]
+};
+
+/* Scope & Notes start unchecked (pick what applies to this job).
+   Scope items carry an optional subs[] list shown once the item is selected.
+   Including/Excluding items carry a mode: "inc", "exc", or "off". */
+const state = {};
+state.scope = LIBRARY.scope.map(entry => {
+  const obj = typeof entry === "string" ? { text: entry, subs: [] } : entry;
+  return {
+    text: obj.text,
+    checked: false,
+    subs: (obj.subs || []).map(s => ({ text: s, checked: false }))
+  };
+});
+state.notes = LIBRARY.notes.map(t => ({ text: t, checked: false }));
+/* Qualifications and boilerplate default ON — uncheck to drop from a proposal. */
+for (const key of ["quals","resp","billing","closing"]) {
+  state[key] = LIBRARY[key].map(t => ({ text: t, checked: true }));
+}
+state.incexc = LIBRARY.incexc.map(i => ({ text: i.text, mode: i.mode }));
+
+/* ---------------- rendering ---------------- */
+function autoGrow(ta){ ta.style.height = "auto"; ta.style.height = (ta.scrollHeight + 2) + "px"; }
+
+function render(key){
+  if (key === "incexc") return renderIncExc();
+  const ul = document.getElementById("list-" + key);
+  ul.innerHTML = "";
+  const filter = (document.querySelector(`[data-filter="${key}"]`)?.value || "").toLowerCase();
+  state[key].forEach((item, i) => {
+    if (filter && !item.text.toLowerCase().includes(filter)) return;
+    const li = document.createElement("li");
+    li.className = "item" + (item.checked ? "" : " unchecked");
+    li.dataset.index = i;
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.checked = item.checked;
+    cb.addEventListener("change", () => {
+      item.checked = cb.checked;
+      li.classList.toggle("unchecked", !cb.checked);
+      updateCount(key);
+      if (key === "scope") render(key); // open/close the sub-item block
+    });
+
+    const ta = document.createElement("textarea");
+    ta.rows = 1;
+    ta.value = item.text;
+    ta.addEventListener("input", () => { item.text = ta.value; autoGrow(ta); });
+    ta.addEventListener("focus", () => autoGrow(ta));
+
+    const del = document.createElement("button");
+    del.className = "del";
+    del.title = "Remove item";
+    del.innerHTML = "&times;";
+    del.addEventListener("click", () => { state[key].splice(i,1); render(key); updateCount(key); });
+
+    li.append(cb, ta, del);
+
+    // Optional subcategory: shown only when the scope item is selected
+    if (key === "scope" && item.checked){
+      const subUl = document.createElement("ul");
+      subUl.className = "subs";
+      item.subs.forEach((sub, j) => {
+        const sli = document.createElement("li");
+        sli.className = "sub" + (sub.checked ? "" : " unchecked");
+
+        const scb = document.createElement("input");
+        scb.type = "checkbox";
+        scb.checked = sub.checked;
+        scb.addEventListener("change", () => {
+          sub.checked = scb.checked;
+          sli.classList.toggle("unchecked", !scb.checked);
+          updateCount(key);
+        });
+
+        const sta = document.createElement("textarea");
+        sta.rows = 1;
+        sta.value = sub.text;
+        sta.addEventListener("input", () => { sub.text = sta.value; autoGrow(sta); });
+        sta.addEventListener("focus", () => autoGrow(sta));
+
+        const sdel = document.createElement("button");
+        sdel.className = "del";
+        sdel.title = "Remove sub-item";
+        sdel.innerHTML = "&times;";
+        sdel.addEventListener("click", () => { item.subs.splice(j,1); render(key); updateCount(key); });
+
+        sli.append(scb, sta, sdel);
+        subUl.appendChild(sli);
+        (window.requestAnimationFrame || (fn => setTimeout(fn, 0)))(() => autoGrow(sta));
+      });
+
+      const addSub = document.createElement("button");
+      addSub.className = "addsub";
+      addSub.type = "button";
+      addSub.textContent = "+ Sub-item";
+      addSub.addEventListener("click", () => {
+        item.subs.push({ text: "", checked: true });
+        render(key);
+        const parent = ul.querySelector(`li.item[data-index="${i}"]`);
+        const nt = parent && parent.querySelector("ul.subs li.sub:last-of-type textarea");
+        if (nt) nt.focus();
+      });
+      subUl.appendChild(document.createElement("li")).appendChild(addSub);
+
+      li.appendChild(subUl);
+    }
+
+    ul.appendChild(li);
+    autoGrow(ta);
+  });
+  updateCount(key);
+}
+
+function renderIncExc(){
+  const ul = document.getElementById("list-incexc");
+  ul.innerHTML = "";
+  state.incexc.forEach((item, i) => {
+    const li = document.createElement("li");
+    li.className = "item" + (item.mode === "off" ? " omitted" : "");
+
+    const seg = document.createElement("div");
+    seg.className = "seg";
+    const modes = [ ["inc","INCL","on-inc"], ["exc","EXCL","on-exc"], ["off","\u2014","on-off"] ];
+    modes.forEach(([mode, label, cls]) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = label;
+      b.title = mode === "inc" ? "Included" : mode === "exc" ? "Excluded" : "Leave off the proposal";
+      if (item.mode === mode) b.classList.add(cls);
+      b.addEventListener("click", () => { item.mode = mode; renderIncExc(); });
+      seg.appendChild(b);
+    });
+
+    const ta = document.createElement("textarea");
+    ta.rows = 1;
+    ta.value = item.text;
+    ta.addEventListener("input", () => { item.text = ta.value; autoGrow(ta); });
+    ta.addEventListener("focus", () => autoGrow(ta));
+
+    const del = document.createElement("button");
+    del.className = "del";
+    del.title = "Remove item";
+    del.innerHTML = "&times;";
+    del.addEventListener("click", () => { state.incexc.splice(i,1); renderIncExc(); });
+
+    li.append(seg, ta, del);
+    ul.appendChild(li);
+    autoGrow(ta);
+  });
+  updateCount("incexc");
+}
+
+function updateCount(key){
+  const el = document.querySelector(`[data-count="${key}"]`);
+  if (!el) return;
+  if (key === "incexc"){
+    const inc = state.incexc.filter(i => i.mode === "inc").length;
+    const exc = state.incexc.filter(i => i.mode === "exc").length;
+    el.textContent = inc + " included \u00b7 " + exc + " excluded";
+  } else if (key === "scope"){
+    const sel = state.scope.filter(i => i.checked);
+    const subs = sel.reduce((n,i) => n + i.subs.filter(s => s.checked).length, 0);
+    el.textContent = sel.length + " selected" + (subs ? " \u00b7 " + subs + " sub-item" + (subs === 1 ? "" : "s") : "");
+  } else {
+    el.textContent = state[key].filter(i => i.checked).length + " selected";
+  }
+}
+
+document.querySelectorAll("[data-add]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const key = btn.dataset.add;
+    if (key === "incexc"){
+      state.incexc.push({ text: "", mode: "inc" });
+    } else {
+      state[key].push({ text: "", checked: true, subs: [] });
+      const f = document.querySelector(`[data-filter="${key}"]`);
+      if (f) f.value = "";
+    }
+    render(key);
+    const ul = document.getElementById("list-" + key);
+    const last = ul.querySelector("li:last-child textarea");
+    if (last) last.focus();
+  });
+});
+
+document.querySelectorAll("[data-filter]").forEach(inp => {
+  inp.addEventListener("input", () => render(inp.dataset.filter));
+});
+
+/* ---------------- draft restore (hydrate from embedded saved state) ---------------- */
+document.getElementById("metaLine").textContent = "V" + APP_META.version + " \u00b7 " + APP_META.author;
+document.title = "FDEC Proposal Builder V" + APP_META.version;
+
+let restoredMsg = "";
+(function hydrate(){
+  const el = document.getElementById("savedState");
+  if (!el) return;
+  try {
+    const saved = JSON.parse(el.textContent);
+    if (saved.job){
+      document.getElementById("jobCustomer").value = saved.job.customer || "";
+      document.getElementById("jobQuote").value    = saved.job.quote    || "";
+      // Date intentionally not restored from the template — it is always set
+      // to today's date on open (see below).
+      if (saved.job.intro) document.getElementById("jobIntro").value = saved.job.intro;
+      if (saved.job.signature != null) document.getElementById("jobSignature").value = saved.job.signature;
+    }
+    if (saved.sections){
+      for (const key of ["scope","notes","quals","resp","billing","closing","incexc"]){
+        if (Array.isArray(saved.sections[key])) state[key] = saved.sections[key];
+      }
+      // guarantee scope items have a subs array
+      state.scope.forEach(i => { if (!Array.isArray(i.subs)) i.subs = []; });
+    }
+    const when = saved.meta && saved.meta.savedAt ? new Date(saved.meta.savedAt) : null;
+    restoredMsg = "Draft restored" + (when ? " \u2014 saved " + when.toLocaleString() : "") + ".";
+  } catch(e){ console.error("Could not restore saved draft:", e); }
+})();
+
+["scope","notes","quals","resp","billing","closing","incexc"].forEach(render);
+// Always open with today's date (local, not UTC, to avoid an off-by-one).
+(function(){
+  const d = new Date();
+  const local = d.getFullYear() + "-" +
+    String(d.getMonth()+1).padStart(2,"0") + "-" +
+    String(d.getDate()).padStart(2,"0");
+  document.getElementById("jobDate").value = local;
+})();
+if (restoredMsg) setTimeout(() => setStatus(restoredMsg, true), 100);
+
+/* When this app first renders inside a hidden iframe (the Quoting tab is
+   shown by default), every textarea measures scrollHeight = 0 and collapses
+   so its text is invisible. Re-grow all textareas once the tab is actually
+   visible. The suite shell posts {type:'relayout'} on tab switch; we also
+   listen for our own becoming-visible as a fallback. */
+function relayoutTextareas(){
+  var run = function(){ document.querySelectorAll("textarea").forEach(autoGrow); };
+  // Defer so the browser has laid out the now-visible iframe before we
+  // read scrollHeight; run twice to catch any late layout.
+  if (typeof requestAnimationFrame === "function"){
+    requestAnimationFrame(function(){ run(); requestAnimationFrame(run); });
+  } else {
+    run();
+  }
+}
+window.addEventListener("message", function(e){
+  var d = e && e.data;
+  if (d && d.fdec === true && d.type === "relayout") relayoutTextareas();
+});
+/* Self-healing: when this document transitions from hidden (0 size) to
+   visible, re-measure textareas automatically — independent of the shell.
+   Covers the case where the app first rendered inside a hidden iframe. */
+(function(){
+  var seenVisible = false;
+  function checkVisible(){
+    var visible = document.body && document.body.clientHeight > 0 &&
+                  document.documentElement.clientWidth > 0;
+    if (visible && !seenVisible){ seenVisible = true; relayoutTextareas(); }
+  }
+  if (typeof ResizeObserver === "function"){
+    try { new ResizeObserver(checkVisible).observe(document.documentElement); } catch(_){}
+  }
+  window.addEventListener("resize", checkVisible);
+  document.addEventListener("visibilitychange", checkVisible);
+  // initial + a few delayed attempts to catch first layout
+  checkVisible();
+  [60, 200, 500].forEach(function(ms){ setTimeout(checkVisible, ms); });
+})();
+/* Fallback: if this document becomes visible via layout, relayout once. */
+if (typeof requestAnimationFrame === "function"){
+  requestAnimationFrame(function(){ if (document.body.clientHeight) relayoutTextareas(); });
+}
+
+/* ---------------- output helpers ---------------- */
+function checkedItems(key){
+  return state[key].filter(i => i.checked && i.text.trim()).map(i => i.text.trim());
+}
+function scopeItems(){
+  return state.scope
+    .filter(i => i.checked && i.text.trim())
+    .map(i => ({
+      text: i.text.trim(),
+      subs: i.subs.filter(s => s.checked && s.text.trim()).map(s => s.text.trim())
+    }));
+}
+function incexcItems(mode){
+  return state.incexc.filter(i => i.mode === mode && i.text.trim()).map(i => i.text.trim());
+}
+function letterFor(n){ // 0 -> A, 25 -> Z, 26 -> AA
+  let s = "";
+  n += 1;
+  while (n > 0){ n--; s = String.fromCharCode(65 + (n % 26)) + s; n = Math.floor(n / 26); }
+  return s;
+}
+function fmtDate(iso){
+  if (!iso) return "";
+  const [y,m,d] = iso.split("-").map(Number);
+  return new Date(y, m-1, d).toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
+}
+function jobHeader(){
+  return {
+    customer: document.getElementById("jobCustomer").value.trim(),
+    recipient:"",
+    address:  "",
+    quote:    document.getElementById("jobQuote").value.trim(),
+    date:     fmtDate(document.getElementById("jobDate").value),
+    intro:    document.getElementById("jobIntro").value.trim(),
+    signature:document.getElementById("jobSignature").value.replace(/\s+$/,"")
+  };
+}
+function setStatus(msg, ok){
+  const s = document.getElementById("status");
+  s.textContent = msg;
+  s.className = ok ? "ok" : "";
+  if (msg) setTimeout(() => { s.textContent = ""; s.className = ""; }, 4000);
+}
+
+/* ---------------- Word generation (WordprocessingML via JSZip) ---------------- */
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+                  .replace(/"/g,"&quot;").replace(/'/g,"&apos;");
+}
+// run properties: Calibri 11pt by default
+function rPr(o={}){
+  return `<w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/>` +
+         (o.bold ? "<w:b/>" : "") +
+         (o.underline ? `<w:u w:val="single"/>` : "") +
+         (o.color ? `<w:color w:val="${o.color}"/>` : "") +
+         `<w:sz w:val="${o.size || 22}"/><w:szCs w:val="${o.size || 22}"/></w:rPr>`;
+}
+function textRun(t, o={}){
+  return `<w:r>${rPr(o)}<w:t xml:space="preserve">${esc(t)}</w:t></w:r>`;
+}
+// plain paragraph
+function xPara(runsXml, { before=0, after=120 } = {}){
+  return `<w:p><w:pPr><w:spacing w:before="${before}" w:after="${after}"/></w:pPr>${runsXml}</w:p>`;
+}
+// numbered/lettered list paragraph with hanging indent (label + tab + text)
+function xListPara(label, text){
+  return `<w:p><w:pPr>` +
+         `<w:tabs><w:tab w:val="left" w:pos="720"/></w:tabs>` +
+         `<w:spacing w:after="120"/>` +
+         `<w:ind w:left="720" w:hanging="720"/>` +
+         `</w:pPr>` +
+         textRun(label) +
+         `<w:r>${rPr()}<w:tab/></w:r>` +
+         textRun(text) +
+         `</w:p>`;
+}
+// second-level sub-item paragraph (a., b., …) indented under its parent
+function xSubListPara(label, text){
+  return `<w:p><w:pPr>` +
+         `<w:tabs><w:tab w:val="left" w:pos="1440"/></w:tabs>` +
+         `<w:spacing w:after="120"/>` +
+         `<w:ind w:left="1440" w:hanging="720"/>` +
+         `</w:pPr>` +
+         textRun(label) +
+         `<w:r>${rPr()}<w:tab/></w:r>` +
+         textRun(text) +
+         `</w:p>`;
+}
+function xHeading(t){
+  return xPara(textRun(t, { bold:true, underline:true }), { before:200, after:140 });
+}
+// bulleted paragraph (• + tab + text) with hanging indent
+function xBulletPara(text){
+  return `<w:p><w:pPr>` +
+         `<w:tabs><w:tab w:val="left" w:pos="720"/></w:tabs>` +
+         `<w:spacing w:after="120"/>` +
+         `<w:ind w:left="720" w:hanging="720"/>` +
+         `</w:pPr>` +
+         textRun("\u2022") +
+         `<w:r>${rPr()}<w:tab/></w:r>` +
+         textRun(text) +
+         `</w:p>`;
+}
+
+function buildDocumentXml(){
+  const h = jobHeader();
+  const body = [];
+
+  if (h.customer) body.push(xPara(textRun(h.customer, { bold:true, size:26 }), { after:40 }));
+  if (h.address)  body.push(xPara(textRun(h.address), { after:40 }));
+  const qd = [h.quote ? "Quote No. " + h.quote : "", h.date].filter(Boolean).join("    |    ");
+  if (qd) body.push(xPara(textRun(qd, { color:"555555" }), { after:200 }));
+  if (h.intro) body.push(xPara(textRun(h.intro), { after:200 }));
+
+  const scope = scopeItems();
+  body.push(xHeading("SCOPE OF WORK:"));
+  scope.forEach((it,i) => {
+    body.push(xListPara((i+1) + ".", it.text));
+    it.subs.forEach((s,j) => body.push(xSubListPara(letterFor(j).toLowerCase() + ".", s)));
+  });
+
+  const notes = checkedItems("notes");
+  if (notes.length){
+    body.push(xHeading("NOTES:"));
+    notes.forEach((t,i) => body.push(xListPara(letterFor(i) + ".", t)));
+  }
+  const inc = incexcItems("inc");
+  if (inc.length){
+    body.push(xHeading("INCLUDING:"));
+    inc.forEach((t,i) => body.push(xListPara((i+1) + ".", t)));
+  }
+  const exc = incexcItems("exc");
+  if (exc.length){
+    body.push(xHeading("EXCLUDING:"));
+    exc.forEach((t,i) => body.push(xListPara((i+1) + ".", t)));
+  }
+
+  const quals = checkedItems("quals");
+  if (quals.length){
+    body.push(xHeading("QUALIFICATIONS:"));
+    quals.forEach((t,i) => body.push(xListPara((i+1) + ".", t)));
+  }
+  const resp = checkedItems("resp");
+  if (resp.length){
+    body.push(xHeading("Customer Responsibilities"));
+    body.push(xPara(textRun("The customer is responsible for the following:"), { after:120 }));
+    resp.forEach(t => body.push(xBulletPara(t)));
+  }
+  const billing = checkedItems("billing");
+  if (billing.length){
+    body.push(xHeading("Billing & Payment Terms"));
+    billing.forEach(t => body.push(xBulletPara(t)));
+  }
+
+  const closing = checkedItems("closing");
+  if (closing.length || h.signature){
+    if (h.recipient) body.push(xPara(textRun(h.recipient + ","), { before:200, after:120 }));
+    closing.forEach(t => body.push(xPara(textRun(t), { after:120 })));
+    if (h.signature){
+      const sig = h.signature.split("\n");
+      sig.forEach((line, i) => body.push(xPara(textRun(line), { before: i === 0 ? 120 : 0, after:0 })));
+    }
+  }
+
+  // US Letter, 0.75" margins
+  const sectPr =
+    `<w:sectPr><w:pgSz w:w="12240" w:h="15840"/>` +
+    `<w:pgMar w:top="1080" w:right="1080" w:bottom="1080" w:left="1080" w:header="720" w:footer="720" w:gutter="0"/>` +
+    `</w:sectPr>`;
+
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+    `<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">` +
+    `<w:body>${body.join("")}${sectPr}</w:body></w:document>`;
+}
+
+const CONTENT_TYPES =
+  `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+  `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">` +
+  `<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>` +
+  `<Default Extension="xml" ContentType="application/xml"/>` +
+  `<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>` +
+  `</Types>`;
+
+const ROOT_RELS =
+  `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+  `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">` +
+  `<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>` +
+  `</Relationships>`;
+
+const DOC_RELS =
+  `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+  `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>`;
+
+async function generateWordProposal(silent){
+  const scope = scopeItems();
+  if (!scope.length){ if(!silent) setStatus("Select at least one Scope of Work item."); return false; }
+  if (typeof JSZip === "undefined"){
+    if(!silent) setStatus("Document library failed to load — check internet connection and reload.");
+    return false;
+  }
+  try {
+    const zip = new JSZip();
+    zip.file("[Content_Types].xml", CONTENT_TYPES);
+    zip.folder("_rels").file(".rels", ROOT_RELS);
+    const word = zip.folder("word");
+    word.file("document.xml", buildDocumentXml());
+    word.folder("_rels").file("document.xml.rels", DOC_RELS);
+
+    const blob = await zip.generateAsync({
+      type:"blob",
+      mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    });
+    const h = jobHeader();
+    const name = (h.quote || h.customer || "FDEC_Proposal").replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"_") || "FDEC_Proposal";
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name + "_Proposal.docx";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+    if(!silent) setStatus("Word proposal downloaded.", true);
+    return true;
+  } catch (err){
+    console.error(err);
+    if(!silent) setStatus("Error generating document — see console.");
+    return false;
+  }
+}
+document.getElementById("btnWord").addEventListener("click", () => generateWordProposal(false));
+
+/* ---------------- Plain-text copy (for pasting into ServiceTrade) ---------------- */
+document.getElementById("btnCopy").addEventListener("click", async () => {
+  const scope = scopeItems();
+  if (!scope.length){ setStatus("Select at least one Scope of Work item."); return; }
+  const h = jobHeader();
+  const L = [];
+  if (h.intro) L.push(h.intro, "");
+  L.push("SCOPE OF WORK:", "");
+  scope.forEach((it,i) => {
+    L.push(`${i+1}. ${it.text}`);
+    it.subs.forEach((s,j) => L.push(`     ${letterFor(j).toLowerCase()}. ${s}`));
+  });
+  const notes = checkedItems("notes");
+  if (notes.length){
+    L.push("", "NOTES:", "");
+    notes.forEach((t,i) => L.push(`${letterFor(i)}. ${t}`));
+  }
+  const inc = incexcItems("inc");
+  if (inc.length){
+    L.push("", "INCLUDING:", "");
+    inc.forEach((t,i) => L.push(`${i+1}. ${t}`));
+  }
+  const exc = incexcItems("exc");
+  if (exc.length){
+    L.push("", "EXCLUDING:", "");
+    exc.forEach((t,i) => L.push(`${i+1}. ${t}`));
+  }
+  const quals = checkedItems("quals");
+  if (quals.length){
+    L.push("", "QUALIFICATIONS:", "");
+    quals.forEach((t,i) => L.push(`${i+1}. ${t}`));
+  }
+  const resp = checkedItems("resp");
+  if (resp.length){
+    L.push("", "Customer Responsibilities", "", "The customer is responsible for the following:");
+    resp.forEach(t => L.push(`- ${t}`));
+  }
+  const billing = checkedItems("billing");
+  if (billing.length){
+    L.push("", "Billing & Payment Terms", "");
+    billing.forEach(t => L.push(`- ${t}`));
+  }
+  const closing = checkedItems("closing");
+  if (closing.length || h.signature){
+    L.push("");
+    if (h.recipient) L.push(h.recipient + ",", "");
+    closing.forEach(t => L.push(t, ""));
+    if (h.signature) L.push(h.signature.replace(/\s+$/,""));
+  }
+  try {
+    await navigator.clipboard.writeText(L.join("\n"));
+    setStatus("Copied to clipboard — paste into ServiceTrade.", true);
+  } catch {
+    setStatus("Clipboard blocked by browser — use the Word download instead.");
+  }
+});
+
+/* ---------------- Formatted HTML (for the combined PDF export) ---------------- */
+/* Builds a clean, print-ready HTML document body from the same section data
+   used by the Word/plain-text exports, so the proposal reads as a finished
+   document (not the editor UI) inside the combined PDF. */
+function buildProposalHTML(){
+  const h = jobHeader();
+  const P = [];
+  const head = [];
+  if (h.customer) head.push(`<div class="pp-cust">${esc(h.customer)}</div>`);
+  const meta = [];
+  if (h.quote) meta.push("Quote " + esc(h.quote));
+  if (h.date)  meta.push(esc(h.date));
+  if (meta.length) head.push(`<div class="pp-meta">${meta.join(" &nbsp;·&nbsp; ")}</div>`);
+  if (head.length) P.push(`<div class="pp-head">${head.join("")}</div>`);
+
+  if (h.intro) P.push(`<p class="pp-intro">${esc(h.intro)}</p>`);
+
+  const scope = scopeItems();
+  if (scope.length){
+    P.push(`<h3 class="pp-h">SCOPE OF WORK</h3>`);
+    let li = "";
+    scope.forEach(it => {
+      let subs = "";
+      if (it.subs && it.subs.length){
+        subs = "<ol class='pp-sub' type='a'>" + it.subs.map(s => `<li>${esc(s)}</li>`).join("") + "</ol>";
+      }
+      li += `<li>${esc(it.text)}${subs}</li>`;
+    });
+    P.push(`<ol class="pp-ol">${li}</ol>`);
+  }
+  const notes = checkedItems("notes");
+  if (notes.length){
+    P.push(`<h3 class="pp-h">NOTES</h3><ol class="pp-ol" type="A">` +
+      notes.map(t => `<li>${esc(t)}</li>`).join("") + `</ol>`);
+  }
+  const inc = incexcItems("inc");
+  if (inc.length){
+    P.push(`<h3 class="pp-h">INCLUDING</h3><ol class="pp-ol">` +
+      inc.map(t => `<li>${esc(t)}</li>`).join("") + `</ol>`);
+  }
+  const exc = incexcItems("exc");
+  if (exc.length){
+    P.push(`<h3 class="pp-h">EXCLUDING</h3><ol class="pp-ol">` +
+      exc.map(t => `<li>${esc(t)}</li>`).join("") + `</ol>`);
+  }
+  const quals = checkedItems("quals");
+  if (quals.length){
+    P.push(`<h3 class="pp-h">QUALIFICATIONS</h3><ol class="pp-ol">` +
+      quals.map(t => `<li>${esc(t)}</li>`).join("") + `</ol>`);
+  }
+  const resp = checkedItems("resp");
+  if (resp.length){
+    P.push(`<h3 class="pp-h">Customer Responsibilities</h3>` +
+      `<p class="pp-lead">The customer is responsible for the following:</p>` +
+      `<ul class="pp-ul">` + resp.map(t => `<li>${esc(t)}</li>`).join("") + `</ul>`);
+  }
+  const billing = checkedItems("billing");
+  if (billing.length){
+    P.push(`<h3 class="pp-h">Billing &amp; Payment Terms</h3><ul class="pp-ul">` +
+      billing.map(t => `<li>${esc(t)}</li>`).join("") + `</ul>`);
+  }
+  const closing = checkedItems("closing");
+  if (closing.length || h.signature){
+    let c = `<div class="pp-closing">`;
+    closing.forEach(t => c += `<p>${esc(t)}</p>`);
+    if (h.signature){
+      c += `<p class="pp-sig">` + esc(h.signature).replace(/\n/g,"<br>") + `</p>`;
+    }
+    c += `</div>`;
+    P.push(c);
+  }
+  return P.join("\n");
+}
+
+/* Scoped CSS for the proposal section of the combined PDF. */
+const PROPOSAL_PRINT_CSS = `
+  .pp-wrap{font:12.5px/1.5 Georgia,"Times New Roman",serif; color:#111; max-width:7.2in; margin:0 auto}
+  .pp-head{border-bottom:2px solid #b3202c; padding-bottom:8px; margin-bottom:14px}
+  .pp-cust{font-size:17px; font-weight:700; color:#182635}
+  .pp-meta{font-size:11px; color:#555; margin-top:3px}
+  .pp-intro{margin:0 0 14px}
+  .pp-h{font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+        color:#b3202c; border-bottom:1px solid #ccc; padding-bottom:2px; margin:16px 0 8px}
+  .pp-ol,.pp-ul{margin:0 0 10px; padding-left:24px}
+  .pp-ol>li,.pp-ul>li{margin:4px 0}
+  .pp-sub{margin:4px 0 4px; padding-left:20px}
+  .pp-sub>li{margin:2px 0; color:#333}
+  .pp-lead{margin:0 0 4px}
+  .pp-closing{margin-top:16px}
+  .pp-closing p{margin:0 0 10px}
+  .pp-sig{margin-top:14px; white-space:pre-line}
+`;
+
+/* Shell requests: return formatted HTML, or trigger the Word download. */
+window.addEventListener("message", function(e){
+  const d = e && e.data;
+  if (!d || d.fdec !== true) return;
+  if (d.type === "get-proposal-html"){
+    let html = "", err = null;
+    try {
+      if (!scopeItems().length) err = "no-scope";
+      else html = buildProposalHTML();
+    } catch(ex){ err = String(ex && ex.message || ex); }
+    // reply to the shell
+    if (window.parent && window.parent !== window){
+      window.parent.postMessage({
+        fdec:true, type:"proposal-html", reqId:d.reqId,
+        html: html, css: PROPOSAL_PRINT_CSS, error: err
+      }, "*");
+    }
+  } else if (d.type === "download-proposal-word"){
+    generateWordProposal(true);
+  }
+});
+
+/* ---------------- Save Draft (.html with embedded state) ---------------- */
+function collectState(){
+  return {
+    meta: { app: "FDEC Proposal Builder", author: APP_META.author, version: APP_META.version, savedAt: new Date().toISOString() },
+    job: {
+      customer: document.getElementById("jobCustomer").value,
+      quote:    document.getElementById("jobQuote").value,
+      date:     document.getElementById("jobDate").value,
+      intro:    document.getElementById("jobIntro").value,
+      signature:document.getElementById("jobSignature").value
+    },
+    sections: JSON.parse(JSON.stringify({
+      scope: state.scope, notes: state.notes, quals: state.quals,
+      resp: state.resp, billing: state.billing, closing: state.closing, incexc: state.incexc
+    }))
+  };
+}
+
+document.getElementById("btnSave").addEventListener("click", () => {
+  try {
+    // JSON payload; escape "</" so it can't terminate the script tag
+    const json = JSON.stringify(collectState()).replace(/<\//g, "<\\/");
+
+    // Serialize a clone of the page so the live view is untouched
+    const clone = document.documentElement.cloneNode(true);
+    const oldState = clone.querySelector("#savedState");
+    if (oldState) oldState.remove();
+    // strip rendered list contents — they're rebuilt on load from the saved state
+    clone.querySelectorAll("ul.items").forEach(ul => ul.innerHTML = "");
+    const body = clone.querySelector("body");
+    const stateScript = document.createElement("script");
+    stateScript.type = "application/json";
+    stateScript.id = "savedState";
+    stateScript.textContent = json;
+    body.insertBefore(stateScript, body.firstChild);
+
+    const html = "<!DOCTYPE html>\n" + clone.outerHTML;
+    const blob = new Blob([html], { type: "text/html" });
+
+    const q = document.getElementById("jobQuote").value.trim();
+    const c = document.getElementById("jobCustomer").value.trim();
+    const base = (q || c || "FDEC_Proposal").replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"_") || "FDEC_Proposal";
+    const stamp = new Date().toISOString().slice(0,10);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = base + "_Draft_" + stamp + ".html";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+    setStatus("Draft saved — reopen the file to continue where you left off.", true);
+  } catch (err){
+    console.error(err);
+    setStatus("Error saving draft — see console.");
+  }
+});
+
+/* ============================================================
+   CROSS-APP LINK — auto-fill the down payment note from the
+   Quoting tab. The suite shell relays the quoting app's down
+   payment total here via postMessage; we drop it into the
+   "A down payment of $____ is required..." note automatically.
+   ============================================================ */
+(function(){
+  // Matches the down payment note whether it still has the blank
+  // underscores or a previously auto-filled dollar amount.
+  const DP_RE = /(A down payment of\s+)(\$[\d,]+(?:\.\d{2})?|\$?_+)(\s+is required)/i;
+
+  function fillDownPayment(display){
+    let touched = false;
+    (state.notes || []).forEach(note => {
+      if (DP_RE.test(note.text)){
+        // Function replacer avoids "$" in the amount being read as a
+        // regex backreference (e.g. $1) inside the replacement string.
+        const next = note.text.replace(DP_RE, (m, pre, amt, post) => pre + display + post);
+        if (next !== note.text){ note.text = next; touched = true; }
+      }
+    });
+    // Re-render notes so the on-screen textarea reflects the new amount.
+    if (touched) render("notes");
+  }
+
+  window.addEventListener("message", function(e){
+    const d = e && e.data;
+    if (!d || d.fdec !== true || d.type !== "downpayment") return;
+    const display = d.display || ("$" + Number(d.value || 0).toFixed(2));
+    fillDownPayment(display);
+  });
+})();
+<\/script>
+
+
+</body></html></script>
+
+<script>
+/* ============================================================
+   AUTH GATE  (browser-local, on this device)
+   NOTE: This is a front-end access gate, not server security.
+   Passwords are stored SHA-256 hashed in localStorage; anyone with
+   file access could still bypass it. Suitable as an internal gate.
+   ============================================================ */
+var STORAGE_KEY = "fdec_suite_users_v1";
+var SESSION_KEY = "fdec_suite_session_v1";
+
+/* Storage helpers that fall back to in-memory if localStorage is blocked. */
+var memStore = {};
+function storeGet(k){
+  try { var v = localStorage.getItem(k); return v == null ? (k in memStore ? memStore[k] : null) : v; }
+  catch(_){ return k in memStore ? memStore[k] : null; }
+}
+function storeSet(k, v){
+  memStore[k] = v;
+  try { localStorage.setItem(k, v); } catch(_){}
+}
+function storeDel(k){
+  delete memStore[k];
+  try { localStorage.removeItem(k); } catch(_){}
+}
+
+function loadUsers(){
+  try { return JSON.parse(storeGet(STORAGE_KEY) || "{}"); } catch(_){ return {}; }
+}
+function saveUsers(u){ storeSet(STORAGE_KEY, JSON.stringify(u)); }
+
+/* SHA-256 hash (hex). Falls back to a simple hash if SubtleCrypto missing. */
+async function hashPassword(pw){
+  try {
+    var enc = new TextEncoder().encode(pw);
+    var buf = await crypto.subtle.digest("SHA-256", enc);
+    return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,"0"); }).join("");
+  } catch(_){
+    var h = 5381; for (var i=0;i<pw.length;i++){ h = ((h<<5)+h) + pw.charCodeAt(i); h |= 0; }
+    return "fallback_" + (h>>>0).toString(16);
+  }
+}
+
+/* Password policy: 8–12 chars, >=1 uppercase, >=1 lowercase letter,
+   >=1 number, >=1 special character. Returns the per-rule results. */
+function evalPassword(pw){
+  var rules = {
+    len:     pw.length >= 8 && pw.length <= 12,
+    upper:   /[A-Z]/.test(pw),
+    lower:   /[a-z]/.test(pw),
+    num:     /[0-9]/.test(pw),
+    special: /[^A-Za-z0-9]/.test(pw)
+  };
+  var met = 0; for (var k in rules){ if (rules[k]) met++; }
+  var allMet = met === 5;
+  var level = "weak";
+  if (allMet) level = "strong";
+  else if (met >= 3 && pw.length >= 6) level = "medium";
+  return { rules: rules, met: met, valid: allMet, level: level };
+}
+
+function authShow(which){
+  var login = which === "login";
+  document.getElementById("authLogin").hidden = !login;
+  document.getElementById("authRegister").hidden = login;
+  document.getElementById("authTabLogin").classList.toggle("active", login);
+  document.getElementById("authTabReg").classList.toggle("active", !login);
+  document.getElementById(login ? "loginMsg" : "regMsg").textContent = "";
+}
+
+function onRegPassInput(){
+  var pw = document.getElementById("regPass").value;
+  var r = evalPassword(pw);
+  var ul = document.getElementById("pwRules");
+  ul.querySelectorAll("li").forEach(function(li){
+    li.classList.toggle("met", !!r.rules[li.getAttribute("data-rule")]);
+  });
+  var bars = document.getElementById("pwBars");
+  var label = document.getElementById("pwLabel");
+  bars.classList.remove("weak","medium","strong");
+  label.classList.remove("weak","medium","strong");
+  if (!pw){ label.innerHTML = "&nbsp;"; return; }
+  bars.classList.add(r.level);
+  label.classList.add(r.level);
+  label.textContent = r.level === "strong" ? "Strong" : r.level === "medium" ? "Medium" : "Weak";
+}
+
+async function doRegister(){
+  var user = document.getElementById("regUser").value.trim();
+  var pw   = document.getElementById("regPass").value;
+  var pw2  = document.getElementById("regPass2").value;
+  var msg  = document.getElementById("regMsg");
+  msg.className = "auth-msg err";
+
+  if (!user){ msg.textContent = "Enter a username."; return; }
+  var users = loadUsers();
+  if (users[user.toLowerCase()]){ msg.textContent = "That username is already registered."; return; }
+  var r = evalPassword(pw);
+  if (!r.valid){ msg.textContent = "Password does not meet all requirements below."; return; }
+  if (pw !== pw2){ msg.textContent = "Passwords do not match."; return; }
+
+  var btn = document.getElementById("regBtn"); btn.disabled = true;
+  var hash = await hashPassword(pw);
+  users[user.toLowerCase()] = { name: user, hash: hash, created: new Date().toISOString() };
+  saveUsers(users);
+  btn.disabled = false;
+
+  document.getElementById("regUser").value = "";
+  document.getElementById("regPass").value = "";
+  document.getElementById("regPass2").value = "";
+  onRegPassInput();
+  authShow("login");
+  var lm = document.getElementById("loginMsg");
+  lm.className = "auth-msg ok";
+  lm.textContent = "Account created. Please sign in.";
+  document.getElementById("loginUser").value = user;
+  document.getElementById("loginPass").focus();
+}
+
+async function doLogin(){
+  var user = document.getElementById("loginUser").value.trim();
+  var pw   = document.getElementById("loginPass").value;
+  var msg  = document.getElementById("loginMsg");
+  msg.className = "auth-msg err";
+
+  if (!user || !pw){ msg.textContent = "Enter your username and password."; return; }
+  var users = loadUsers();
+  var rec = users[user.toLowerCase()];
+  if (!rec){ msg.textContent = "No account found for that username."; return; }
+  var hash = await hashPassword(pw);
+  if (hash !== rec.hash){ msg.textContent = "Incorrect password."; return; }
+
+  if (document.getElementById("loginRemember").checked){
+    storeSet(SESSION_KEY, JSON.stringify({ user: rec.name, at: Date.now() }));
+  } else {
+    storeDel(SESSION_KEY);
+  }
+  document.getElementById("loginPass").value = "";
+  unlockSuite();
+}
+
+function doSignOut(){
+  storeDel(SESSION_KEY);
+  location.reload();
+}
+
+var appsLoaded = false;
+function loadApps(){
+  if (appsLoaded) return;
+  appsLoaded = true;
+  function unshield(s){ return s.split("<\\/script").join("</script"); }
+  function load(iframeId, srcId){
+    var raw = document.getElementById(srcId).textContent;
+    var blob = new Blob([unshield(raw)], { type: "text/html" });
+    document.getElementById(iframeId).src = URL.createObjectURL(blob);
+  }
+  load("view-quote", "src-quote");
+  load("view-proposal", "src-proposal");
+}
+
+function unlockSuite(){
+  document.getElementById("authGate").hidden = true;
+  loadApps();
+}
+
+/* On open: if a remembered session exists, go straight in; else show gate. */
+(function initAuth(){
+  var sess = null;
+  try { sess = JSON.parse(storeGet(SESSION_KEY) || "null"); } catch(_){}
+  if (sess && sess.user){ unlockSuite(); }
+  else {
+    document.getElementById("authGate").hidden = false;
+    authShow("login");
+  }
+})();
+
+/* Allow Enter to submit each form. */
+document.addEventListener("keydown", function(e){
+  if (e.key !== "Enter") return;
+  if (!document.getElementById("authGate").hidden){
+    if (!document.getElementById("authRegister").hidden) doRegister();
+    else doLogin();
+  }
+});
+
+function showView(which){
+  var q = document.getElementById('view-quote');
+  var p = document.getElementById('view-proposal');
+  var tq = document.getElementById('tab-quote');
+  var tp = document.getElementById('tab-proposal');
+  var showQuote = which === 'quote';
+  q.hidden = !showQuote;
+  p.hidden = showQuote;
+  tq.classList.toggle('active', showQuote);
+  tp.classList.toggle('active', !showQuote);
+  /* When opening the Proposal tab, ask the Quoting frame to re-broadcast
+     its current down payment so the note is up to date. */
+  if (!showQuote && q && q.contentWindow){
+    q.contentWindow.postMessage({ fdec:true, type:'request-sync' }, '*');
+  }
+  /* The proposal renders while hidden, so its auto-sizing textareas collapse
+     to zero height. Tell it to re-measure now that it is visible. */
+  if (!showQuote && p && p.contentWindow){
+    p.contentWindow.postMessage({ fdec:true, type:'relayout' }, '*');
+  }
+}
+
+/* Relay FDEC cross-app messages (e.g. down payment total) from the
+   Quoting iframe into the Proposal iframe so the proposal can auto-fill
+   its down payment note live as the quote is edited. */
+window.addEventListener('message', function(e){
+  var d = e && e.data;
+  if (!d || d.fdec !== true) return;
+  // Resolve any pending export request replies.
+  if (d.type === 'quote-html' && pending['q'+d.reqId]){ pending['q'+d.reqId](d); delete pending['q'+d.reqId]; return; }
+  if (d.type === 'proposal-html' && pending['p'+d.reqId]){ pending['p'+d.reqId](d); delete pending['p'+d.reqId]; return; }
+  // Otherwise relay quoting -> proposal (down payment sync, etc.)
+  var p = document.getElementById('view-proposal');
+  if (p && p.contentWindow) p.contentWindow.postMessage(d, '*');
+});
+
+/* ============================================================
+   EXPORT FULL PACKAGE
+   1. Ask each iframe for its print-ready HTML + CSS.
+   2. Combine into one document (quote page 1, proposal page 2).
+   3. Print it (browser "Save as PDF" -> one combined PDF).
+   4. Simultaneously trigger the proposal's Word (.docx) download.
+   ============================================================ */
+var pending = {};
+var reqSeq = 0;
+
+function askFrame(prefix, iframeId, type){
+  return new Promise(function(resolve){
+    var id = ++reqSeq;
+    var frame = document.getElementById(iframeId);
+    if (!frame || !frame.contentWindow){ resolve({ error:'frame-unavailable' }); return; }
+    pending[prefix+id] = resolve;
+    frame.contentWindow.postMessage({ fdec:true, type:type, reqId:id }, '*');
+    // safety timeout
+    setTimeout(function(){
+      if (pending[prefix+id]){ delete pending[prefix+id]; resolve({ error:'timeout' }); }
+    }, 4000);
+  });
+}
+
+function exportFullPackage(){
+  var btn = document.getElementById('btn-export');
+  btn.disabled = true;
+  var original = btn.textContent;
+  btn.textContent = 'Preparing…';
+
+  Promise.all([
+    askFrame('q', 'view-quote', 'get-quote-html'),
+    askFrame('p', 'view-proposal', 'get-proposal-html')
+  ]).then(function(res){
+    var q = res[0] || {}, p = res[1] || {};
+
+    if (p.error === 'no-scope'){
+      alert('Select at least one Scope of Work item on the Proposal & Verbiage page before exporting.');
+      return;
+    }
+
+    // Trigger the Word download from the proposal (runs independently).
+    var pf = document.getElementById('view-proposal');
+    if (pf && pf.contentWindow){
+      pf.contentWindow.postMessage({ fdec:true, type:'download-proposal-word' }, '*');
+    }
+
+    // Build the combined print document.
+    var quoteSection = q && q.html
+      ? '<section class="pkg-page pkg-quote"><style>'+ (q.css||'') +'</style>'+ q.html +'</section>'
+      : '<section class="pkg-page"><p style="color:#900">Quote content unavailable.</p></section>';
+    var proposalSection = p && p.html
+      ? '<section class="pkg-page pkg-proposal"><div class="pp-wrap">'+ p.html +'</div></section>'
+      : '';
+    var proposalCss = (p && p.css) || '';
+
+    var docHtml =
+      '<!DOCTYPE html><html><head><meta charset="utf-8"><title>FDEC Full Package</title>'+
+      '<style>'+
+      '  @page{ margin:0.5in; }'+
+      '  html,body{ margin:0; padding:0; background:#fff; }'+
+      '  .pkg-page{ padding:0 0 0 0; }'+
+      '  .pkg-proposal{ page-break-before:always; }'+
+      '  @media print{ .pkg-proposal{ page-break-before:always; } }'+
+         proposalCss +
+      '</style></head><body>'+
+        quoteSection + proposalSection +
+      '</body></html>';
+
+    // Print via a hidden iframe so the suite UI is untouched.
+    var printFrame = document.createElement('iframe');
+    printFrame.style.position = 'fixed';
+    printFrame.style.right = '0';
+    printFrame.style.bottom = '0';
+    printFrame.style.width = '0';
+    printFrame.style.height = '0';
+    printFrame.style.border = '0';
+    document.body.appendChild(printFrame);
+
+    var pdoc = printFrame.contentWindow.document;
+    pdoc.open();
+    pdoc.write(docHtml);
+    pdoc.close();
+
+    // Give the browser a moment to lay out, then print.
+    var done = function(){
+      try { printFrame.contentWindow.focus(); printFrame.contentWindow.print(); }
+      catch(err){ console.error(err); alert('Could not open the print dialog: '+err); }
+      // Clean up after the dialog is handled.
+      setTimeout(function(){ if (printFrame && printFrame.parentNode) printFrame.parentNode.removeChild(printFrame); }, 1500);
+    };
+    if (printFrame.contentWindow.document.readyState === 'complete') setTimeout(done, 350);
+    else printFrame.onload = function(){ setTimeout(done, 350); };
+  }).catch(function(err){
+    console.error(err);
+    alert('Export failed: ' + err);
+  }).then(function(){
+    btn.disabled = false;
+    btn.textContent = original;
+  });
+}
+</script>
+
+</body>
+</html>
