@@ -2,7 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FDEC Suite">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#010039">
 <title>FDEC Quoting &amp; Proposal Suite 2026</title>
 <style>
   :root{
@@ -14,13 +20,19 @@
   body{
     background:var(--page);
     font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-    display:flex; flex-direction:column; height:100vh;
+    display:flex; flex-direction:column;
+    height:100vh;
+    height:100dvh;              /* dynamic viewport height — avoids iOS toolbar gap */
+    -webkit-text-size-adjust:100%;
   }
   .suitebar{
     background:var(--navy); color:#fff; flex:none;
     border-bottom:4px solid var(--red);
     display:flex; align-items:stretch; gap:0;
     padding:0 14px;
+    padding-left:max(14px, env(safe-area-inset-left));
+    padding-right:max(14px, env(safe-area-inset-right));
+    padding-top:env(safe-area-inset-top);
   }
   .suitebar .brand{
     display:flex; flex-direction:column; justify-content:center;
@@ -56,18 +68,18 @@
   #exportModal{position:fixed; inset:0; z-index:1100; display:flex; align-items:center; justify-content:center; padding:20px}
   #exportModal[hidden]{display:none}
   .xm-backdrop{position:absolute; inset:0; background:rgba(15,22,30,.55)}
-  .xm-card{position:relative; width:100%; max-width:430px; background:#fff; border-radius:12px; box-shadow:0 18px 50px rgba(0,0,0,.4); overflow:hidden}
+  .xm-card{position:relative; width:100%; max-width:430px; max-height:calc(100dvh - 40px); overflow-y:auto; -webkit-overflow-scrolling:touch; background:#fff; border-radius:12px; box-shadow:0 18px 50px rgba(0,0,0,.4)}
   .xm-head{background:var(--navy); color:#fff; padding:18px 22px 14px; border-bottom:4px solid var(--red)}
   .xm-head b{display:block; font-size:15px; letter-spacing:.03em}
   .xm-head span{display:block; font-size:11.5px; color:#8fa8c9; margin-top:4px}
   .xm-body{padding:16px 22px 8px}
-  .xm-row{display:flex; align-items:flex-start; gap:10px; padding:9px 0; font-size:14px; color:#20262d; cursor:pointer; border-bottom:1px solid #eef0f3}
+  .xm-row{display:flex; align-items:flex-start; gap:12px; padding:12px 0; font-size:15px; color:#20262d; cursor:pointer; border-bottom:1px solid #eef0f3}
   .xm-row:last-of-type{border-bottom:none}
-  .xm-row input{width:17px; height:17px; margin-top:1px; accent-color:var(--red); flex:none; cursor:pointer}
+  .xm-row input{width:22px; height:22px; margin-top:1px; accent-color:var(--red); flex:none; cursor:pointer}
   .xm-row em{color:#7c8896; font-style:normal; font-size:12px}
   .xm-note{font-size:11.5px; color:#7c8896; margin:10px 0 4px; line-height:1.4}
   .xm-foot{display:flex; justify-content:flex-end; gap:10px; padding:14px 22px 18px}
-  .xm-foot button{font:inherit; font-size:13.5px; font-weight:700; border-radius:6px; padding:9px 16px; cursor:pointer; border:1px solid var(--line)}
+  .xm-foot button{font:inherit; font-size:15px; font-weight:700; border-radius:6px; padding:12px 18px; min-height:46px; cursor:pointer; border:1px solid var(--line)}
   .xm-cancel{background:#f4f6f8; color:#5b6572}
   .xm-cancel:hover{background:#e9edf1}
   .xm-go{background:var(--red); color:#fff; border-color:var(--red)}
@@ -79,21 +91,52 @@
     border:none; background:var(--page);
   }
   .views iframe[hidden]{display:none}
+
+  /* Tablet & phone: let the bar wrap so nothing gets cut off. */
+  @media(max-width:900px){
+    .suitebar{flex-wrap:wrap; padding-top:calc(env(safe-area-inset-top) + 4px)}
+    .suitebar .brand{width:100%; margin-right:0; padding:8px 4px 4px}
+    .suitebar nav{
+      width:100%; order:2;
+      overflow-x:auto; -webkit-overflow-scrolling:touch;
+      flex-wrap:nowrap; gap:2px;
+      padding-bottom:6px;
+      scrollbar-width:none;
+    }
+    .suitebar nav::-webkit-scrollbar{display:none}
+    .suitebar button{
+      flex:0 0 auto; white-space:nowrap;
+      min-height:40px; padding:0 16px;
+      margin-bottom:0; border-bottom-width:3px;
+    }
+    .suitebar button.export, .suitebar button.signout{
+      align-self:auto; margin:0 2px; min-height:40px;
+    }
+  }
   @media(max-width:560px){
-    .suitebar .brand span{display:none}
-    .suitebar button{padding:0 14px}
+    .suitebar .brand b{font-size:13.5px}
+    .suitebar .brand span{font-size:9.5px}
+    .suitebar button{font-size:12px; padding:0 13px}
+  }
+  /* Bigger, easier-to-tap controls on touch devices. */
+  @media (hover:none) and (pointer:coarse){
+    .suitebar button{min-height:44px}
   }
 
   /* ---------------- Auth gate ---------------- */
   #authGate{
     position:fixed; inset:0; z-index:1000;
     background:linear-gradient(160deg,#010039 0%,#0a1a4a 60%,#12245c 100%);
-    display:flex; align-items:center; justify-content:center; padding:20px;
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+    padding:max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+    overflow-y:auto; -webkit-overflow-scrolling:touch;
   }
   #authGate[hidden]{display:none}
   .auth-card{
     width:100%; max-width:400px; background:#fff; border-radius:12px;
     box-shadow:0 18px 50px rgba(0,0,0,.35); overflow:hidden;
+    margin:auto;
   }
   .auth-head{
     background:var(--navy); color:#fff; padding:20px 24px 16px;
@@ -104,7 +147,7 @@
   .auth-tabs{display:flex; border-bottom:1px solid var(--line)}
   .auth-tabs button{
     flex:1; font:inherit; font-size:13px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
-    background:#f4f6f8; color:#7c8896; border:none; cursor:pointer; padding:12px 0;
+    background:#f4f6f8; color:#7c8896; border:none; cursor:pointer; padding:14px 0; min-height:46px;
     border-bottom:3px solid transparent;
   }
   .auth-tabs button.active{background:#fff; color:var(--navy); border-bottom-color:var(--red)}
@@ -113,16 +156,16 @@
   .auth-field{display:block; margin-bottom:14px}
   .auth-field label{display:block; font-size:12px; font-weight:600; color:#5a6673; margin-bottom:5px; letter-spacing:.02em}
   .auth-field input{
-    width:100%; font:inherit; font-size:14px; padding:9px 11px;
+    width:100%; font:inherit; font-size:16px; padding:11px 12px;
     border:1px solid var(--line); border-radius:6px; background:#fcfcfd;
   }
   .auth-field input:focus{border-color:var(--red); outline:none; background:#fff}
   .auth-row{display:flex; align-items:center; gap:8px; margin:2px 0 16px; font-size:13px; color:#5a6673}
-  .auth-row input{width:15px; height:15px; accent-color:var(--red)}
+  .auth-row input{width:20px; height:20px; accent-color:var(--red)}
   .auth-btn{
-    width:100%; font:inherit; font-size:14px; font-weight:700; letter-spacing:.03em;
+    width:100%; font:inherit; font-size:16px; font-weight:700; letter-spacing:.03em;
     background:var(--red); color:#fff; border:none; border-radius:6px;
-    padding:11px 0; cursor:pointer;
+    padding:14px 0; min-height:48px; cursor:pointer;
   }
   .auth-btn:hover{background:#256a9c}
   .auth-btn:disabled{opacity:.5; cursor:default}
@@ -260,7 +303,9 @@
 <!-- saved from url=(0061)file:///C:/Users/mitch/Downloads/FDEC_Quoting_Template_2.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
 <title>FDEC 2026 Quoting Template</title>
 <style>
   :root{
@@ -273,7 +318,8 @@
   body{
     margin:0; background:var(--page); color:var(--ink);
     font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-    font-variant-numeric:tabular-nums; padding-bottom:84px;
+    font-variant-numeric:tabular-nums; padding-bottom:calc(84px + env(safe-area-inset-bottom));
+    -webkit-text-size-adjust:100%;
   }
   header.top{
     background:var(--navy); color:#fff; padding:18px 22px;
@@ -308,17 +354,32 @@
   tr:last-child td{border-bottom:none}
   td.num, th.num{text-align:right; white-space:nowrap}
   input.qty, input.rate{
-    width:78px; padding:6px 8px; border:1px solid var(--line); border-radius:5px;
-    text-align:right; font-size:14px; font-variant-numeric:tabular-nums;
+    width:82px; padding:9px 8px; border:1px solid var(--line); border-radius:5px;
+    text-align:right; font-size:16px; font-variant-numeric:tabular-nums;
   }
   input.qty:focus, input.rate:focus, .jobbar input:focus, textarea:focus, select:focus, input.wide:focus{outline:2px solid var(--red); outline-offset:1px; border-color:var(--red)}
-  input.wide{width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:5px; font-size:14px}
-  input.money{width:110px}
+  input.wide{width:100%; padding:9px 8px; border:1px solid var(--line); border-radius:5px; font-size:16px}
+  input.money{width:120px}
   .hint{font-size:12px; color:var(--steel); margin:6px 0 0}
   .cols2{display:grid; grid-template-columns:1fr 1fr; gap:0 28px}
   @media(max-width:760px){
     .cols2{grid-template-columns:1fr}
     .jobbar{grid-template-columns:1fr}
+    .wrap{padding:14px 10px}
+    header.top{padding:16px 16px; padding-top:calc(16px + env(safe-area-inset-top))}
+    /* Wide tables scroll horizontally inside their card instead of breaking
+       the page. The table keeps a sensible min-width so columns stay legible. */
+    .body{overflow-x:auto; -webkit-overflow-scrolling:touch}
+    .body table{min-width:520px}
+    details.card>summary{padding:14px 14px; min-height:48px; align-items:center}
+    .body{padding:12px 12px}
+  }
+  @media(max-width:760px) and (hover:none){
+    /* Bigger tap targets on touch devices */
+    button{min-height:42px; padding:9px 14px}
+    button.small{min-height:38px; padding:7px 12px}
+    select.lvl{min-height:40px}
+    .jobbar input{padding:11px 10px}
   }
   button{
     font:inherit; border:1px solid var(--line); background:var(--soft); color:var(--ink);
@@ -356,6 +417,9 @@
   .totbar{
     position:fixed; left:0; right:0; bottom:0; background:var(--navy); color:#fff;
     display:flex; gap:26px; align-items:center; padding:12px 22px; font-size:14px;
+    padding-bottom:calc(12px + env(safe-area-inset-bottom));
+    padding-left:max(22px, env(safe-area-inset-left));
+    padding-right:max(22px, env(safe-area-inset-right));
     border-top:3px solid var(--red); z-index:50; flex-wrap:wrap;
   }
   .totbar .lab{font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#8fa8c9; display:block}
@@ -378,10 +442,10 @@
     color:var(--steel); line-height:1.25; font-weight:600;
     border-right:1px solid var(--line); padding-right:8px; margin-right:2px;
   }
-  .mk-item input{width:58px; text-align:right; flex:none}
+  .mk-item input{width:64px; text-align:right; flex:none; font-size:16px; padding:8px 6px}
   .ratetable{max-width:480px; margin-bottom:4px}
-  .ratetable input{width:92px}
-  select.lvl{padding:5px 6px; font-size:13px}
+  .ratetable input{width:98px}
+  select.lvl{padding:8px 6px; font-size:16px}
   .mp-note{font-size:13px; color:var(--steel)}
   /* print */
   @media print{
@@ -1364,7 +1428,9 @@ window.addEventListener('message', function(e){
 <script type="text/html" id="src-proposal"><!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
 <title>FDEC Proposal Builder V2.0</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"><\/script>
 <style>
@@ -1389,11 +1455,13 @@ window.addEventListener('message', function(e){
     color:var(--ink);
     font-size:15px;
     line-height:1.45;
+    -webkit-text-size-adjust:100%;
   }
   header{
     background:var(--navy);
     color:#fff;
     padding:16px 22px;
+    padding-top:calc(16px + env(safe-area-inset-top));
     display:flex;
     align-items:baseline;
     justify-content:space-between;
@@ -1438,8 +1506,8 @@ window.addEventListener('message', function(e){
   label.field{display:block;font-size:12.5px;font-weight:600;color:var(--steel)}
   label.field input, label.field textarea{
     display:block;width:100%;margin-top:4px;
-    font:inherit;font-size:14.5px;font-weight:400;
-    padding:8px 10px;border:1px solid var(--line);border-radius:4px;background:#fff;
+    font:inherit;font-size:16px;font-weight:400;
+    padding:10px 11px;border:1px solid var(--line);border-radius:4px;background:#fff;
   }
   label.field textarea{resize:vertical;min-height:60px}
   input:focus, textarea:focus{outline:2px solid var(--red);outline-offset:1px;border-color:var(--red)}
@@ -1447,7 +1515,7 @@ window.addEventListener('message', function(e){
   /* Item rows */
   .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .toolbar input[type="search"]{
-    font:inherit;font-size:13.5px;padding:6px 9px;border:1px solid var(--line);
+    font:inherit;font-size:16px;padding:9px 11px;border:1px solid var(--line);
     border-radius:4px;width:210px;background:#fff;
   }
   ul.items{list-style:none}
@@ -1457,19 +1525,19 @@ window.addEventListener('message', function(e){
   }
   li.item:last-child{border-bottom:none}
   li.item input[type="checkbox"]{
-    width:18px;height:18px;margin-top:5px;accent-color:var(--check);flex-shrink:0;cursor:pointer;
+    width:22px;height:22px;margin-top:4px;accent-color:var(--check);flex-shrink:0;cursor:pointer;
   }
   li.item textarea{
-    flex:1;font:inherit;font-size:14.5px;line-height:1.4;
+    flex:1;font:inherit;font-size:16px;line-height:1.4;
     border:1px solid transparent;border-radius:4px;background:transparent;
-    padding:4px 6px;resize:none;overflow:hidden;
+    padding:5px 6px;resize:none;overflow:hidden;
   }
   li.item textarea:hover{border-color:var(--line);background:#fff}
   li.item textarea:focus{border-color:var(--red);background:#fff}
   li.item.unchecked textarea{color:#9aa0a8}
   li.item .del{
-    border:none;background:none;color:#b9bec5;cursor:pointer;font-size:16px;
-    margin-top:4px;line-height:1;flex-shrink:0;padding:2px 4px;border-radius:3px;
+    border:none;background:none;color:#b9bec5;cursor:pointer;font-size:20px;
+    margin-top:2px;line-height:1;flex-shrink:0;padding:4px 8px;border-radius:3px;
   }
   li.item .del:hover{color:var(--red);background:#e2eef7}
 
@@ -1481,10 +1549,10 @@ window.addEventListener('message', function(e){
   }
   li.sub{display:flex;gap:8px;align-items:flex-start;padding:4px 2px}
   li.sub input[type="checkbox"]{
-    width:15px;height:15px;margin-top:4px;accent-color:var(--steel);flex-shrink:0;cursor:pointer;
+    width:20px;height:20px;margin-top:3px;accent-color:var(--steel);flex-shrink:0;cursor:pointer;
   }
   li.sub textarea{
-    flex:1;font:inherit;font-size:13.5px;line-height:1.4;color:var(--steel);
+    flex:1;font:inherit;font-size:16px;line-height:1.4;color:var(--steel);
     border:1px solid transparent;border-radius:4px;background:transparent;
     padding:3px 6px;resize:none;overflow:hidden;
   }
@@ -1534,6 +1602,7 @@ window.addEventListener('message', function(e){
     background:#fff;border-top:1px solid var(--line);
     box-shadow:0 -3px 14px rgba(0,0,0,.08);
     padding:12px 18px;
+    padding-bottom:calc(12px + env(safe-area-inset-bottom));
     display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;
     z-index:10;
   }
@@ -1554,7 +1623,18 @@ window.addEventListener('message', function(e){
 
   @media (max-width:640px){
     .toolbar input[type="search"]{width:100%}
-    main{padding-bottom:150px}
+    main{padding:18px 12px calc(170px + env(safe-area-inset-bottom))}
+    header{padding-left:16px;padding-right:16px}
+    .actionbar{gap:8px}
+    .actionbar button.primary{flex:1 1 100%;padding:14px 20px;min-height:50px;font-size:16px}
+    .actionbar button.secondary{flex:1 1 45%;min-height:46px}
+    #status{flex:1 1 100%;order:-1;margin-bottom:2px}
+  }
+  @media (max-width:640px) and (hover:none){
+    .toolbar button{min-height:40px}
+    button.small{min-height:38px}
+    .seg button{padding:9px 13px;font-size:12.5px;min-height:40px}
+    button.addsub{min-height:36px;padding:6px 12px}
   }
 </style>
 </head>
@@ -2646,7 +2726,9 @@ document.getElementById("btnSave").addEventListener("click", () => {
 <script type="text/html" id="src-annual"><!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
 <title>FDEC Proposal Builder V2.0</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"><\/script>
 <style>
@@ -2671,11 +2753,13 @@ document.getElementById("btnSave").addEventListener("click", () => {
     color:var(--ink);
     font-size:15px;
     line-height:1.45;
+    -webkit-text-size-adjust:100%;
   }
   header{
     background:var(--navy);
     color:#fff;
     padding:16px 22px;
+    padding-top:calc(16px + env(safe-area-inset-top));
     display:flex;
     align-items:baseline;
     justify-content:space-between;
@@ -2720,8 +2804,8 @@ document.getElementById("btnSave").addEventListener("click", () => {
   label.field{display:block;font-size:12.5px;font-weight:600;color:var(--steel)}
   label.field input, label.field textarea{
     display:block;width:100%;margin-top:4px;
-    font:inherit;font-size:14.5px;font-weight:400;
-    padding:8px 10px;border:1px solid var(--line);border-radius:4px;background:#fff;
+    font:inherit;font-size:16px;font-weight:400;
+    padding:10px 11px;border:1px solid var(--line);border-radius:4px;background:#fff;
   }
   label.field textarea{resize:vertical;min-height:60px}
   input:focus, textarea:focus{outline:2px solid var(--red);outline-offset:1px;border-color:var(--red)}
@@ -2729,7 +2813,7 @@ document.getElementById("btnSave").addEventListener("click", () => {
   /* Item rows */
   .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .toolbar input[type="search"]{
-    font:inherit;font-size:13.5px;padding:6px 9px;border:1px solid var(--line);
+    font:inherit;font-size:16px;padding:9px 11px;border:1px solid var(--line);
     border-radius:4px;width:210px;background:#fff;
   }
   ul.items{list-style:none}
@@ -2739,19 +2823,19 @@ document.getElementById("btnSave").addEventListener("click", () => {
   }
   li.item:last-child{border-bottom:none}
   li.item input[type="checkbox"]{
-    width:18px;height:18px;margin-top:5px;accent-color:var(--check);flex-shrink:0;cursor:pointer;
+    width:22px;height:22px;margin-top:4px;accent-color:var(--check);flex-shrink:0;cursor:pointer;
   }
   li.item textarea{
-    flex:1;font:inherit;font-size:14.5px;line-height:1.4;
+    flex:1;font:inherit;font-size:16px;line-height:1.4;
     border:1px solid transparent;border-radius:4px;background:transparent;
-    padding:4px 6px;resize:none;overflow:hidden;
+    padding:5px 6px;resize:none;overflow:hidden;
   }
   li.item textarea:hover{border-color:var(--line);background:#fff}
   li.item textarea:focus{border-color:var(--red);background:#fff}
   li.item.unchecked textarea{color:#9aa0a8}
   li.item .del{
-    border:none;background:none;color:#b9bec5;cursor:pointer;font-size:16px;
-    margin-top:4px;line-height:1;flex-shrink:0;padding:2px 4px;border-radius:3px;
+    border:none;background:none;color:#b9bec5;cursor:pointer;font-size:20px;
+    margin-top:2px;line-height:1;flex-shrink:0;padding:4px 8px;border-radius:3px;
   }
   li.item .del:hover{color:var(--red);background:#e2eef7}
 
@@ -2763,10 +2847,10 @@ document.getElementById("btnSave").addEventListener("click", () => {
   }
   li.sub{display:flex;gap:8px;align-items:flex-start;padding:4px 2px}
   li.sub input[type="checkbox"]{
-    width:15px;height:15px;margin-top:4px;accent-color:var(--steel);flex-shrink:0;cursor:pointer;
+    width:20px;height:20px;margin-top:3px;accent-color:var(--steel);flex-shrink:0;cursor:pointer;
   }
   li.sub textarea{
-    flex:1;font:inherit;font-size:13.5px;line-height:1.4;color:var(--steel);
+    flex:1;font:inherit;font-size:16px;line-height:1.4;color:var(--steel);
     border:1px solid transparent;border-radius:4px;background:transparent;
     padding:3px 6px;resize:none;overflow:hidden;
   }
@@ -2816,6 +2900,7 @@ document.getElementById("btnSave").addEventListener("click", () => {
     background:#fff;border-top:1px solid var(--line);
     box-shadow:0 -3px 14px rgba(0,0,0,.08);
     padding:12px 18px;
+    padding-bottom:calc(12px + env(safe-area-inset-bottom));
     display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;
     z-index:10;
   }
@@ -2836,7 +2921,18 @@ document.getElementById("btnSave").addEventListener("click", () => {
 
   @media (max-width:640px){
     .toolbar input[type="search"]{width:100%}
-    main{padding-bottom:150px}
+    main{padding:18px 12px calc(170px + env(safe-area-inset-bottom))}
+    header{padding-left:16px;padding-right:16px}
+    .actionbar{gap:8px}
+    .actionbar button.primary{flex:1 1 100%;padding:14px 20px;min-height:50px;font-size:16px}
+    .actionbar button.secondary{flex:1 1 45%;min-height:46px}
+    #status{flex:1 1 100%;order:-1;margin-bottom:2px}
+  }
+  @media (max-width:640px) and (hover:none){
+    .toolbar button{min-height:40px}
+    button.small{min-height:38px}
+    .seg button{padding:9px 13px;font-size:12.5px;min-height:40px}
+    button.addsub{min-height:36px;padding:6px 12px}
   }
 </style>
 </head>
@@ -3911,7 +4007,9 @@ document.getElementById("btnSave").addEventListener("click", () => {
 <script type="text/html" id="src-install"><!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
 <title>FDEC Proposal Builder V2.0</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"><\/script>
 <style>
@@ -3936,11 +4034,13 @@ document.getElementById("btnSave").addEventListener("click", () => {
     color:var(--ink);
     font-size:15px;
     line-height:1.45;
+    -webkit-text-size-adjust:100%;
   }
   header{
     background:var(--navy);
     color:#fff;
     padding:16px 22px;
+    padding-top:calc(16px + env(safe-area-inset-top));
     display:flex;
     align-items:baseline;
     justify-content:space-between;
@@ -3985,8 +4085,8 @@ document.getElementById("btnSave").addEventListener("click", () => {
   label.field{display:block;font-size:12.5px;font-weight:600;color:var(--steel)}
   label.field input, label.field textarea{
     display:block;width:100%;margin-top:4px;
-    font:inherit;font-size:14.5px;font-weight:400;
-    padding:8px 10px;border:1px solid var(--line);border-radius:4px;background:#fff;
+    font:inherit;font-size:16px;font-weight:400;
+    padding:10px 11px;border:1px solid var(--line);border-radius:4px;background:#fff;
   }
   label.field textarea{resize:vertical;min-height:60px}
   input:focus, textarea:focus{outline:2px solid var(--red);outline-offset:1px;border-color:var(--red)}
@@ -3994,7 +4094,7 @@ document.getElementById("btnSave").addEventListener("click", () => {
   /* Item rows */
   .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .toolbar input[type="search"]{
-    font:inherit;font-size:13.5px;padding:6px 9px;border:1px solid var(--line);
+    font:inherit;font-size:16px;padding:9px 11px;border:1px solid var(--line);
     border-radius:4px;width:210px;background:#fff;
   }
   ul.items{list-style:none}
@@ -4004,19 +4104,19 @@ document.getElementById("btnSave").addEventListener("click", () => {
   }
   li.item:last-child{border-bottom:none}
   li.item input[type="checkbox"]{
-    width:18px;height:18px;margin-top:5px;accent-color:var(--check);flex-shrink:0;cursor:pointer;
+    width:22px;height:22px;margin-top:4px;accent-color:var(--check);flex-shrink:0;cursor:pointer;
   }
   li.item textarea{
-    flex:1;font:inherit;font-size:14.5px;line-height:1.4;
+    flex:1;font:inherit;font-size:16px;line-height:1.4;
     border:1px solid transparent;border-radius:4px;background:transparent;
-    padding:4px 6px;resize:none;overflow:hidden;
+    padding:5px 6px;resize:none;overflow:hidden;
   }
   li.item textarea:hover{border-color:var(--line);background:#fff}
   li.item textarea:focus{border-color:var(--red);background:#fff}
   li.item.unchecked textarea{color:#9aa0a8}
   li.item .del{
-    border:none;background:none;color:#b9bec5;cursor:pointer;font-size:16px;
-    margin-top:4px;line-height:1;flex-shrink:0;padding:2px 4px;border-radius:3px;
+    border:none;background:none;color:#b9bec5;cursor:pointer;font-size:20px;
+    margin-top:2px;line-height:1;flex-shrink:0;padding:4px 8px;border-radius:3px;
   }
   li.item .del:hover{color:var(--red);background:#e2eef7}
 
@@ -4028,10 +4128,10 @@ document.getElementById("btnSave").addEventListener("click", () => {
   }
   li.sub{display:flex;gap:8px;align-items:flex-start;padding:4px 2px}
   li.sub input[type="checkbox"]{
-    width:15px;height:15px;margin-top:4px;accent-color:var(--steel);flex-shrink:0;cursor:pointer;
+    width:20px;height:20px;margin-top:3px;accent-color:var(--steel);flex-shrink:0;cursor:pointer;
   }
   li.sub textarea{
-    flex:1;font:inherit;font-size:13.5px;line-height:1.4;color:var(--steel);
+    flex:1;font:inherit;font-size:16px;line-height:1.4;color:var(--steel);
     border:1px solid transparent;border-radius:4px;background:transparent;
     padding:3px 6px;resize:none;overflow:hidden;
   }
@@ -4081,6 +4181,7 @@ document.getElementById("btnSave").addEventListener("click", () => {
     background:#fff;border-top:1px solid var(--line);
     box-shadow:0 -3px 14px rgba(0,0,0,.08);
     padding:12px 18px;
+    padding-bottom:calc(12px + env(safe-area-inset-bottom));
     display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;
     z-index:10;
   }
@@ -4101,7 +4202,18 @@ document.getElementById("btnSave").addEventListener("click", () => {
 
   @media (max-width:640px){
     .toolbar input[type="search"]{width:100%}
-    main{padding-bottom:150px}
+    main{padding:18px 12px calc(170px + env(safe-area-inset-bottom))}
+    header{padding-left:16px;padding-right:16px}
+    .actionbar{gap:8px}
+    .actionbar button.primary{flex:1 1 100%;padding:14px 20px;min-height:50px;font-size:16px}
+    .actionbar button.secondary{flex:1 1 45%;min-height:46px}
+    #status{flex:1 1 100%;order:-1;margin-bottom:2px}
+  }
+  @media (max-width:640px) and (hover:none){
+    .toolbar button{min-height:40px}
+    button.small{min-height:38px}
+    .seg button{padding:9px 13px;font-size:12.5px;min-height:40px}
+    button.addsub{min-height:36px;padding:6px 12px}
   }
 </style>
 </head>
