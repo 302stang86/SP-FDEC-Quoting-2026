@@ -6,8 +6,8 @@
 <title>FDEC Quoting &amp; Proposal Suite 2026</title>
 <style>
   :root{
-    --navy:#182635; --red:#b3202c; --line:#d9dde2; --page:#eef0f3;
-    --muted:#9fb0c2;
+    --navy:#010039; --red:#3281b9; --line:#cdd9e8; --page:#eaf1f8;
+    --muted:#8fa8c9;
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
@@ -39,18 +39,40 @@
   .suitebar button.active{color:#fff; border-bottom-color:var(--red)}
   .suitebar button.export{
     align-self:center; margin:0 4px 0 18px; padding:8px 16px;
-    border:1px solid #a9d5a2; border-bottom:1px solid #a9d5a2;
-    border-radius:6px; background:#e3f4e1; color:#1f5a2b;
+    border:1px solid #8fd2d9; border-bottom:1px solid #8fd2d9;
+    border-radius:6px; background:#d6f0f3; color:#0d5b64;
     text-transform:none; letter-spacing:.02em; font-size:12.5px;
   }
-  .suitebar button.export:hover{background:#d3ecd0; color:#1f5a2b; border-color:#8cc684}
+  .suitebar button.export:hover{background:#c2e9ee; color:#0d5b64; border-color:#6fc4cd}
   .suitebar button.export:disabled{opacity:.6; cursor:default}
   .suitebar button.signout{
     align-self:center; margin:0 0 0 4px; padding:8px 14px;
-    border:1px solid #3a5670; border-radius:6px; background:#22384d; color:#dfe7ef;
+    border:1px solid #26407a; border-radius:6px; background:#0a1a4a; color:#d1e8fc;
     text-transform:none; letter-spacing:.02em; font-size:12.5px;
   }
-  .suitebar button.signout:hover{background:#2b445e; color:#fff}
+  .suitebar button.signout:hover{background:#12245c; color:#fff}
+
+  /* ---------------- Export selection modal ---------------- */
+  #exportModal{position:fixed; inset:0; z-index:1100; display:flex; align-items:center; justify-content:center; padding:20px}
+  #exportModal[hidden]{display:none}
+  .xm-backdrop{position:absolute; inset:0; background:rgba(15,22,30,.55)}
+  .xm-card{position:relative; width:100%; max-width:430px; background:#fff; border-radius:12px; box-shadow:0 18px 50px rgba(0,0,0,.4); overflow:hidden}
+  .xm-head{background:var(--navy); color:#fff; padding:18px 22px 14px; border-bottom:4px solid var(--red)}
+  .xm-head b{display:block; font-size:15px; letter-spacing:.03em}
+  .xm-head span{display:block; font-size:11.5px; color:#8fa8c9; margin-top:4px}
+  .xm-body{padding:16px 22px 8px}
+  .xm-row{display:flex; align-items:flex-start; gap:10px; padding:9px 0; font-size:14px; color:#20262d; cursor:pointer; border-bottom:1px solid #eef0f3}
+  .xm-row:last-of-type{border-bottom:none}
+  .xm-row input{width:17px; height:17px; margin-top:1px; accent-color:var(--red); flex:none; cursor:pointer}
+  .xm-row em{color:#7c8896; font-style:normal; font-size:12px}
+  .xm-note{font-size:11.5px; color:#7c8896; margin:10px 0 4px; line-height:1.4}
+  .xm-foot{display:flex; justify-content:flex-end; gap:10px; padding:14px 22px 18px}
+  .xm-foot button{font:inherit; font-size:13.5px; font-weight:700; border-radius:6px; padding:9px 16px; cursor:pointer; border:1px solid var(--line)}
+  .xm-cancel{background:#f4f6f8; color:#5b6572}
+  .xm-cancel:hover{background:#e9edf1}
+  .xm-go{background:var(--red); color:#fff; border-color:var(--red)}
+  .xm-go:hover{background:#256a9c}
+  .xm-go:disabled{opacity:.5; cursor:default}
   .views{flex:1; position:relative; min-height:0}
   .views iframe{
     position:absolute; inset:0; width:100%; height:100%;
@@ -65,7 +87,7 @@
   /* ---------------- Auth gate ---------------- */
   #authGate{
     position:fixed; inset:0; z-index:1000;
-    background:linear-gradient(160deg,#182635 0%,#22384d 60%,#31506d 100%);
+    background:linear-gradient(160deg,#010039 0%,#0a1a4a 60%,#12245c 100%);
     display:flex; align-items:center; justify-content:center; padding:20px;
   }
   #authGate[hidden]{display:none}
@@ -102,11 +124,11 @@
     background:var(--red); color:#fff; border:none; border-radius:6px;
     padding:11px 0; cursor:pointer;
   }
-  .auth-btn:hover{background:#8f1a23}
+  .auth-btn:hover{background:#256a9c}
   .auth-btn:disabled{opacity:.5; cursor:default}
   .auth-msg{font-size:12.5px; margin-top:12px; min-height:16px; line-height:1.4}
   .auth-msg.err{color:var(--red)}
-  .auth-msg.ok{color:#1f7a3d}
+  .auth-msg.ok{color:#0190a0}
   /* password strength meter */
   .pw-meter{margin:-4px 0 6px}
   .pw-bars{display:flex; gap:5px; margin-bottom:5px}
@@ -114,16 +136,16 @@
   .pw-bars.weak   span:nth-child(1){background:#d64545}
   .pw-bars.medium span:nth-child(1),
   .pw-bars.medium span:nth-child(2){background:#e0a53a}
-  .pw-bars.strong span{background:#2f9e51}
+  .pw-bars.strong span{background:#0aa6b5}
   .pw-label{font-size:11.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase}
   .pw-label.weak{color:#d64545}
   .pw-label.medium{color:#c98a1e}
-  .pw-label.strong{color:#2f9e51}
+  .pw-label.strong{color:#0aa6b5}
   .pw-rules{list-style:none; margin:8px 0 4px; padding:0; font-size:11.5px; color:#8a94a0}
   .pw-rules li{margin:3px 0; padding-left:18px; position:relative}
   .pw-rules li::before{content:"\2022"; position:absolute; left:4px; color:#c2c8d0}
-  .pw-rules li.met{color:#2f9e51}
-  .pw-rules li.met::before{content:"\2713"; left:2px; color:#2f9e51; font-weight:700}
+  .pw-rules li.met{color:#0aa6b5}
+  .pw-rules li.met::before{content:"\2713"; left:2px; color:#0aa6b5; font-weight:700}
   .auth-foot{font-size:10.5px; color:#9aa4af; text-align:center; padding:0 24px 18px}
 </style>
 </head>
@@ -199,14 +221,39 @@
   <nav>
     <button id="tab-quote" class="active" type="button" onclick="showView('quote')">Quoting Template</button>
     <button id="tab-proposal" type="button" onclick="showView('proposal')">Repair Verbiage</button>
-    <button id="btn-export" class="export" type="button" onclick="exportFullPackage()" title="Combined PDF of both pages, plus the Word proposal">Export Full Package</button>
+    <button id="tab-annual" type="button" onclick="showView('annual')">Annual Inspection</button>
+    <button id="tab-install" type="button" onclick="showView('install')">New Install</button>
+    <button id="btn-export" class="export" type="button" onclick="exportFullPackage()" title="Combined PDF of selected pages, plus the Word proposal">Export Full Package</button>
     <button id="btn-signout" class="signout" type="button" onclick="doSignOut()" title="Sign out">Sign Out</button>
   </nav>
 </div>
 
 <div class="views">
   <iframe id="view-quote" title="FDEC Quoting Template"></iframe>
-  <iframe id="view-proposal" title="FDEC Proposal Builder" hidden></iframe>
+  <iframe id="view-proposal" title="FDEC Repair Verbiage" hidden></iframe>
+  <iframe id="view-annual" title="FDEC Annual Inspection" hidden></iframe>
+  <iframe id="view-install" title="FDEC New Install" hidden></iframe>
+</div>
+
+<div id="exportModal" hidden>
+  <div class="xm-backdrop" onclick="closeExportModal()"></div>
+  <div class="xm-card">
+    <div class="xm-head">
+      <b>Export Full Package</b>
+      <span>Select the pages to include in the combined PDF.</span>
+    </div>
+    <div class="xm-body">
+      <label class="xm-row"><input type="checkbox" id="xm-quote" checked> <span>Quoting Template <em>(Selected Materials &amp; Quote Summary)</em></span></label>
+      <label class="xm-row"><input type="checkbox" id="xm-proposal" checked> <span>Repair Verbiage</span></label>
+      <label class="xm-row"><input type="checkbox" id="xm-annual"> <span>Annual Inspection</span></label>
+      <label class="xm-row"><input type="checkbox" id="xm-install"> <span>New Install</span></label>
+      <div class="xm-note">Each selected verbiage page also downloads its own Word (.docx) file.</div>
+    </div>
+    <div class="xm-foot">
+      <button type="button" class="xm-cancel" onclick="closeExportModal()">Cancel</button>
+      <button type="button" class="xm-go" id="xm-go" onclick="runExport()">Export Selected</button>
+    </div>
+  </div>
 </div>
 
 <script type="text/html" id="src-quote"><!DOCTYPE html>
@@ -217,9 +264,9 @@
 <title>FDEC 2026 Quoting Template</title>
 <style>
   :root{
-    --ink:#20262d; --steel:#5b6572; --line:#d9dde2; --card:#ffffff;
-    --page:#eef0f3; --red:#b3202c; --navy:#182635; --soft:#f6f7f9;
-    --good:#1c6e3c;
+    --ink:#20262d; --steel:#5b6572; --line:#cdd9e8; --card:#ffffff;
+    --page:#eaf1f8; --red:#3281b9; --navy:#010039; --soft:#eef5fb;
+    --good:#0190a0;
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
@@ -233,9 +280,9 @@
     border-bottom:4px solid var(--red);
   }
   header.top h1{margin:0; font-size:19px; letter-spacing:.04em}
-  header.top .sub{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#9fb0c2; margin-top:3px}
+  header.top .sub{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#8fa8c9; margin-top:3px}
   header.top .topflex{display:flex; align-items:flex-end; gap:16px; max-width:1080px; margin:0 auto}
-  header.top .credit{margin-left:auto; text-align:right; font-size:11px; letter-spacing:.08em; color:#9fb0c2; line-height:1.5; white-space:nowrap}
+  header.top .credit{margin-left:auto; text-align:right; font-size:11px; letter-spacing:.08em; color:#8fa8c9; line-height:1.5; white-space:nowrap}
   .wrap{max-width:1080px; margin:0 auto; padding:18px 14px}
   .jobbar{display:grid; grid-template-columns:2fr 1fr 1fr; gap:12px; margin-bottom:16px}
   .jobbar label{display:block; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--steel); margin-bottom:4px}
@@ -282,11 +329,11 @@
   button.small{padding:4px 10px; font-size:13px}
   button.apply-mp{
     font-weight:700;
-    background:#e3f4e1;
-    border-color:#a9d5a2;
-    color:#1f5a2b;
+    background:#d6f0f3;
+    border-color:#8fd2d9;
+    color:#0d5b64;
   }
-  button.apply-mp:hover{ background:#d3ecd0; border-color:#8cc684; }
+  button.apply-mp:hover{ background:#c2e9ee; border-color:#6fc4cd; }
   textarea{
     width:100%; min-height:72px; padding:8px 10px; border:1px solid var(--line);
     border-radius:6px; font:inherit; resize:vertical;
@@ -302,7 +349,7 @@
   /* Alternating stripes on itemized line rows: white / light gray / light blue */
   #summaryTable tr.lineitem:nth-child(3n+1) td{background:#ffffff}
   #summaryTable tr.lineitem:nth-child(3n+2) td{background:#f3f4f6}
-  #summaryTable tr.lineitem:nth-child(3n)   td{background:#e8f0fb}
+  #summaryTable tr.lineitem:nth-child(3n)   td{background:#d1e8fc}
   /* Customer Total column (4th) bold across the whole table */
   #summaryTable td:nth-child(4),
   #summaryTable th:nth-child(4){font-weight:700}
@@ -311,7 +358,7 @@
     display:flex; gap:26px; align-items:center; padding:12px 22px; font-size:14px;
     border-top:3px solid var(--red); z-index:50; flex-wrap:wrap;
   }
-  .totbar .lab{font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#9fb0c2; display:block}
+  .totbar .lab{font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#8fa8c9; display:block}
   .totbar .val{font-size:18px; font-weight:700}
   .totbar .val.big{font-size:22px}
   .totbar .val.profit{color:#5fd48b}
@@ -1224,6 +1271,31 @@ document.body.addEventListener('input', recalc);
 document.body.addEventListener('change', recalc);
 recalc();
 
+/* ---------------- Shared job-info master ----------------
+   The Quoting Template owns Job Name / Quote # / Date. When these change,
+   broadcast them (mapped to a shared shape) to the suite shell, which relays
+   the values to the verbiage pages. */
+function broadcastJobInfo(){
+  try {
+    if (window.parent && window.parent !== window){
+      var jn = document.getElementById('jobName');
+      var qn = document.getElementById('quoteNo');
+      var qd = document.getElementById('quoteDate');
+      window.parent.postMessage({ fdec:true, type:'jobinfo', value:{
+        customer: jn ? jn.value : '',
+        quote:    qn ? qn.value : '',
+        date:     qd ? qd.value : ''
+      }}, '*');
+    }
+  } catch(_){}
+}
+['jobName','quoteNo','quoteDate'].forEach(function(id){
+  var el = document.getElementById(id);
+  if (el){ el.addEventListener('input', broadcastJobInfo); el.addEventListener('change', broadcastJobInfo); }
+});
+// Broadcast initial values once the shell is ready.
+setTimeout(broadcastJobInfo, 150);
+
 /* Re-broadcast the down payment when the suite shell asks (e.g. when the
    Proposal tab is opened), so the note stays in sync even if the proposal
    frame loaded after the last edit. */
@@ -1231,6 +1303,12 @@ window.addEventListener('message', function(e){
   const d = e && e.data;
   if (!d || d.fdec !== true) return;
   if (d.type === 'request-sync'){ recalc(); return; }
+  if (d.type === 'send-jobinfo'){
+    // The Quoting Template is the master for Job Name / Quote # / Date.
+    // Broadcast current values so the verbiage pages can follow.
+    broadcastJobInfo();
+    return;
+  }
   if (d.type === 'get-quote-html'){
     let html = "", css = "", err = null;
     try {
@@ -1292,16 +1370,16 @@ window.addEventListener('message', function(e){
 <style>
   :root{
     --ink:#20262d;
-    --paper:#eef0f3;
+    --paper:#eaf1f8;
     --panel:#ffffff;
-    --line:#d9dde2;
-    --red:#b3202c;
-    --red-dark:#8f1a23;
-    --navy:#182635;
-    --soft:#f6f7f9;
+    --line:#cdd9e8;
+    --red:#3281b9;
+    --red-dark:#256a9c;
+    --navy:#010039;
+    --soft:#eef5fb;
     --steel:#5b6572;
     --muted:#7c8896;
-    --check:#b3202c;
+    --check:#3281b9;
     --radius:6px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -1324,8 +1402,8 @@ window.addEventListener('message', function(e){
     border-bottom:4px solid var(--red);
   }
   header h1{font-size:20px;font-weight:700;letter-spacing:.3px}
-  header h1 span{color:#9fb0c2;font-weight:400}
-  header .sub{font-size:12.5px;color:#9fb0c2;text-transform:uppercase;letter-spacing:1.2px}
+  header h1 span{color:#8fa8c9;font-weight:400}
+  header .sub{font-size:12.5px;color:#8fa8c9;text-transform:uppercase;letter-spacing:1.2px}
   main{max-width:1060px;margin:0 auto;padding:22px 18px 120px}
 
   section.card{
@@ -1393,7 +1471,7 @@ window.addEventListener('message', function(e){
     border:none;background:none;color:#b9bec5;cursor:pointer;font-size:16px;
     margin-top:4px;line-height:1;flex-shrink:0;padding:2px 4px;border-radius:3px;
   }
-  li.item .del:hover{color:var(--red);background:#f6e7e6}
+  li.item .del:hover{color:var(--red);background:#e2eef7}
 
   /* Sub-items (optional subcategory under a selected scope item) */
   ul.subs{
@@ -1417,7 +1495,7 @@ window.addEventListener('message', function(e){
     border:none;background:none;color:#b9bec5;cursor:pointer;font-size:14px;
     margin-top:3px;line-height:1;flex-shrink:0;padding:2px 4px;border-radius:3px;
   }
-  li.sub .del:hover{color:var(--red);background:#f6e7e6}
+  li.sub .del:hover{color:var(--red);background:#e2eef7}
   button.addsub{
     font:inherit;font-size:12px;font-weight:600;
     margin:2px 0 2px 2px;padding:3px 8px;border-radius:4px;cursor:pointer;
@@ -1970,6 +2048,60 @@ let restoredMsg = "";
     String(d.getDate()).padStart(2,"0");
   document.getElementById("jobDate").value = local;
 })();
+
+/* ---------------- Shared job-info sync ----------------
+   Repair Verbiage is the MASTER for Job Name / Quote # / Date. When these
+   change here, broadcast to the suite shell, which relays the values to the
+   other pages. Followers (the generated clone pages) set IS_JOBINFO_MASTER
+   to false and only receive. */
+var IS_JOBINFO_MASTER = false;
+(function(){
+  function currentJobInfo(){
+    return {
+      customer: document.getElementById("jobCustomer").value,
+      quote:    document.getElementById("jobQuote").value,
+      date:     document.getElementById("jobDate").value
+    };
+  }
+  function broadcastJobInfo(){
+    if (!IS_JOBINFO_MASTER) return;
+    if (window.parent && window.parent !== window){
+      window.parent.postMessage({ fdec:true, type:"jobinfo", value: currentJobInfo() }, "*");
+    }
+  }
+  function applyJobInfo(v){
+    if (!v) return;
+    if (typeof v.customer === "string") document.getElementById("jobCustomer").value = v.customer;
+    if (typeof v.quote === "string")    document.getElementById("jobQuote").value = v.quote;
+    if (typeof v.date === "string" && v.date) document.getElementById("jobDate").value = v.date;
+  }
+  // Master: broadcast on any edit to the three shared fields.
+  if (IS_JOBINFO_MASTER){
+    ["jobCustomer","jobQuote","jobDate"].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el){ el.addEventListener("input", broadcastJobInfo); el.addEventListener("change", broadcastJobInfo); }
+    });
+    // Broadcast the initial values (incl. today's date) once the shell is ready.
+    setTimeout(broadcastJobInfo, 150);
+  }
+  // Everyone: accept incoming job-info from the shell. The shell only relays
+  // to followers, so the master won't receive its own broadcast.
+  window.addEventListener("message", function(e){
+    var d = e && e.data;
+    if (!d || d.fdec !== true) return;
+    if (d.type === "jobinfo") applyJobInfo(d.value);
+    // A follower loaded and asked for values; the shell forwards this to the
+    // master as 'send-jobinfo'. Master responds by broadcasting current values.
+    else if (d.type === "send-jobinfo" && IS_JOBINFO_MASTER) broadcastJobInfo();
+  });
+  // Followers can request the current values when they load/become visible.
+  if (!IS_JOBINFO_MASTER){
+    if (window.parent && window.parent !== window){
+      window.parent.postMessage({ fdec:true, type:"request-jobinfo" }, "*");
+    }
+  }
+})();
+
 if (restoredMsg) setTimeout(() => setStatus(restoredMsg, true), 100);
 
 /* When this app first renders inside a hidden iframe (the Quoting tab is
@@ -2380,12 +2512,2520 @@ function buildProposalHTML(){
 /* Scoped CSS for the proposal section of the combined PDF. */
 const PROPOSAL_PRINT_CSS = `
   .pp-wrap{font:12.5px/1.5 Georgia,"Times New Roman",serif; color:#111; max-width:7.2in; margin:0 auto}
-  .pp-head{border-bottom:2px solid #b3202c; padding-bottom:8px; margin-bottom:14px}
-  .pp-cust{font-size:17px; font-weight:700; color:#182635}
+  .pp-head{border-bottom:2px solid #3281b9; padding-bottom:8px; margin-bottom:14px}
+  .pp-cust{font-size:17px; font-weight:700; color:#010039}
   .pp-meta{font-size:11px; color:#555; margin-top:3px}
   .pp-intro{margin:0 0 14px}
   .pp-h{font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
-        color:#b3202c; border-bottom:1px solid #ccc; padding-bottom:2px; margin:16px 0 8px}
+        color:#3281b9; border-bottom:1px solid #ccc; padding-bottom:2px; margin:16px 0 8px}
+  .pp-ol,.pp-ul{margin:0 0 10px; padding-left:24px}
+  .pp-ol>li,.pp-ul>li{margin:4px 0}
+  .pp-sub{margin:4px 0 4px; padding-left:20px}
+  .pp-sub>li{margin:2px 0; color:#333}
+  .pp-lead{margin:0 0 4px}
+  .pp-closing{margin-top:16px}
+  .pp-closing p{margin:0 0 10px}
+  .pp-sig{margin-top:14px; white-space:pre-line}
+`;
+
+/* Shell requests: return formatted HTML, or trigger the Word download. */
+window.addEventListener("message", function(e){
+  const d = e && e.data;
+  if (!d || d.fdec !== true) return;
+  if (d.type === "get-proposal-html"){
+    let html = "", err = null;
+    try {
+      if (!scopeItems().length) err = "no-scope";
+      else html = buildProposalHTML();
+    } catch(ex){ err = String(ex && ex.message || ex); }
+    // reply to the shell
+    if (window.parent && window.parent !== window){
+      window.parent.postMessage({
+        fdec:true, type:"proposal-html", reqId:d.reqId,
+        html: html, css: PROPOSAL_PRINT_CSS, error: err
+      }, "*");
+    }
+  } else if (d.type === "download-proposal-word"){
+    generateWordProposal(true);
+  }
+});
+
+/* ---------------- Save Draft (.html with embedded state) ---------------- */
+function collectState(){
+  return {
+    meta: { app: "FDEC Proposal Builder", author: APP_META.author, version: APP_META.version, savedAt: new Date().toISOString() },
+    job: {
+      customer: document.getElementById("jobCustomer").value,
+      quote:    document.getElementById("jobQuote").value,
+      date:     document.getElementById("jobDate").value,
+      intro:    document.getElementById("jobIntro").value,
+      signature:document.getElementById("jobSignature").value
+    },
+    sections: JSON.parse(JSON.stringify({
+      scope: state.scope, notes: state.notes, quals: state.quals,
+      resp: state.resp, billing: state.billing, closing: state.closing, incexc: state.incexc
+    }))
+  };
+}
+
+document.getElementById("btnSave").addEventListener("click", () => {
+  try {
+    // JSON payload; escape "</" so it can't terminate the script tag
+    const json = JSON.stringify(collectState()).replace(/<\//g, "<\\/");
+
+    // Serialize a clone of the page so the live view is untouched
+    const clone = document.documentElement.cloneNode(true);
+    const oldState = clone.querySelector("#savedState");
+    if (oldState) oldState.remove();
+    // strip rendered list contents — they're rebuilt on load from the saved state
+    clone.querySelectorAll("ul.items").forEach(ul => ul.innerHTML = "");
+    const body = clone.querySelector("body");
+    const stateScript = document.createElement("script");
+    stateScript.type = "application/json";
+    stateScript.id = "savedState";
+    stateScript.textContent = json;
+    body.insertBefore(stateScript, body.firstChild);
+
+    const html = "<!DOCTYPE html>\n" + clone.outerHTML;
+    const blob = new Blob([html], { type: "text/html" });
+
+    const q = document.getElementById("jobQuote").value.trim();
+    const c = document.getElementById("jobCustomer").value.trim();
+    const base = (q || c || "FDEC_Proposal").replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"_") || "FDEC_Proposal";
+    const stamp = new Date().toISOString().slice(0,10);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = base + "_Draft_" + stamp + ".html";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+    setStatus("Draft saved — reopen the file to continue where you left off.", true);
+  } catch (err){
+    console.error(err);
+    setStatus("Error saving draft — see console.");
+  }
+});
+
+/* ============================================================
+   CROSS-APP LINK — auto-fill the down payment note from the
+   Quoting tab. The suite shell relays the quoting app's down
+   payment total here via postMessage; we drop it into the
+   "A down payment of $____ is required..." note automatically.
+   ============================================================ */
+(function(){
+  // Matches the down payment note whether it still has the blank
+  // underscores or a previously auto-filled dollar amount.
+  const DP_RE = /(A down payment of\s+)(\$[\d,]+(?:\.\d{2})?|\$?_+)(\s+is required)/i;
+
+  function fillDownPayment(display){
+    let touched = false;
+    (state.notes || []).forEach(note => {
+      if (DP_RE.test(note.text)){
+        // Function replacer avoids "$" in the amount being read as a
+        // regex backreference (e.g. $1) inside the replacement string.
+        const next = note.text.replace(DP_RE, (m, pre, amt, post) => pre + display + post);
+        if (next !== note.text){ note.text = next; touched = true; }
+      }
+    });
+    // Re-render notes so the on-screen textarea reflects the new amount.
+    if (touched) render("notes");
+  }
+
+  window.addEventListener("message", function(e){
+    const d = e && e.data;
+    if (!d || d.fdec !== true || d.type !== "downpayment") return;
+    const display = d.display || ("$" + Number(d.value || 0).toFixed(2));
+    fillDownPayment(display);
+  });
+})();
+<\/script>
+
+
+</body></html></script>
+<script type="text/html" id="src-annual"><!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FDEC Proposal Builder V2.0</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"><\/script>
+<style>
+  :root{
+    --ink:#20262d;
+    --paper:#eaf1f8;
+    --panel:#ffffff;
+    --line:#cdd9e8;
+    --red:#3281b9;
+    --red-dark:#256a9c;
+    --navy:#010039;
+    --soft:#eef5fb;
+    --steel:#5b6572;
+    --muted:#7c8896;
+    --check:#3281b9;
+    --radius:6px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    font-size:15px;
+    line-height:1.45;
+  }
+  header{
+    background:var(--navy);
+    color:#fff;
+    padding:16px 22px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+    border-bottom:4px solid var(--red);
+  }
+  header h1{font-size:20px;font-weight:700;letter-spacing:.3px}
+  header h1 span{color:#8fa8c9;font-weight:400}
+  header .sub{font-size:12.5px;color:#8fa8c9;text-transform:uppercase;letter-spacing:1.2px}
+  main{max-width:1060px;margin:0 auto;padding:22px 18px 120px}
+
+  section.card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    margin-bottom:18px;
+    overflow:hidden;
+  }
+  .card-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:12px 16px;
+    background:var(--soft);
+    border-bottom:1px solid var(--line);
+    border-left:4px solid var(--red);
+    flex-wrap:wrap;
+  }
+  .card-head h2{
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:1.1px;
+    color:var(--red);
+  }
+  .card-head .hint{font-size:12.5px;color:var(--muted)}
+  .card-body{padding:14px 16px}
+
+  /* Job info grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+  label.field{display:block;font-size:12.5px;font-weight:600;color:var(--steel)}
+  label.field input, label.field textarea{
+    display:block;width:100%;margin-top:4px;
+    font:inherit;font-size:14.5px;font-weight:400;
+    padding:8px 10px;border:1px solid var(--line);border-radius:4px;background:#fff;
+  }
+  label.field textarea{resize:vertical;min-height:60px}
+  input:focus, textarea:focus{outline:2px solid var(--red);outline-offset:1px;border-color:var(--red)}
+
+  /* Item rows */
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .toolbar input[type="search"]{
+    font:inherit;font-size:13.5px;padding:6px 9px;border:1px solid var(--line);
+    border-radius:4px;width:210px;background:#fff;
+  }
+  ul.items{list-style:none}
+  li.item{
+    display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;
+    padding:8px 6px;border-bottom:1px dashed var(--line);
+  }
+  li.item:last-child{border-bottom:none}
+  li.item input[type="checkbox"]{
+    width:18px;height:18px;margin-top:5px;accent-color:var(--check);flex-shrink:0;cursor:pointer;
+  }
+  li.item textarea{
+    flex:1;font:inherit;font-size:14.5px;line-height:1.4;
+    border:1px solid transparent;border-radius:4px;background:transparent;
+    padding:4px 6px;resize:none;overflow:hidden;
+  }
+  li.item textarea:hover{border-color:var(--line);background:#fff}
+  li.item textarea:focus{border-color:var(--red);background:#fff}
+  li.item.unchecked textarea{color:#9aa0a8}
+  li.item .del{
+    border:none;background:none;color:#b9bec5;cursor:pointer;font-size:16px;
+    margin-top:4px;line-height:1;flex-shrink:0;padding:2px 4px;border-radius:3px;
+  }
+  li.item .del:hover{color:var(--red);background:#e2eef7}
+
+  /* Sub-items (optional subcategory under a selected scope item) */
+  ul.subs{
+    list-style:none;flex-basis:100%;
+    margin:4px 0 2px 28px;padding:4px 0 2px 10px;
+    border-left:2px solid var(--line);
+  }
+  li.sub{display:flex;gap:8px;align-items:flex-start;padding:4px 2px}
+  li.sub input[type="checkbox"]{
+    width:15px;height:15px;margin-top:4px;accent-color:var(--steel);flex-shrink:0;cursor:pointer;
+  }
+  li.sub textarea{
+    flex:1;font:inherit;font-size:13.5px;line-height:1.4;color:var(--steel);
+    border:1px solid transparent;border-radius:4px;background:transparent;
+    padding:3px 6px;resize:none;overflow:hidden;
+  }
+  li.sub textarea:hover{border-color:var(--line);background:#fff}
+  li.sub textarea:focus{border-color:var(--red);background:#fff}
+  li.sub.unchecked textarea{color:#9aa0a8}
+  li.sub .del{
+    border:none;background:none;color:#b9bec5;cursor:pointer;font-size:14px;
+    margin-top:3px;line-height:1;flex-shrink:0;padding:2px 4px;border-radius:3px;
+  }
+  li.sub .del:hover{color:var(--red);background:#e2eef7}
+  button.addsub{
+    font:inherit;font-size:12px;font-weight:600;
+    margin:2px 0 2px 2px;padding:3px 8px;border-radius:4px;cursor:pointer;
+    border:1px dashed var(--line);background:none;color:var(--muted);
+  }
+  button.addsub:hover{border-color:var(--red);color:var(--red)}
+
+  button.small{
+    font:inherit;font-size:13px;font-weight:600;
+    padding:6px 12px;border-radius:4px;cursor:pointer;
+    border:1px solid var(--line);background:#fff;color:var(--steel);
+  }
+  button.small:hover{border-color:var(--red);color:var(--red)}
+  .selcount{font-size:12.5px;color:var(--muted);white-space:nowrap}
+
+  /* Combined Including/Excluding controls */
+  .legend{font-size:12.5px;color:var(--muted);margin:0 0 10px 2px}
+  .seg{
+    display:inline-flex;flex-shrink:0;margin-top:2px;
+    border:1px solid var(--line);border-radius:4px;overflow:hidden;
+  }
+  .seg button{
+    font:inherit;font-size:11.5px;font-weight:700;letter-spacing:.4px;
+    padding:5px 9px;border:none;background:#fff;color:#9aa0a8;cursor:pointer;
+    border-right:1px solid var(--line);
+  }
+  .seg button:last-child{border-right:none}
+  .seg button.on-inc{background:#1a7a3c;color:#fff}
+  .seg button.on-exc{background:var(--red);color:#fff}
+  .seg button.on-off{background:var(--steel);color:#fff}
+  li.item.omitted textarea{color:#9aa0a8;text-decoration:line-through}
+
+  /* Footer action bar */
+  .actionbar{
+    position:fixed;left:0;right:0;bottom:0;
+    background:#fff;border-top:1px solid var(--line);
+    box-shadow:0 -3px 14px rgba(0,0,0,.08);
+    padding:12px 18px;
+    display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;
+    z-index:10;
+  }
+  button.primary{
+    font:inherit;font-size:15px;font-weight:700;
+    background:var(--red);color:#fff;border:none;border-radius:5px;
+    padding:12px 26px;cursor:pointer;letter-spacing:.2px;
+  }
+  button.primary:hover{background:var(--red-dark)}
+  button.secondary{
+    font:inherit;font-size:14px;font-weight:600;
+    background:#fff;color:var(--steel);border:1.5px solid var(--steel);
+    border-radius:5px;padding:11px 20px;cursor:pointer;
+  }
+  button.secondary:hover{border-color:var(--red);color:var(--red)}
+  #status{font-size:13px;color:var(--muted);min-width:160px;text-align:center}
+  #status.ok{color:#1a7a3c;font-weight:600}
+
+  @media (max-width:640px){
+    .toolbar input[type="search"]{width:100%}
+    main{padding-bottom:150px}
+  }
+</style>
+</head>
+<body><script type="application/json" id="savedState">{"meta": {"app": "FDEC Proposal Builder", "author": "Mitch Peebles", "version": "2.0", "savedAt": "2026-07-20T14:59:21.202Z"}, "job": {"customer": "", "address": "", "quote": "", "date": "2026-07-20", "intro": "Fire Defense Equipment Co. is pleased to present this quotation for the following annual inspection and testing services at the above-referenced location:"}}<\/script>
+
+<header>
+  <h1>Annual Inspection <span>· Sprinkler &amp; Fire Alarm Division</span></h1>
+  <div class="sub">ServiceTrade quotation generator &nbsp;·&nbsp; <span id="metaLine">V2.0 · Mitch Peebles</span></div>
+</header>
+
+<main>
+
+  <!-- JOB INFO -->
+  <section class="card">
+    <div class="card-head"><h2>Job Information</h2><span class="hint">Appears at the top of the proposal</span></div>
+    <div class="card-body">
+      <div class="grid">
+        <label class="field">Customer / Facility
+          <input type="text" id="jobCustomer" placeholder="e.g., BIRDI — Plymouth, MI">
+        </label>
+        <label class="field">Quote Number
+          <input type="text" id="jobQuote" placeholder="e.g., Q-2026-0143">
+        </label>
+        <label class="field">Date
+          <input type="date" id="jobDate">
+        </label>
+      </div>
+      <div style="margin-top:12px">
+        <label class="field">Introduction Paragraph
+          <textarea id="jobIntro">Fire Defense Equipment Co. is pleased to present this quotation for the following annual inspection and testing services at the above-referenced location:</textarea>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCOPE -->
+  <section class="card" id="sec-scope">
+    <div class="card-head">
+      <h2>Scope of Work</h2>
+      <div class="toolbar">
+        <input type="search" placeholder="Filter scope items…" data-filter="scope">
+        <button class="small" data-add="scope">+ Add Custom Item</button>
+        <span class="selcount" data-count="scope">0 selected</span>
+      </div>
+    </div>
+    <div class="card-body"><ul class="items" id="list-scope"></ul></div>
+  </section>
+
+  <!-- NOTES -->
+  <section class="card" id="sec-notes">
+    <div class="card-head">
+      <h2>Notes</h2>
+      <div class="toolbar">
+        <input type="search" placeholder="Filter notes…" data-filter="notes">
+        <button class="small" data-add="notes">+ Add Custom Note</button>
+        <span class="selcount" data-count="notes">0 selected</span>
+      </div>
+    </div>
+    <div class="card-body"><ul class="items" id="list-notes"></ul></div>
+  </section>
+
+  <!-- INCLUDING / EXCLUDING (combined) -->
+  <section class="card" id="sec-incexc">
+    <div class="card-head">
+      <h2>Including / Excluding</h2>
+      <div class="toolbar">
+        <button class="small" data-add="incexc">+ Add Item</button>
+        <span class="selcount" data-count="incexc">5 included · 18 excluded</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="legend">Mark each item <strong>INCL</strong> (included), <strong>EXCL</strong> (excluded), or <strong>—</strong> (leave off the proposal). The document builds separate INCLUDING and EXCLUDING lists automatically.</p>
+      <ul class="items" id="list-incexc"></ul>
+    </div>
+  </section>
+  <!-- QUALIFICATIONS -->
+  <section class="card" id="sec-quals">
+    <div class="card-head">
+      <h2>Qualifications</h2>
+      <div class="toolbar">
+        <button class="small" data-add="quals">+ Add Qualification</button>
+        <span class="selcount" data-count="quals">4 selected</span>
+      </div>
+    </div>
+    <div class="card-body"><ul class="items" id="list-quals"></ul></div>
+  </section>
+
+  <!-- CUSTOMER RESPONSIBILITIES -->
+  <section class="card" id="sec-resp">
+    <div class="card-head">
+      <h2>Customer Responsibilities</h2>
+      <div class="toolbar">
+        <button class="small" data-add="resp">+ Add Item</button>
+        <span class="selcount" data-count="resp">4 selected</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="legend">Checked items appear as bullets under “The customer is responsible for the following:”</p>
+      <ul class="items" id="list-resp"></ul>
+    </div>
+  </section>
+
+  <!-- BILLING & PAYMENT TERMS -->
+  <section class="card" id="sec-billing">
+    <div class="card-head">
+      <h2>Billing &amp; Payment Terms</h2>
+      <div class="toolbar">
+        <button class="small" data-add="billing">+ Add Term</button>
+        <span class="selcount" data-count="billing">6 selected</span>
+      </div>
+    </div>
+    <div class="card-body"><ul class="items" id="list-billing"></ul></div>
+  </section>
+
+  <!-- CLOSING -->
+  <section class="card" id="sec-closing">
+    <div class="card-head">
+      <h2>Closing</h2>
+      <div class="toolbar">
+        <button class="small" data-add="closing">+ Add Line</button>
+        <span class="selcount" data-count="closing">0 selected</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="legend">Checked closing lines appear at the very end of the proposal, before the signature block below.</p>
+      <ul class="items" id="list-closing"></ul>
+      <label class="field" style="margin-top:12px">Signature Block
+        <textarea id="jobSignature" rows="6" style="min-height:120px">Mitchell Peebles
+Cell (248) 797-4488
+Office (248) 549-8113
+Mp1@firedefense.com</textarea>
+      </label>
+    </div>
+  </section>
+
+</main>
+
+<div class="actionbar">
+  <button class="primary" id="btnWord">Generate Word Proposal (.docx)</button>
+  <button class="secondary" id="btnCopy">Copy as Plain Text</button>
+  <button class="secondary" id="btnSave">Save Draft (.html)</button>
+  <span id="status" class=""></span>
+</div>
+
+<script>
+/* ============================================================
+   APP METADATA — version increases by 0.5 with each revision
+   ============================================================ */
+const APP_META = {
+  author: "Mitch Peebles",
+  version: "2.0"
+};
+
+/* ============================================================
+   VERBIAGE LIBRARY — edit freely; app numbers/letters items
+   automatically based on what is checked at generation time.
+   ============================================================ */
+
+const LIBRARY = {
+  scope: [
+    { text: "Perform the Annual Inspection and Testing on one (1) wet pipe fire sprinkler system.",
+      subs: [
+        "Including one (1) wall post indicator valve (PIV).",
+        "Including two (2) control valve supervisory switches.",
+        "Including three (3) waterflow switches.",
+        "Including one (1) elevator control valve.",
+        "Including four (4) sectional valves.",
+      ] },
+    "Perform the Annual Inspection and Testing on one (1) yard post indicator valve (PIV).",
+    "Perform the Annual Inspection and Testing on one (1) dry pipe fire sprinkler system.",
+    "Perform the Annual Inspection and Testing on one (1) antifreeze fire suppression system.",
+    "Perform the Annual Inspection and Testing on one (1) pre-action fire suppression system.",
+    "Perform the Annual Inspection and Testing on one (1) dry standpipe system.",
+    "Perform the Annual Testing on two (2) fire system backflow preventers.",
+    "Perform the Annual Inspection and Testing on one (1) fire pump.",
+    "Perform the Annual Inspection and Testing on one (1) electric fire pump drive motor.",
+    "Perform the Annual Inspection, Testing, and Maintenance on one (1) diesel fire pump drive engine.",
+    "Perform the Annual Inspection on ( ) portable fire extinguishers.",
+    "Perform the Annual 90-Minute Illuminated Emergency Light Testing on ( ) units.",
+  ],
+  notes: [
+    "If the building is equipped with a fire alarm system, testing the sprinkler system will activate it. The customer must have any required reset codes available prior to the start of work.",
+    "If the fire alarm is connected to a central station monitoring company, the customer must contact the monitoring company in advance to place the system on TEST to prevent a false dispatch to the fire department.",
+    "Dry pipe systems are tested between May and September only.",
+  ],
+  quals: [
+    "Unless otherwise noted, all work will be performed during normal business hours (Monday–Friday, 8:00 a.m. to 4:30 p.m.), excluding holidays.",
+    "This quotation is not a survey to determine whether the building is properly protected or whether the system was correctly installed. It is solely a test of the components listed above and a visual inspection of sprinkler head condition. If verification of compliance regarding proper protection or installation is required, a complete building and system survey must be conducted at an additional cost.",
+    "Fire Defense Equipment Co. is not responsible for water damage caused by a clogged or overflowing drain.",
+    "Fire Defense Equipment Co. is not responsible for replacing equipment that fails during testing due to abuse, misuse, or normal wear and tear.",
+  ],
+  resp: [
+    "Ensuring all areas around the sprinkler risers and fire protection equipment are accessible and clear of stock, furniture, or any materials that may hinder work.",
+    "Providing timely access to all locked rooms.",
+    "Ensuring the proper operation of the building's fire alarm system and contacting the fire alarm monitoring company and fire department, if applicable.",
+    "Mitigating any safety hazards caused by drained system water that may freeze on walkways or parking lots during freezing weather conditions.",
+    "NFPA 25 requires weekly, monthly, quarterly, and semi-annual inspections and maintenance. These are not included in this quotation.",
+  ],
+  billing: [
+    "Billing terms: Net 30 days with approved credit.",
+    "A 3% fee will be applied to all credit card transactions.",
+    "This quotation is valid for 30 days from the date of issue.",
+  ],
+  closing: [
+    "Thank you for the opportunity to present you with the attached quote to complete the annual fire sprinkler system inspection and testing.",
+    "Please don't hesitate to contact me should you have any questions.",
+  ],
+  incexc: [
+    { text: "Main drain test", mode: "inc" },
+    { text: "Testing of all supervisory switches", mode: "inc" },
+    { text: "Testing of all waterflow alarm devices", mode: "inc" },
+    { text: "Full exercise of all control valves", mode: "inc" },
+    { text: "Exercise and lubrication of all OS&Y control valves", mode: "inc" },
+    { text: "Exercise and lubrication of all wall and yard PIV control valves", mode: "inc" },
+    { text: "Inspection, exercise, and lubrication of the fire department connection", mode: "inc" },
+    { text: "Inspection, exercise, and lubrication of all pit valves", mode: "inc" },
+    { text: "Testing of the dry valve low air pressure alarm", mode: "inc" },
+    { text: "Full trip test of the dry valve", mode: "inc" },
+    { text: "Internal inspection and cleanout of the dry valve", mode: "inc" },
+    { text: "Opening and draining of all dry system drum drips and drains", mode: "inc" },
+    { text: "Annual dry system air compressor testing", mode: "inc" },
+    { text: "Annual pre-action releasing panel inspection and testing", mode: "inc" },
+    { text: "Annual antifreeze sample testing", mode: "inc" },
+    { text: "Floor-level visual inspection of sprinkler head condition (common areas only, per customer direction, and only in areas to which access is granted)", mode: "inc" },
+    { text: "Written report of visible system condition and test results for all fire sprinkler systems", mode: "inc" },
+    { text: "Annual fire pump visual inspection and performance testing", mode: "inc" },
+    { text: "Annual electric motor visual inspection and performance testing", mode: "inc" },
+    { text: "Annual diesel engine visual inspection, performance testing, and maintenance", mode: "inc" },
+    { text: "Written report of visible condition and test results for the fire pump and drives", mode: "inc" },
+    { text: "IROL (Inspection Report On-Line) reporting, as required by the local fire department", mode: "inc" },
+    { text: "Annual backflow preventer testing", mode: "exc" },
+    { text: "Annual fire pump testing", mode: "exc" },
+    { text: "Annual fire alarm system testing", mode: "exc" },
+    { text: "Annual standpipe inspection, testing, and maintenance — excluded per customer request", mode: "exc" },
+    { text: "Annual dry pipe system inspection, testing, and maintenance", mode: "exc" },
+    { text: "Annual pre-action system inspection, testing, and maintenance", mode: "exc" },
+    { text: "Annual antifreeze system inspection, testing, and maintenance", mode: "exc" },
+    { text: "Inspection, exercise, and lubrication of pit valves", mode: "exc" },
+    { text: "Annual private fire hydrant inspection and testing", mode: "exc" },
+    { text: "Annual fire extinguisher maintenance", mode: "exc" },
+    { text: "Annual emergency light testing", mode: "exc" },
+    { text: "Fire extinguisher recharging, 6-year maintenance, and hydrotesting", mode: "exc" },
+    { text: "NFPA 25 required weekly, monthly, quarterly, and semi-annual inspections and maintenance", mode: "exc" },
+    { text: "Labor or materials required to bring a non-compliant system into compliance", mode: "exc" },
+    { text: "Any other labor or materials not listed above", mode: "exc" },
+  ]
+};
+
+/* Scope & Notes start unchecked (pick what applies to this job).
+   Scope items carry an optional subs[] list shown once the item is selected.
+   Including/Excluding items carry a mode: "inc", "exc", or "off". */
+const state = {};
+state.scope = LIBRARY.scope.map(entry => {
+  const obj = typeof entry === "string" ? { text: entry, subs: [] } : entry;
+  return {
+    text: obj.text,
+    checked: false,
+    subs: (obj.subs || []).map(s => ({ text: s, checked: false }))
+  };
+});
+state.notes = LIBRARY.notes.map(t => ({ text: t, checked: false }));
+/* Qualifications and boilerplate default ON — uncheck to drop from a proposal. */
+for (const key of ["quals","resp","billing","closing"]) {
+  state[key] = LIBRARY[key].map(t => ({ text: t, checked: true }));
+}
+state.incexc = LIBRARY.incexc.map(i => ({ text: i.text, mode: i.mode }));
+
+/* ---------------- rendering ---------------- */
+function autoGrow(ta){ ta.style.height = "auto"; ta.style.height = (ta.scrollHeight + 2) + "px"; }
+
+function render(key){
+  if (key === "incexc") return renderIncExc();
+  const ul = document.getElementById("list-" + key);
+  ul.innerHTML = "";
+  const filter = (document.querySelector(`[data-filter="${key}"]`)?.value || "").toLowerCase();
+  state[key].forEach((item, i) => {
+    if (filter && !item.text.toLowerCase().includes(filter)) return;
+    const li = document.createElement("li");
+    li.className = "item" + (item.checked ? "" : " unchecked");
+    li.dataset.index = i;
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.checked = item.checked;
+    cb.addEventListener("change", () => {
+      item.checked = cb.checked;
+      li.classList.toggle("unchecked", !cb.checked);
+      updateCount(key);
+      if (key === "scope") render(key); // open/close the sub-item block
+    });
+
+    const ta = document.createElement("textarea");
+    ta.rows = 1;
+    ta.value = item.text;
+    ta.addEventListener("input", () => { item.text = ta.value; autoGrow(ta); });
+    ta.addEventListener("focus", () => autoGrow(ta));
+
+    const del = document.createElement("button");
+    del.className = "del";
+    del.title = "Remove item";
+    del.innerHTML = "&times;";
+    del.addEventListener("click", () => { state[key].splice(i,1); render(key); updateCount(key); });
+
+    li.append(cb, ta, del);
+
+    // Optional subcategory: shown only when the scope item is selected
+    if (key === "scope" && item.checked){
+      const subUl = document.createElement("ul");
+      subUl.className = "subs";
+      item.subs.forEach((sub, j) => {
+        const sli = document.createElement("li");
+        sli.className = "sub" + (sub.checked ? "" : " unchecked");
+
+        const scb = document.createElement("input");
+        scb.type = "checkbox";
+        scb.checked = sub.checked;
+        scb.addEventListener("change", () => {
+          sub.checked = scb.checked;
+          sli.classList.toggle("unchecked", !scb.checked);
+          updateCount(key);
+        });
+
+        const sta = document.createElement("textarea");
+        sta.rows = 1;
+        sta.value = sub.text;
+        sta.addEventListener("input", () => { sub.text = sta.value; autoGrow(sta); });
+        sta.addEventListener("focus", () => autoGrow(sta));
+
+        const sdel = document.createElement("button");
+        sdel.className = "del";
+        sdel.title = "Remove sub-item";
+        sdel.innerHTML = "&times;";
+        sdel.addEventListener("click", () => { item.subs.splice(j,1); render(key); updateCount(key); });
+
+        sli.append(scb, sta, sdel);
+        subUl.appendChild(sli);
+        (window.requestAnimationFrame || (fn => setTimeout(fn, 0)))(() => autoGrow(sta));
+      });
+
+      const addSub = document.createElement("button");
+      addSub.className = "addsub";
+      addSub.type = "button";
+      addSub.textContent = "+ Sub-item";
+      addSub.addEventListener("click", () => {
+        item.subs.push({ text: "", checked: true });
+        render(key);
+        const parent = ul.querySelector(`li.item[data-index="${i}"]`);
+        const nt = parent && parent.querySelector("ul.subs li.sub:last-of-type textarea");
+        if (nt) nt.focus();
+      });
+      subUl.appendChild(document.createElement("li")).appendChild(addSub);
+
+      li.appendChild(subUl);
+    }
+
+    ul.appendChild(li);
+    autoGrow(ta);
+  });
+  updateCount(key);
+}
+
+function renderIncExc(){
+  const ul = document.getElementById("list-incexc");
+  ul.innerHTML = "";
+  state.incexc.forEach((item, i) => {
+    const li = document.createElement("li");
+    li.className = "item" + (item.mode === "off" ? " omitted" : "");
+
+    const seg = document.createElement("div");
+    seg.className = "seg";
+    const modes = [ ["inc","INCL","on-inc"], ["exc","EXCL","on-exc"], ["off","\u2014","on-off"] ];
+    modes.forEach(([mode, label, cls]) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = label;
+      b.title = mode === "inc" ? "Included" : mode === "exc" ? "Excluded" : "Leave off the proposal";
+      if (item.mode === mode) b.classList.add(cls);
+      b.addEventListener("click", () => { item.mode = mode; renderIncExc(); });
+      seg.appendChild(b);
+    });
+
+    const ta = document.createElement("textarea");
+    ta.rows = 1;
+    ta.value = item.text;
+    ta.addEventListener("input", () => { item.text = ta.value; autoGrow(ta); });
+    ta.addEventListener("focus", () => autoGrow(ta));
+
+    const del = document.createElement("button");
+    del.className = "del";
+    del.title = "Remove item";
+    del.innerHTML = "&times;";
+    del.addEventListener("click", () => { state.incexc.splice(i,1); renderIncExc(); });
+
+    li.append(seg, ta, del);
+    ul.appendChild(li);
+    autoGrow(ta);
+  });
+  updateCount("incexc");
+}
+
+function updateCount(key){
+  const el = document.querySelector(`[data-count="${key}"]`);
+  if (!el) return;
+  if (key === "incexc"){
+    const inc = state.incexc.filter(i => i.mode === "inc").length;
+    const exc = state.incexc.filter(i => i.mode === "exc").length;
+    el.textContent = inc + " included \u00b7 " + exc + " excluded";
+  } else if (key === "scope"){
+    const sel = state.scope.filter(i => i.checked);
+    const subs = sel.reduce((n,i) => n + i.subs.filter(s => s.checked).length, 0);
+    el.textContent = sel.length + " selected" + (subs ? " \u00b7 " + subs + " sub-item" + (subs === 1 ? "" : "s") : "");
+  } else {
+    el.textContent = state[key].filter(i => i.checked).length + " selected";
+  }
+}
+
+document.querySelectorAll("[data-add]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const key = btn.dataset.add;
+    if (key === "incexc"){
+      state.incexc.push({ text: "", mode: "inc" });
+    } else {
+      state[key].push({ text: "", checked: true, subs: [] });
+      const f = document.querySelector(`[data-filter="${key}"]`);
+      if (f) f.value = "";
+    }
+    render(key);
+    const ul = document.getElementById("list-" + key);
+    const last = ul.querySelector("li:last-child textarea");
+    if (last) last.focus();
+  });
+});
+
+document.querySelectorAll("[data-filter]").forEach(inp => {
+  inp.addEventListener("input", () => render(inp.dataset.filter));
+});
+
+/* ---------------- draft restore (hydrate from embedded saved state) ---------------- */
+document.getElementById("metaLine").textContent = "V" + APP_META.version + " \u00b7 " + APP_META.author;
+document.title = "FDEC Annual Inspection" + " V" + APP_META.version;
+
+let restoredMsg = "";
+(function hydrate(){
+  const el = document.getElementById("savedState");
+  if (!el) return;
+  try {
+    const saved = JSON.parse(el.textContent);
+    if (saved.job){
+      document.getElementById("jobCustomer").value = saved.job.customer || "";
+      document.getElementById("jobQuote").value    = saved.job.quote    || "";
+      // Date intentionally not restored from the template — it is always set
+      // to today's date on open (see below).
+      if (saved.job.intro) document.getElementById("jobIntro").value = saved.job.intro;
+      if (saved.job.signature != null) document.getElementById("jobSignature").value = saved.job.signature;
+    }
+    if (saved.sections){
+      for (const key of ["scope","notes","quals","resp","billing","closing","incexc"]){
+        if (Array.isArray(saved.sections[key])) state[key] = saved.sections[key];
+      }
+      // guarantee scope items have a subs array
+      state.scope.forEach(i => { if (!Array.isArray(i.subs)) i.subs = []; });
+    }
+    const when = saved.meta && saved.meta.savedAt ? new Date(saved.meta.savedAt) : null;
+    restoredMsg = "Draft restored" + (when ? " \u2014 saved " + when.toLocaleString() : "") + ".";
+  } catch(e){ console.error("Could not restore saved draft:", e); }
+})();
+
+["scope","notes","quals","resp","billing","closing","incexc"].forEach(render);
+// Always open with today's date (local, not UTC, to avoid an off-by-one).
+(function(){
+  const d = new Date();
+  const local = d.getFullYear() + "-" +
+    String(d.getMonth()+1).padStart(2,"0") + "-" +
+    String(d.getDate()).padStart(2,"0");
+  document.getElementById("jobDate").value = local;
+})();
+
+/* ---------------- Shared job-info sync ----------------
+   Repair Verbiage is the MASTER for Job Name / Quote # / Date. When these
+   change here, broadcast to the suite shell, which relays the values to the
+   other pages. Followers (the generated clone pages) set IS_JOBINFO_MASTER
+   to false and only receive. */
+var IS_JOBINFO_MASTER = false;
+(function(){
+  function currentJobInfo(){
+    return {
+      customer: document.getElementById("jobCustomer").value,
+      quote:    document.getElementById("jobQuote").value,
+      date:     document.getElementById("jobDate").value
+    };
+  }
+  function broadcastJobInfo(){
+    if (!IS_JOBINFO_MASTER) return;
+    if (window.parent && window.parent !== window){
+      window.parent.postMessage({ fdec:true, type:"jobinfo", value: currentJobInfo() }, "*");
+    }
+  }
+  function applyJobInfo(v){
+    if (!v) return;
+    if (typeof v.customer === "string") document.getElementById("jobCustomer").value = v.customer;
+    if (typeof v.quote === "string")    document.getElementById("jobQuote").value = v.quote;
+    if (typeof v.date === "string" && v.date) document.getElementById("jobDate").value = v.date;
+  }
+  // Master: broadcast on any edit to the three shared fields.
+  if (IS_JOBINFO_MASTER){
+    ["jobCustomer","jobQuote","jobDate"].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el){ el.addEventListener("input", broadcastJobInfo); el.addEventListener("change", broadcastJobInfo); }
+    });
+    // Broadcast the initial values (incl. today's date) once the shell is ready.
+    setTimeout(broadcastJobInfo, 150);
+  }
+  // Everyone: accept incoming job-info from the shell. The shell only relays
+  // to followers, so the master won't receive its own broadcast.
+  window.addEventListener("message", function(e){
+    var d = e && e.data;
+    if (!d || d.fdec !== true) return;
+    if (d.type === "jobinfo") applyJobInfo(d.value);
+    // A follower loaded and asked for values; the shell forwards this to the
+    // master as 'send-jobinfo'. Master responds by broadcasting current values.
+    else if (d.type === "send-jobinfo" && IS_JOBINFO_MASTER) broadcastJobInfo();
+  });
+  // Followers can request the current values when they load/become visible.
+  if (!IS_JOBINFO_MASTER){
+    if (window.parent && window.parent !== window){
+      window.parent.postMessage({ fdec:true, type:"request-jobinfo" }, "*");
+    }
+  }
+})();
+
+if (restoredMsg) setTimeout(() => setStatus(restoredMsg, true), 100);
+
+/* When this app first renders inside a hidden iframe (the Quoting tab is
+   shown by default), every textarea measures scrollHeight = 0 and collapses
+   so its text is invisible. Re-grow all textareas once the tab is actually
+   visible. The suite shell posts {type:'relayout'} on tab switch; we also
+   listen for our own becoming-visible as a fallback. */
+function relayoutTextareas(){
+  var run = function(){ document.querySelectorAll("textarea").forEach(autoGrow); };
+  // Defer so the browser has laid out the now-visible iframe before we
+  // read scrollHeight; run twice to catch any late layout.
+  if (typeof requestAnimationFrame === "function"){
+    requestAnimationFrame(function(){ run(); requestAnimationFrame(run); });
+  } else {
+    run();
+  }
+}
+window.addEventListener("message", function(e){
+  var d = e && e.data;
+  if (d && d.fdec === true && d.type === "relayout") relayoutTextareas();
+});
+/* Self-healing: when this document transitions from hidden (0 size) to
+   visible, re-measure textareas automatically — independent of the shell.
+   Covers the case where the app first rendered inside a hidden iframe. */
+(function(){
+  var seenVisible = false;
+  function checkVisible(){
+    var visible = document.body && document.body.clientHeight > 0 &&
+                  document.documentElement.clientWidth > 0;
+    if (visible && !seenVisible){ seenVisible = true; relayoutTextareas(); }
+  }
+  if (typeof ResizeObserver === "function"){
+    try { new ResizeObserver(checkVisible).observe(document.documentElement); } catch(_){}
+  }
+  window.addEventListener("resize", checkVisible);
+  document.addEventListener("visibilitychange", checkVisible);
+  // initial + a few delayed attempts to catch first layout
+  checkVisible();
+  [60, 200, 500].forEach(function(ms){ setTimeout(checkVisible, ms); });
+})();
+/* Fallback: if this document becomes visible via layout, relayout once. */
+if (typeof requestAnimationFrame === "function"){
+  requestAnimationFrame(function(){ if (document.body.clientHeight) relayoutTextareas(); });
+}
+
+/* ---------------- output helpers ---------------- */
+function checkedItems(key){
+  return state[key].filter(i => i.checked && i.text.trim()).map(i => i.text.trim());
+}
+function scopeItems(){
+  return state.scope
+    .filter(i => i.checked && i.text.trim())
+    .map(i => ({
+      text: i.text.trim(),
+      subs: i.subs.filter(s => s.checked && s.text.trim()).map(s => s.text.trim())
+    }));
+}
+function incexcItems(mode){
+  return state.incexc.filter(i => i.mode === mode && i.text.trim()).map(i => i.text.trim());
+}
+function letterFor(n){ // 0 -> A, 25 -> Z, 26 -> AA
+  let s = "";
+  n += 1;
+  while (n > 0){ n--; s = String.fromCharCode(65 + (n % 26)) + s; n = Math.floor(n / 26); }
+  return s;
+}
+function fmtDate(iso){
+  if (!iso) return "";
+  const [y,m,d] = iso.split("-").map(Number);
+  return new Date(y, m-1, d).toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
+}
+function jobHeader(){
+  return {
+    customer: document.getElementById("jobCustomer").value.trim(),
+    recipient:"",
+    address:  "",
+    quote:    document.getElementById("jobQuote").value.trim(),
+    date:     fmtDate(document.getElementById("jobDate").value),
+    intro:    document.getElementById("jobIntro").value.trim(),
+    signature:document.getElementById("jobSignature").value.replace(/\s+$/,"")
+  };
+}
+function setStatus(msg, ok){
+  const s = document.getElementById("status");
+  s.textContent = msg;
+  s.className = ok ? "ok" : "";
+  if (msg) setTimeout(() => { s.textContent = ""; s.className = ""; }, 4000);
+}
+
+/* ---------------- Word generation (WordprocessingML via JSZip) ---------------- */
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+                  .replace(/"/g,"&quot;").replace(/'/g,"&apos;");
+}
+// run properties: Calibri 11pt by default
+function rPr(o={}){
+  return `<w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/>` +
+         (o.bold ? "<w:b/>" : "") +
+         (o.underline ? `<w:u w:val="single"/>` : "") +
+         (o.color ? `<w:color w:val="${o.color}"/>` : "") +
+         `<w:sz w:val="${o.size || 22}"/><w:szCs w:val="${o.size || 22}"/></w:rPr>`;
+}
+function textRun(t, o={}){
+  return `<w:r>${rPr(o)}<w:t xml:space="preserve">${esc(t)}</w:t></w:r>`;
+}
+// plain paragraph
+function xPara(runsXml, { before=0, after=120 } = {}){
+  return `<w:p><w:pPr><w:spacing w:before="${before}" w:after="${after}"/></w:pPr>${runsXml}</w:p>`;
+}
+// numbered/lettered list paragraph with hanging indent (label + tab + text)
+function xListPara(label, text){
+  return `<w:p><w:pPr>` +
+         `<w:tabs><w:tab w:val="left" w:pos="720"/></w:tabs>` +
+         `<w:spacing w:after="120"/>` +
+         `<w:ind w:left="720" w:hanging="720"/>` +
+         `</w:pPr>` +
+         textRun(label) +
+         `<w:r>${rPr()}<w:tab/></w:r>` +
+         textRun(text) +
+         `</w:p>`;
+}
+// second-level sub-item paragraph (a., b., …) indented under its parent
+function xSubListPara(label, text){
+  return `<w:p><w:pPr>` +
+         `<w:tabs><w:tab w:val="left" w:pos="1440"/></w:tabs>` +
+         `<w:spacing w:after="120"/>` +
+         `<w:ind w:left="1440" w:hanging="720"/>` +
+         `</w:pPr>` +
+         textRun(label) +
+         `<w:r>${rPr()}<w:tab/></w:r>` +
+         textRun(text) +
+         `</w:p>`;
+}
+function xHeading(t){
+  return xPara(textRun(t, { bold:true, underline:true }), { before:200, after:140 });
+}
+// bulleted paragraph (• + tab + text) with hanging indent
+function xBulletPara(text){
+  return `<w:p><w:pPr>` +
+         `<w:tabs><w:tab w:val="left" w:pos="720"/></w:tabs>` +
+         `<w:spacing w:after="120"/>` +
+         `<w:ind w:left="720" w:hanging="720"/>` +
+         `</w:pPr>` +
+         textRun("\u2022") +
+         `<w:r>${rPr()}<w:tab/></w:r>` +
+         textRun(text) +
+         `</w:p>`;
+}
+
+function buildDocumentXml(){
+  const h = jobHeader();
+  const body = [];
+
+  if (h.customer) body.push(xPara(textRun(h.customer, { bold:true, size:26 }), { after:40 }));
+  if (h.address)  body.push(xPara(textRun(h.address), { after:40 }));
+  const qd = [h.quote ? "Quote No. " + h.quote : "", h.date].filter(Boolean).join("    |    ");
+  if (qd) body.push(xPara(textRun(qd, { color:"555555" }), { after:200 }));
+  if (h.intro) body.push(xPara(textRun(h.intro), { after:200 }));
+
+  const scope = scopeItems();
+  body.push(xHeading("SCOPE OF WORK:"));
+  scope.forEach((it,i) => {
+    body.push(xListPara((i+1) + ".", it.text));
+    it.subs.forEach((s,j) => body.push(xSubListPara(letterFor(j).toLowerCase() + ".", s)));
+  });
+
+  const notes = checkedItems("notes");
+  if (notes.length){
+    body.push(xHeading("NOTES:"));
+    notes.forEach((t,i) => body.push(xListPara(letterFor(i) + ".", t)));
+  }
+  const inc = incexcItems("inc");
+  if (inc.length){
+    body.push(xHeading("INCLUDING:"));
+    inc.forEach((t,i) => body.push(xListPara((i+1) + ".", t)));
+  }
+  const exc = incexcItems("exc");
+  if (exc.length){
+    body.push(xHeading("EXCLUDING:"));
+    exc.forEach((t,i) => body.push(xListPara((i+1) + ".", t)));
+  }
+
+  const quals = checkedItems("quals");
+  if (quals.length){
+    body.push(xHeading("QUALIFICATIONS:"));
+    quals.forEach((t,i) => body.push(xListPara((i+1) + ".", t)));
+  }
+  const resp = checkedItems("resp");
+  if (resp.length){
+    body.push(xHeading("Customer Responsibilities"));
+    body.push(xPara(textRun("The customer is responsible for the following:"), { after:120 }));
+    resp.forEach(t => body.push(xBulletPara(t)));
+  }
+  const billing = checkedItems("billing");
+  if (billing.length){
+    body.push(xHeading("Billing & Payment Terms"));
+    billing.forEach(t => body.push(xBulletPara(t)));
+  }
+
+  const closing = checkedItems("closing");
+  if (closing.length || h.signature){
+    if (h.recipient) body.push(xPara(textRun(h.recipient + ","), { before:200, after:120 }));
+    closing.forEach(t => body.push(xPara(textRun(t), { after:120 })));
+    if (h.signature){
+      const sig = h.signature.split("\n");
+      sig.forEach((line, i) => body.push(xPara(textRun(line), { before: i === 0 ? 120 : 0, after:0 })));
+    }
+  }
+
+  // US Letter, 0.75" margins
+  const sectPr =
+    `<w:sectPr><w:pgSz w:w="12240" w:h="15840"/>` +
+    `<w:pgMar w:top="1080" w:right="1080" w:bottom="1080" w:left="1080" w:header="720" w:footer="720" w:gutter="0"/>` +
+    `</w:sectPr>`;
+
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+    `<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">` +
+    `<w:body>${body.join("")}${sectPr}</w:body></w:document>`;
+}
+
+const CONTENT_TYPES =
+  `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+  `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">` +
+  `<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>` +
+  `<Default Extension="xml" ContentType="application/xml"/>` +
+  `<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>` +
+  `</Types>`;
+
+const ROOT_RELS =
+  `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+  `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">` +
+  `<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>` +
+  `</Relationships>`;
+
+const DOC_RELS =
+  `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+  `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>`;
+
+async function generateWordProposal(silent){
+  const scope = scopeItems();
+  if (!scope.length){ if(!silent) setStatus("Select at least one Scope of Work item."); return false; }
+  if (typeof JSZip === "undefined"){
+    if(!silent) setStatus("Document library failed to load — check internet connection and reload.");
+    return false;
+  }
+  try {
+    const zip = new JSZip();
+    zip.file("[Content_Types].xml", CONTENT_TYPES);
+    zip.folder("_rels").file(".rels", ROOT_RELS);
+    const word = zip.folder("word");
+    word.file("document.xml", buildDocumentXml());
+    word.folder("_rels").file("document.xml.rels", DOC_RELS);
+
+    const blob = await zip.generateAsync({
+      type:"blob",
+      mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    });
+    const h = jobHeader();
+    const name = (h.quote || h.customer || "FDEC_Proposal").replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"_") || "FDEC_Proposal";
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name + "_Proposal.docx";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+    if(!silent) setStatus("Word proposal downloaded.", true);
+    return true;
+  } catch (err){
+    console.error(err);
+    if(!silent) setStatus("Error generating document — see console.");
+    return false;
+  }
+}
+document.getElementById("btnWord").addEventListener("click", () => generateWordProposal(false));
+
+/* ---------------- Plain-text copy (for pasting into ServiceTrade) ---------------- */
+document.getElementById("btnCopy").addEventListener("click", async () => {
+  const scope = scopeItems();
+  if (!scope.length){ setStatus("Select at least one Scope of Work item."); return; }
+  const h = jobHeader();
+  const L = [];
+  if (h.intro) L.push(h.intro, "");
+  L.push("SCOPE OF WORK:", "");
+  scope.forEach((it,i) => {
+    L.push(`${i+1}. ${it.text}`);
+    it.subs.forEach((s,j) => L.push(`     ${letterFor(j).toLowerCase()}. ${s}`));
+  });
+  const notes = checkedItems("notes");
+  if (notes.length){
+    L.push("", "NOTES:", "");
+    notes.forEach((t,i) => L.push(`${letterFor(i)}. ${t}`));
+  }
+  const inc = incexcItems("inc");
+  if (inc.length){
+    L.push("", "INCLUDING:", "");
+    inc.forEach((t,i) => L.push(`${i+1}. ${t}`));
+  }
+  const exc = incexcItems("exc");
+  if (exc.length){
+    L.push("", "EXCLUDING:", "");
+    exc.forEach((t,i) => L.push(`${i+1}. ${t}`));
+  }
+  const quals = checkedItems("quals");
+  if (quals.length){
+    L.push("", "QUALIFICATIONS:", "");
+    quals.forEach((t,i) => L.push(`${i+1}. ${t}`));
+  }
+  const resp = checkedItems("resp");
+  if (resp.length){
+    L.push("", "Customer Responsibilities", "", "The customer is responsible for the following:");
+    resp.forEach(t => L.push(`- ${t}`));
+  }
+  const billing = checkedItems("billing");
+  if (billing.length){
+    L.push("", "Billing & Payment Terms", "");
+    billing.forEach(t => L.push(`- ${t}`));
+  }
+  const closing = checkedItems("closing");
+  if (closing.length || h.signature){
+    L.push("");
+    if (h.recipient) L.push(h.recipient + ",", "");
+    closing.forEach(t => L.push(t, ""));
+    if (h.signature) L.push(h.signature.replace(/\s+$/,""));
+  }
+  try {
+    await navigator.clipboard.writeText(L.join("\n"));
+    setStatus("Copied to clipboard — paste into ServiceTrade.", true);
+  } catch {
+    setStatus("Clipboard blocked by browser — use the Word download instead.");
+  }
+});
+
+/* ---------------- Formatted HTML (for the combined PDF export) ---------------- */
+/* Builds a clean, print-ready HTML document body from the same section data
+   used by the Word/plain-text exports, so the proposal reads as a finished
+   document (not the editor UI) inside the combined PDF. */
+function buildProposalHTML(){
+  const h = jobHeader();
+  const P = [];
+  const head = [];
+  if (h.customer) head.push(`<div class="pp-cust">${esc(h.customer)}</div>`);
+  const meta = [];
+  if (h.quote) meta.push("Quote " + esc(h.quote));
+  if (h.date)  meta.push(esc(h.date));
+  if (meta.length) head.push(`<div class="pp-meta">${meta.join(" &nbsp;·&nbsp; ")}</div>`);
+  if (head.length) P.push(`<div class="pp-head">${head.join("")}</div>`);
+
+  if (h.intro) P.push(`<p class="pp-intro">${esc(h.intro)}</p>`);
+
+  const scope = scopeItems();
+  if (scope.length){
+    P.push(`<h3 class="pp-h">SCOPE OF WORK</h3>`);
+    let li = "";
+    scope.forEach(it => {
+      let subs = "";
+      if (it.subs && it.subs.length){
+        subs = "<ol class='pp-sub' type='a'>" + it.subs.map(s => `<li>${esc(s)}</li>`).join("") + "</ol>";
+      }
+      li += `<li>${esc(it.text)}${subs}</li>`;
+    });
+    P.push(`<ol class="pp-ol">${li}</ol>`);
+  }
+  const notes = checkedItems("notes");
+  if (notes.length){
+    P.push(`<h3 class="pp-h">NOTES</h3><ol class="pp-ol" type="A">` +
+      notes.map(t => `<li>${esc(t)}</li>`).join("") + `</ol>`);
+  }
+  const inc = incexcItems("inc");
+  if (inc.length){
+    P.push(`<h3 class="pp-h">INCLUDING</h3><ol class="pp-ol">` +
+      inc.map(t => `<li>${esc(t)}</li>`).join("") + `</ol>`);
+  }
+  const exc = incexcItems("exc");
+  if (exc.length){
+    P.push(`<h3 class="pp-h">EXCLUDING</h3><ol class="pp-ol">` +
+      exc.map(t => `<li>${esc(t)}</li>`).join("") + `</ol>`);
+  }
+  const quals = checkedItems("quals");
+  if (quals.length){
+    P.push(`<h3 class="pp-h">QUALIFICATIONS</h3><ol class="pp-ol">` +
+      quals.map(t => `<li>${esc(t)}</li>`).join("") + `</ol>`);
+  }
+  const resp = checkedItems("resp");
+  if (resp.length){
+    P.push(`<h3 class="pp-h">Customer Responsibilities</h3>` +
+      `<p class="pp-lead">The customer is responsible for the following:</p>` +
+      `<ul class="pp-ul">` + resp.map(t => `<li>${esc(t)}</li>`).join("") + `</ul>`);
+  }
+  const billing = checkedItems("billing");
+  if (billing.length){
+    P.push(`<h3 class="pp-h">Billing &amp; Payment Terms</h3><ul class="pp-ul">` +
+      billing.map(t => `<li>${esc(t)}</li>`).join("") + `</ul>`);
+  }
+  const closing = checkedItems("closing");
+  if (closing.length || h.signature){
+    let c = `<div class="pp-closing">`;
+    closing.forEach(t => c += `<p>${esc(t)}</p>`);
+    if (h.signature){
+      c += `<p class="pp-sig">` + esc(h.signature).replace(/\n/g,"<br>") + `</p>`;
+    }
+    c += `</div>`;
+    P.push(c);
+  }
+  return P.join("\n");
+}
+
+/* Scoped CSS for the proposal section of the combined PDF. */
+const PROPOSAL_PRINT_CSS = `
+  .pp-wrap{font:12.5px/1.5 Georgia,"Times New Roman",serif; color:#111; max-width:7.2in; margin:0 auto}
+  .pp-head{border-bottom:2px solid #3281b9; padding-bottom:8px; margin-bottom:14px}
+  .pp-cust{font-size:17px; font-weight:700; color:#010039}
+  .pp-meta{font-size:11px; color:#555; margin-top:3px}
+  .pp-intro{margin:0 0 14px}
+  .pp-h{font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+        color:#3281b9; border-bottom:1px solid #ccc; padding-bottom:2px; margin:16px 0 8px}
+  .pp-ol,.pp-ul{margin:0 0 10px; padding-left:24px}
+  .pp-ol>li,.pp-ul>li{margin:4px 0}
+  .pp-sub{margin:4px 0 4px; padding-left:20px}
+  .pp-sub>li{margin:2px 0; color:#333}
+  .pp-lead{margin:0 0 4px}
+  .pp-closing{margin-top:16px}
+  .pp-closing p{margin:0 0 10px}
+  .pp-sig{margin-top:14px; white-space:pre-line}
+`;
+
+/* Shell requests: return formatted HTML, or trigger the Word download. */
+window.addEventListener("message", function(e){
+  const d = e && e.data;
+  if (!d || d.fdec !== true) return;
+  if (d.type === "get-proposal-html"){
+    let html = "", err = null;
+    try {
+      if (!scopeItems().length) err = "no-scope";
+      else html = buildProposalHTML();
+    } catch(ex){ err = String(ex && ex.message || ex); }
+    // reply to the shell
+    if (window.parent && window.parent !== window){
+      window.parent.postMessage({
+        fdec:true, type:"proposal-html", reqId:d.reqId,
+        html: html, css: PROPOSAL_PRINT_CSS, error: err
+      }, "*");
+    }
+  } else if (d.type === "download-proposal-word"){
+    generateWordProposal(true);
+  }
+});
+
+/* ---------------- Save Draft (.html with embedded state) ---------------- */
+function collectState(){
+  return {
+    meta: { app: "FDEC Proposal Builder", author: APP_META.author, version: APP_META.version, savedAt: new Date().toISOString() },
+    job: {
+      customer: document.getElementById("jobCustomer").value,
+      quote:    document.getElementById("jobQuote").value,
+      date:     document.getElementById("jobDate").value,
+      intro:    document.getElementById("jobIntro").value,
+      signature:document.getElementById("jobSignature").value
+    },
+    sections: JSON.parse(JSON.stringify({
+      scope: state.scope, notes: state.notes, quals: state.quals,
+      resp: state.resp, billing: state.billing, closing: state.closing, incexc: state.incexc
+    }))
+  };
+}
+
+document.getElementById("btnSave").addEventListener("click", () => {
+  try {
+    // JSON payload; escape "</" so it can't terminate the script tag
+    const json = JSON.stringify(collectState()).replace(/<\//g, "<\\/");
+
+    // Serialize a clone of the page so the live view is untouched
+    const clone = document.documentElement.cloneNode(true);
+    const oldState = clone.querySelector("#savedState");
+    if (oldState) oldState.remove();
+    // strip rendered list contents — they're rebuilt on load from the saved state
+    clone.querySelectorAll("ul.items").forEach(ul => ul.innerHTML = "");
+    const body = clone.querySelector("body");
+    const stateScript = document.createElement("script");
+    stateScript.type = "application/json";
+    stateScript.id = "savedState";
+    stateScript.textContent = json;
+    body.insertBefore(stateScript, body.firstChild);
+
+    const html = "<!DOCTYPE html>\n" + clone.outerHTML;
+    const blob = new Blob([html], { type: "text/html" });
+
+    const q = document.getElementById("jobQuote").value.trim();
+    const c = document.getElementById("jobCustomer").value.trim();
+    const base = (q || c || "FDEC_Proposal").replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"_") || "FDEC_Proposal";
+    const stamp = new Date().toISOString().slice(0,10);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = base + "_Draft_" + stamp + ".html";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+    setStatus("Draft saved — reopen the file to continue where you left off.", true);
+  } catch (err){
+    console.error(err);
+    setStatus("Error saving draft — see console.");
+  }
+});
+
+/* ============================================================
+   CROSS-APP LINK — auto-fill the down payment note from the
+   Quoting tab. The suite shell relays the quoting app's down
+   payment total here via postMessage; we drop it into the
+   "A down payment of $____ is required..." note automatically.
+   ============================================================ */
+(function(){
+  // Matches the down payment note whether it still has the blank
+  // underscores or a previously auto-filled dollar amount.
+  const DP_RE = /(A down payment of\s+)(\$[\d,]+(?:\.\d{2})?|\$?_+)(\s+is required)/i;
+
+  function fillDownPayment(display){
+    let touched = false;
+    (state.notes || []).forEach(note => {
+      if (DP_RE.test(note.text)){
+        // Function replacer avoids "$" in the amount being read as a
+        // regex backreference (e.g. $1) inside the replacement string.
+        const next = note.text.replace(DP_RE, (m, pre, amt, post) => pre + display + post);
+        if (next !== note.text){ note.text = next; touched = true; }
+      }
+    });
+    // Re-render notes so the on-screen textarea reflects the new amount.
+    if (touched) render("notes");
+  }
+
+  window.addEventListener("message", function(e){
+    const d = e && e.data;
+    if (!d || d.fdec !== true || d.type !== "downpayment") return;
+    const display = d.display || ("$" + Number(d.value || 0).toFixed(2));
+    fillDownPayment(display);
+  });
+})();
+<\/script>
+
+
+</body></html></script>
+<script type="text/html" id="src-install"><!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FDEC Proposal Builder V2.0</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"><\/script>
+<style>
+  :root{
+    --ink:#20262d;
+    --paper:#eaf1f8;
+    --panel:#ffffff;
+    --line:#cdd9e8;
+    --red:#3281b9;
+    --red-dark:#256a9c;
+    --navy:#010039;
+    --soft:#eef5fb;
+    --steel:#5b6572;
+    --muted:#7c8896;
+    --check:#3281b9;
+    --radius:6px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    font-size:15px;
+    line-height:1.45;
+  }
+  header{
+    background:var(--navy);
+    color:#fff;
+    padding:16px 22px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+    border-bottom:4px solid var(--red);
+  }
+  header h1{font-size:20px;font-weight:700;letter-spacing:.3px}
+  header h1 span{color:#8fa8c9;font-weight:400}
+  header .sub{font-size:12.5px;color:#8fa8c9;text-transform:uppercase;letter-spacing:1.2px}
+  main{max-width:1060px;margin:0 auto;padding:22px 18px 120px}
+
+  section.card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    margin-bottom:18px;
+    overflow:hidden;
+  }
+  .card-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:12px 16px;
+    background:var(--soft);
+    border-bottom:1px solid var(--line);
+    border-left:4px solid var(--red);
+    flex-wrap:wrap;
+  }
+  .card-head h2{
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:1.1px;
+    color:var(--red);
+  }
+  .card-head .hint{font-size:12.5px;color:var(--muted)}
+  .card-body{padding:14px 16px}
+
+  /* Job info grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+  label.field{display:block;font-size:12.5px;font-weight:600;color:var(--steel)}
+  label.field input, label.field textarea{
+    display:block;width:100%;margin-top:4px;
+    font:inherit;font-size:14.5px;font-weight:400;
+    padding:8px 10px;border:1px solid var(--line);border-radius:4px;background:#fff;
+  }
+  label.field textarea{resize:vertical;min-height:60px}
+  input:focus, textarea:focus{outline:2px solid var(--red);outline-offset:1px;border-color:var(--red)}
+
+  /* Item rows */
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .toolbar input[type="search"]{
+    font:inherit;font-size:13.5px;padding:6px 9px;border:1px solid var(--line);
+    border-radius:4px;width:210px;background:#fff;
+  }
+  ul.items{list-style:none}
+  li.item{
+    display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;
+    padding:8px 6px;border-bottom:1px dashed var(--line);
+  }
+  li.item:last-child{border-bottom:none}
+  li.item input[type="checkbox"]{
+    width:18px;height:18px;margin-top:5px;accent-color:var(--check);flex-shrink:0;cursor:pointer;
+  }
+  li.item textarea{
+    flex:1;font:inherit;font-size:14.5px;line-height:1.4;
+    border:1px solid transparent;border-radius:4px;background:transparent;
+    padding:4px 6px;resize:none;overflow:hidden;
+  }
+  li.item textarea:hover{border-color:var(--line);background:#fff}
+  li.item textarea:focus{border-color:var(--red);background:#fff}
+  li.item.unchecked textarea{color:#9aa0a8}
+  li.item .del{
+    border:none;background:none;color:#b9bec5;cursor:pointer;font-size:16px;
+    margin-top:4px;line-height:1;flex-shrink:0;padding:2px 4px;border-radius:3px;
+  }
+  li.item .del:hover{color:var(--red);background:#e2eef7}
+
+  /* Sub-items (optional subcategory under a selected scope item) */
+  ul.subs{
+    list-style:none;flex-basis:100%;
+    margin:4px 0 2px 28px;padding:4px 0 2px 10px;
+    border-left:2px solid var(--line);
+  }
+  li.sub{display:flex;gap:8px;align-items:flex-start;padding:4px 2px}
+  li.sub input[type="checkbox"]{
+    width:15px;height:15px;margin-top:4px;accent-color:var(--steel);flex-shrink:0;cursor:pointer;
+  }
+  li.sub textarea{
+    flex:1;font:inherit;font-size:13.5px;line-height:1.4;color:var(--steel);
+    border:1px solid transparent;border-radius:4px;background:transparent;
+    padding:3px 6px;resize:none;overflow:hidden;
+  }
+  li.sub textarea:hover{border-color:var(--line);background:#fff}
+  li.sub textarea:focus{border-color:var(--red);background:#fff}
+  li.sub.unchecked textarea{color:#9aa0a8}
+  li.sub .del{
+    border:none;background:none;color:#b9bec5;cursor:pointer;font-size:14px;
+    margin-top:3px;line-height:1;flex-shrink:0;padding:2px 4px;border-radius:3px;
+  }
+  li.sub .del:hover{color:var(--red);background:#e2eef7}
+  button.addsub{
+    font:inherit;font-size:12px;font-weight:600;
+    margin:2px 0 2px 2px;padding:3px 8px;border-radius:4px;cursor:pointer;
+    border:1px dashed var(--line);background:none;color:var(--muted);
+  }
+  button.addsub:hover{border-color:var(--red);color:var(--red)}
+
+  button.small{
+    font:inherit;font-size:13px;font-weight:600;
+    padding:6px 12px;border-radius:4px;cursor:pointer;
+    border:1px solid var(--line);background:#fff;color:var(--steel);
+  }
+  button.small:hover{border-color:var(--red);color:var(--red)}
+  .selcount{font-size:12.5px;color:var(--muted);white-space:nowrap}
+
+  /* Combined Including/Excluding controls */
+  .legend{font-size:12.5px;color:var(--muted);margin:0 0 10px 2px}
+  .seg{
+    display:inline-flex;flex-shrink:0;margin-top:2px;
+    border:1px solid var(--line);border-radius:4px;overflow:hidden;
+  }
+  .seg button{
+    font:inherit;font-size:11.5px;font-weight:700;letter-spacing:.4px;
+    padding:5px 9px;border:none;background:#fff;color:#9aa0a8;cursor:pointer;
+    border-right:1px solid var(--line);
+  }
+  .seg button:last-child{border-right:none}
+  .seg button.on-inc{background:#1a7a3c;color:#fff}
+  .seg button.on-exc{background:var(--red);color:#fff}
+  .seg button.on-off{background:var(--steel);color:#fff}
+  li.item.omitted textarea{color:#9aa0a8;text-decoration:line-through}
+
+  /* Footer action bar */
+  .actionbar{
+    position:fixed;left:0;right:0;bottom:0;
+    background:#fff;border-top:1px solid var(--line);
+    box-shadow:0 -3px 14px rgba(0,0,0,.08);
+    padding:12px 18px;
+    display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;
+    z-index:10;
+  }
+  button.primary{
+    font:inherit;font-size:15px;font-weight:700;
+    background:var(--red);color:#fff;border:none;border-radius:5px;
+    padding:12px 26px;cursor:pointer;letter-spacing:.2px;
+  }
+  button.primary:hover{background:var(--red-dark)}
+  button.secondary{
+    font:inherit;font-size:14px;font-weight:600;
+    background:#fff;color:var(--steel);border:1.5px solid var(--steel);
+    border-radius:5px;padding:11px 20px;cursor:pointer;
+  }
+  button.secondary:hover{border-color:var(--red);color:var(--red)}
+  #status{font-size:13px;color:var(--muted);min-width:160px;text-align:center}
+  #status.ok{color:#1a7a3c;font-weight:600}
+
+  @media (max-width:640px){
+    .toolbar input[type="search"]{width:100%}
+    main{padding-bottom:150px}
+  }
+</style>
+</head>
+<body><script type="application/json" id="savedState">{"meta": {"app": "FDEC Proposal Builder", "author": "Mitch Peebles", "version": "2.0", "savedAt": "2026-07-20T14:59:21.202Z"}, "job": {"customer": "", "address": "", "quote": "", "date": "2026-07-20", "intro": "Fire Defense Equipment Co. is pleased to present this quotation to perform the following fire sprinkler work at the above-referenced location:"}}<\/script>
+
+<header>
+  <h1>New Install <span>· Sprinkler &amp; Fire Alarm Division</span></h1>
+  <div class="sub">ServiceTrade quotation generator &nbsp;·&nbsp; <span id="metaLine">V2.0 · Mitch Peebles</span></div>
+</header>
+
+<main>
+
+  <!-- JOB INFO -->
+  <section class="card">
+    <div class="card-head"><h2>Job Information</h2><span class="hint">Appears at the top of the proposal</span></div>
+    <div class="card-body">
+      <div class="grid">
+        <label class="field">Customer / Facility
+          <input type="text" id="jobCustomer" placeholder="e.g., BIRDI — Plymouth, MI">
+        </label>
+        <label class="field">Quote Number
+          <input type="text" id="jobQuote" placeholder="e.g., Q-2026-0143">
+        </label>
+        <label class="field">Date
+          <input type="date" id="jobDate">
+        </label>
+      </div>
+      <div style="margin-top:12px">
+        <label class="field">Introduction Paragraph
+          <textarea id="jobIntro">Fire Defense Equipment Co. is pleased to present this quotation to perform the following fire sprinkler work at the above-referenced location:</textarea>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCOPE -->
+  <section class="card" id="sec-scope">
+    <div class="card-head">
+      <h2>Scope of Work</h2>
+      <div class="toolbar">
+        <input type="search" placeholder="Filter scope items…" data-filter="scope">
+        <button class="small" data-add="scope">+ Add Custom Item</button>
+        <span class="selcount" data-count="scope">0 selected</span>
+      </div>
+    </div>
+    <div class="card-body"><ul class="items" id="list-scope"></ul></div>
+  </section>
+
+  <!-- NOTES -->
+  <section class="card" id="sec-notes">
+    <div class="card-head">
+      <h2>Notes</h2>
+      <div class="toolbar">
+        <input type="search" placeholder="Filter notes…" data-filter="notes">
+        <button class="small" data-add="notes">+ Add Custom Note</button>
+        <span class="selcount" data-count="notes">0 selected</span>
+      </div>
+    </div>
+    <div class="card-body"><ul class="items" id="list-notes"></ul></div>
+  </section>
+
+  <!-- INCLUDING / EXCLUDING (combined) -->
+  <section class="card" id="sec-incexc">
+    <div class="card-head">
+      <h2>Including / Excluding</h2>
+      <div class="toolbar">
+        <button class="small" data-add="incexc">+ Add Item</button>
+        <span class="selcount" data-count="incexc">5 included · 18 excluded</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="legend">Mark each item <strong>INCL</strong> (included), <strong>EXCL</strong> (excluded), or <strong>—</strong> (leave off the proposal). The document builds separate INCLUDING and EXCLUDING lists automatically.</p>
+      <ul class="items" id="list-incexc"></ul>
+    </div>
+  </section>
+  <!-- QUALIFICATIONS -->
+  <section class="card" id="sec-quals">
+    <div class="card-head">
+      <h2>Qualifications</h2>
+      <div class="toolbar">
+        <button class="small" data-add="quals">+ Add Qualification</button>
+        <span class="selcount" data-count="quals">4 selected</span>
+      </div>
+    </div>
+    <div class="card-body"><ul class="items" id="list-quals"></ul></div>
+  </section>
+
+  <!-- CUSTOMER RESPONSIBILITIES -->
+  <section class="card" id="sec-resp">
+    <div class="card-head">
+      <h2>Customer Responsibilities</h2>
+      <div class="toolbar">
+        <button class="small" data-add="resp">+ Add Item</button>
+        <span class="selcount" data-count="resp">4 selected</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="legend">Checked items appear as bullets under “The customer is responsible for the following:”</p>
+      <ul class="items" id="list-resp"></ul>
+    </div>
+  </section>
+
+  <!-- BILLING & PAYMENT TERMS -->
+  <section class="card" id="sec-billing">
+    <div class="card-head">
+      <h2>Billing &amp; Payment Terms</h2>
+      <div class="toolbar">
+        <button class="small" data-add="billing">+ Add Term</button>
+        <span class="selcount" data-count="billing">6 selected</span>
+      </div>
+    </div>
+    <div class="card-body"><ul class="items" id="list-billing"></ul></div>
+  </section>
+
+  <!-- CLOSING -->
+  <section class="card" id="sec-closing">
+    <div class="card-head">
+      <h2>Closing</h2>
+      <div class="toolbar">
+        <button class="small" data-add="closing">+ Add Line</button>
+        <span class="selcount" data-count="closing">0 selected</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="legend">Checked closing lines appear at the very end of the proposal, before the signature block below.</p>
+      <ul class="items" id="list-closing"></ul>
+      <label class="field" style="margin-top:12px">Signature Block
+        <textarea id="jobSignature" rows="6" style="min-height:120px">Mitchell Peebles
+Cell (248) 797-4488
+Office (248) 549-8113
+Mp1@firedefense.com</textarea>
+      </label>
+    </div>
+  </section>
+
+</main>
+
+<div class="actionbar">
+  <button class="primary" id="btnWord">Generate Word Proposal (.docx)</button>
+  <button class="secondary" id="btnCopy">Copy as Plain Text</button>
+  <button class="secondary" id="btnSave">Save Draft (.html)</button>
+  <span id="status" class=""></span>
+</div>
+
+<script>
+/* ============================================================
+   APP METADATA — version increases by 0.5 with each revision
+   ============================================================ */
+const APP_META = {
+  author: "Mitch Peebles",
+  version: "2.0"
+};
+
+/* ============================================================
+   VERBIAGE LIBRARY — edit freely; app numbers/letters items
+   automatically based on what is checked at generation time.
+   ============================================================ */
+
+const LIBRARY = {
+  scope: [
+    "Provide all labor, materials, equipment, supervision, and permits required to furnish and install a complete wet pipe fire sprinkler system at the subject location in accordance with NFPA 13 and all applicable local codes and authority having jurisdiction (AHJ) requirements.",
+    "Perform site evaluation and verification of existing building conditions.",
+    "Prepare hydraulic calculations and system design drawings.",
+    "Submit shop drawings, product data, and calculations for review and approval by the AHJ prior to installation.",
+    "Provide as-built drawings.",
+    "Provide basic training to the owner's personnel on the operation of system valves and general maintenance requirements.",
+  ],
+  notes: [
+    "The system shall be designed in accordance with the requirements of NFPA 13. Attainment of the required density is based upon adequate city water supply being available.",
+    "This work has been quoted as subcontracted to Guardian Automatic Sprinkler Corporation under the direct supervision of Fire Defense Equipment Co.",
+    "A down payment of $____________ is required prior to scheduling or commencing work.",
+    "Due to fluctuating costs and delivery times, we will order the materials when this work is approved and invoice them when received.",
+  ],
+  quals: [
+    "Unless otherwise noted, all work will be performed during normal business hours (Monday–Friday, 7:00 a.m. to 5:00 p.m.), excluding holidays.",
+    "During hydrostatic testing, Fire Defense Equipment Co. is not responsible for any damages resulting from leaking or burst pipe or fittings on existing system components. Any required repair or replacement will be invoiced at additional cost.",
+  ],
+  resp: [
+    "Ensuring all areas of fire protection work are accessible and clear of stock, furniture, or any materials that may hinder installation",
+    "Providing timely access to all locked rooms, if applicable",
+    "Ensuring the proper operation of the building's fire alarm system and contacting the fire alarm monitoring company and fire department, if applicable",
+    "Mitigating any safety hazards caused by drained system water that may freeze on walkways or parking lots during freezing weather conditions",
+  ],
+  billing: [
+    "Billing terms: Net 10 days with approved credit.",
+    "A 3% fee will be applied to all credit card transactions.",
+    "Billing will be invoiced monthly based on the percentage of work completed.",
+    "Payment is due by the 15th of the month following the month invoiced, or net 30.",
+    "Contractor terms are subject to review by Fire Defense Equipment Co. Additional terms and conditions may apply.",
+    "This quotation is valid for 30 days from the date of issue.",
+  ],
+  closing: [
+    "Thank you for the opportunity to provide this quotation for the requested fire protection services at your facility.",
+    "Please don't hesitate to contact me should you have any questions, or if you would like to schedule an on-site consultation to review this proposal.",
+  ],
+  incexc: [
+    { text: "Brass upright and chrome pendant sprinkler heads", mode: "inc" },
+    { text: "Black steel pipe, fittings, and hangers", mode: "inc" },
+    { text: "One (1) double-check detector assembly backflow preventer", mode: "inc" },
+    { text: "Backflow testing", mode: "inc" },
+    { text: "Two (2) control valves with supervisory switches (wiring by others)", mode: "inc" },
+    { text: "One (1) fire department connection on building exterior — (CITY) standard specification", mode: "inc" },
+    { text: "One (1) water flow switch (wiring by others)", mode: "inc" },
+    { text: "Spare sprinkler cabinet with spare sprinkler heads and wrench", mode: "inc" },
+    { text: "Water flow test as necessary to complete hydraulic calculations", mode: "inc" },
+    { text: "Design drawings for review by (City) Fire Department", mode: "inc" },
+    { text: "Fabrication and installation", mode: "inc" },
+    { text: "Freight and cartage of equipment and materials to the site", mode: "inc" },
+    { text: "Pressure testing per NFPA 13", mode: "inc" },
+    { text: "(City) fire suppression permit and fees", mode: "inc" },
+    { text: "Premium time labor", mode: "exc" },
+    { text: "Electrical wiring or fire alarm systems", mode: "exc" },
+    { text: "Painting or pipe identification", mode: "exc" },
+    { text: "Fire hose racks, reels, or fire extinguishers", mode: "exc" },
+    { text: "Fire suppression system modifications other than those specified in this quotation", mode: "exc" },
+    { text: "Adequate water supply, hydrants, or underground work", mode: "exc" },
+    { text: "Interior dry sprinklers, antifreeze systems, or dry pipe systems", mode: "exc" },
+    { text: "Fire protection in concealed spaces or on the building exterior", mode: "exc" },
+    { text: "Knox Box or Knox FDC caps", mode: "exc" },
+    { text: "Relocation of storage — some items may need to be moved prior to installation", mode: "exc" },
+    { text: "Tanks, pumps, controllers, or standpipes", mode: "exc" },
+    { text: "Dumpster or cleaning fees", mode: "exc" },
+    { text: "Adequate heat to prevent damage to the wet system", mode: "exc" },
+  ]
+};
+
+/* Scope & Notes start unchecked (pick what applies to this job).
+   Scope items carry an optional subs[] list shown once the item is selected.
+   Including/Excluding items carry a mode: "inc", "exc", or "off". */
+const state = {};
+state.scope = LIBRARY.scope.map(entry => {
+  const obj = typeof entry === "string" ? { text: entry, subs: [] } : entry;
+  return {
+    text: obj.text,
+    checked: false,
+    subs: (obj.subs || []).map(s => ({ text: s, checked: false }))
+  };
+});
+state.notes = LIBRARY.notes.map(t => ({ text: t, checked: false }));
+/* Qualifications and boilerplate default ON — uncheck to drop from a proposal. */
+for (const key of ["quals","resp","billing","closing"]) {
+  state[key] = LIBRARY[key].map(t => ({ text: t, checked: true }));
+}
+state.incexc = LIBRARY.incexc.map(i => ({ text: i.text, mode: i.mode }));
+
+/* ---------------- rendering ---------------- */
+function autoGrow(ta){ ta.style.height = "auto"; ta.style.height = (ta.scrollHeight + 2) + "px"; }
+
+function render(key){
+  if (key === "incexc") return renderIncExc();
+  const ul = document.getElementById("list-" + key);
+  ul.innerHTML = "";
+  const filter = (document.querySelector(`[data-filter="${key}"]`)?.value || "").toLowerCase();
+  state[key].forEach((item, i) => {
+    if (filter && !item.text.toLowerCase().includes(filter)) return;
+    const li = document.createElement("li");
+    li.className = "item" + (item.checked ? "" : " unchecked");
+    li.dataset.index = i;
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.checked = item.checked;
+    cb.addEventListener("change", () => {
+      item.checked = cb.checked;
+      li.classList.toggle("unchecked", !cb.checked);
+      updateCount(key);
+      if (key === "scope") render(key); // open/close the sub-item block
+    });
+
+    const ta = document.createElement("textarea");
+    ta.rows = 1;
+    ta.value = item.text;
+    ta.addEventListener("input", () => { item.text = ta.value; autoGrow(ta); });
+    ta.addEventListener("focus", () => autoGrow(ta));
+
+    const del = document.createElement("button");
+    del.className = "del";
+    del.title = "Remove item";
+    del.innerHTML = "&times;";
+    del.addEventListener("click", () => { state[key].splice(i,1); render(key); updateCount(key); });
+
+    li.append(cb, ta, del);
+
+    // Optional subcategory: shown only when the scope item is selected
+    if (key === "scope" && item.checked){
+      const subUl = document.createElement("ul");
+      subUl.className = "subs";
+      item.subs.forEach((sub, j) => {
+        const sli = document.createElement("li");
+        sli.className = "sub" + (sub.checked ? "" : " unchecked");
+
+        const scb = document.createElement("input");
+        scb.type = "checkbox";
+        scb.checked = sub.checked;
+        scb.addEventListener("change", () => {
+          sub.checked = scb.checked;
+          sli.classList.toggle("unchecked", !scb.checked);
+          updateCount(key);
+        });
+
+        const sta = document.createElement("textarea");
+        sta.rows = 1;
+        sta.value = sub.text;
+        sta.addEventListener("input", () => { sub.text = sta.value; autoGrow(sta); });
+        sta.addEventListener("focus", () => autoGrow(sta));
+
+        const sdel = document.createElement("button");
+        sdel.className = "del";
+        sdel.title = "Remove sub-item";
+        sdel.innerHTML = "&times;";
+        sdel.addEventListener("click", () => { item.subs.splice(j,1); render(key); updateCount(key); });
+
+        sli.append(scb, sta, sdel);
+        subUl.appendChild(sli);
+        (window.requestAnimationFrame || (fn => setTimeout(fn, 0)))(() => autoGrow(sta));
+      });
+
+      const addSub = document.createElement("button");
+      addSub.className = "addsub";
+      addSub.type = "button";
+      addSub.textContent = "+ Sub-item";
+      addSub.addEventListener("click", () => {
+        item.subs.push({ text: "", checked: true });
+        render(key);
+        const parent = ul.querySelector(`li.item[data-index="${i}"]`);
+        const nt = parent && parent.querySelector("ul.subs li.sub:last-of-type textarea");
+        if (nt) nt.focus();
+      });
+      subUl.appendChild(document.createElement("li")).appendChild(addSub);
+
+      li.appendChild(subUl);
+    }
+
+    ul.appendChild(li);
+    autoGrow(ta);
+  });
+  updateCount(key);
+}
+
+function renderIncExc(){
+  const ul = document.getElementById("list-incexc");
+  ul.innerHTML = "";
+  state.incexc.forEach((item, i) => {
+    const li = document.createElement("li");
+    li.className = "item" + (item.mode === "off" ? " omitted" : "");
+
+    const seg = document.createElement("div");
+    seg.className = "seg";
+    const modes = [ ["inc","INCL","on-inc"], ["exc","EXCL","on-exc"], ["off","\u2014","on-off"] ];
+    modes.forEach(([mode, label, cls]) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = label;
+      b.title = mode === "inc" ? "Included" : mode === "exc" ? "Excluded" : "Leave off the proposal";
+      if (item.mode === mode) b.classList.add(cls);
+      b.addEventListener("click", () => { item.mode = mode; renderIncExc(); });
+      seg.appendChild(b);
+    });
+
+    const ta = document.createElement("textarea");
+    ta.rows = 1;
+    ta.value = item.text;
+    ta.addEventListener("input", () => { item.text = ta.value; autoGrow(ta); });
+    ta.addEventListener("focus", () => autoGrow(ta));
+
+    const del = document.createElement("button");
+    del.className = "del";
+    del.title = "Remove item";
+    del.innerHTML = "&times;";
+    del.addEventListener("click", () => { state.incexc.splice(i,1); renderIncExc(); });
+
+    li.append(seg, ta, del);
+    ul.appendChild(li);
+    autoGrow(ta);
+  });
+  updateCount("incexc");
+}
+
+function updateCount(key){
+  const el = document.querySelector(`[data-count="${key}"]`);
+  if (!el) return;
+  if (key === "incexc"){
+    const inc = state.incexc.filter(i => i.mode === "inc").length;
+    const exc = state.incexc.filter(i => i.mode === "exc").length;
+    el.textContent = inc + " included \u00b7 " + exc + " excluded";
+  } else if (key === "scope"){
+    const sel = state.scope.filter(i => i.checked);
+    const subs = sel.reduce((n,i) => n + i.subs.filter(s => s.checked).length, 0);
+    el.textContent = sel.length + " selected" + (subs ? " \u00b7 " + subs + " sub-item" + (subs === 1 ? "" : "s") : "");
+  } else {
+    el.textContent = state[key].filter(i => i.checked).length + " selected";
+  }
+}
+
+document.querySelectorAll("[data-add]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const key = btn.dataset.add;
+    if (key === "incexc"){
+      state.incexc.push({ text: "", mode: "inc" });
+    } else {
+      state[key].push({ text: "", checked: true, subs: [] });
+      const f = document.querySelector(`[data-filter="${key}"]`);
+      if (f) f.value = "";
+    }
+    render(key);
+    const ul = document.getElementById("list-" + key);
+    const last = ul.querySelector("li:last-child textarea");
+    if (last) last.focus();
+  });
+});
+
+document.querySelectorAll("[data-filter]").forEach(inp => {
+  inp.addEventListener("input", () => render(inp.dataset.filter));
+});
+
+/* ---------------- draft restore (hydrate from embedded saved state) ---------------- */
+document.getElementById("metaLine").textContent = "V" + APP_META.version + " \u00b7 " + APP_META.author;
+document.title = "FDEC New Install" + " V" + APP_META.version;
+
+let restoredMsg = "";
+(function hydrate(){
+  const el = document.getElementById("savedState");
+  if (!el) return;
+  try {
+    const saved = JSON.parse(el.textContent);
+    if (saved.job){
+      document.getElementById("jobCustomer").value = saved.job.customer || "";
+      document.getElementById("jobQuote").value    = saved.job.quote    || "";
+      // Date intentionally not restored from the template — it is always set
+      // to today's date on open (see below).
+      if (saved.job.intro) document.getElementById("jobIntro").value = saved.job.intro;
+      if (saved.job.signature != null) document.getElementById("jobSignature").value = saved.job.signature;
+    }
+    if (saved.sections){
+      for (const key of ["scope","notes","quals","resp","billing","closing","incexc"]){
+        if (Array.isArray(saved.sections[key])) state[key] = saved.sections[key];
+      }
+      // guarantee scope items have a subs array
+      state.scope.forEach(i => { if (!Array.isArray(i.subs)) i.subs = []; });
+    }
+    const when = saved.meta && saved.meta.savedAt ? new Date(saved.meta.savedAt) : null;
+    restoredMsg = "Draft restored" + (when ? " \u2014 saved " + when.toLocaleString() : "") + ".";
+  } catch(e){ console.error("Could not restore saved draft:", e); }
+})();
+
+["scope","notes","quals","resp","billing","closing","incexc"].forEach(render);
+// Always open with today's date (local, not UTC, to avoid an off-by-one).
+(function(){
+  const d = new Date();
+  const local = d.getFullYear() + "-" +
+    String(d.getMonth()+1).padStart(2,"0") + "-" +
+    String(d.getDate()).padStart(2,"0");
+  document.getElementById("jobDate").value = local;
+})();
+
+/* ---------------- Shared job-info sync ----------------
+   Repair Verbiage is the MASTER for Job Name / Quote # / Date. When these
+   change here, broadcast to the suite shell, which relays the values to the
+   other pages. Followers (the generated clone pages) set IS_JOBINFO_MASTER
+   to false and only receive. */
+var IS_JOBINFO_MASTER = false;
+(function(){
+  function currentJobInfo(){
+    return {
+      customer: document.getElementById("jobCustomer").value,
+      quote:    document.getElementById("jobQuote").value,
+      date:     document.getElementById("jobDate").value
+    };
+  }
+  function broadcastJobInfo(){
+    if (!IS_JOBINFO_MASTER) return;
+    if (window.parent && window.parent !== window){
+      window.parent.postMessage({ fdec:true, type:"jobinfo", value: currentJobInfo() }, "*");
+    }
+  }
+  function applyJobInfo(v){
+    if (!v) return;
+    if (typeof v.customer === "string") document.getElementById("jobCustomer").value = v.customer;
+    if (typeof v.quote === "string")    document.getElementById("jobQuote").value = v.quote;
+    if (typeof v.date === "string" && v.date) document.getElementById("jobDate").value = v.date;
+  }
+  // Master: broadcast on any edit to the three shared fields.
+  if (IS_JOBINFO_MASTER){
+    ["jobCustomer","jobQuote","jobDate"].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el){ el.addEventListener("input", broadcastJobInfo); el.addEventListener("change", broadcastJobInfo); }
+    });
+    // Broadcast the initial values (incl. today's date) once the shell is ready.
+    setTimeout(broadcastJobInfo, 150);
+  }
+  // Everyone: accept incoming job-info from the shell. The shell only relays
+  // to followers, so the master won't receive its own broadcast.
+  window.addEventListener("message", function(e){
+    var d = e && e.data;
+    if (!d || d.fdec !== true) return;
+    if (d.type === "jobinfo") applyJobInfo(d.value);
+    // A follower loaded and asked for values; the shell forwards this to the
+    // master as 'send-jobinfo'. Master responds by broadcasting current values.
+    else if (d.type === "send-jobinfo" && IS_JOBINFO_MASTER) broadcastJobInfo();
+  });
+  // Followers can request the current values when they load/become visible.
+  if (!IS_JOBINFO_MASTER){
+    if (window.parent && window.parent !== window){
+      window.parent.postMessage({ fdec:true, type:"request-jobinfo" }, "*");
+    }
+  }
+})();
+
+if (restoredMsg) setTimeout(() => setStatus(restoredMsg, true), 100);
+
+/* When this app first renders inside a hidden iframe (the Quoting tab is
+   shown by default), every textarea measures scrollHeight = 0 and collapses
+   so its text is invisible. Re-grow all textareas once the tab is actually
+   visible. The suite shell posts {type:'relayout'} on tab switch; we also
+   listen for our own becoming-visible as a fallback. */
+function relayoutTextareas(){
+  var run = function(){ document.querySelectorAll("textarea").forEach(autoGrow); };
+  // Defer so the browser has laid out the now-visible iframe before we
+  // read scrollHeight; run twice to catch any late layout.
+  if (typeof requestAnimationFrame === "function"){
+    requestAnimationFrame(function(){ run(); requestAnimationFrame(run); });
+  } else {
+    run();
+  }
+}
+window.addEventListener("message", function(e){
+  var d = e && e.data;
+  if (d && d.fdec === true && d.type === "relayout") relayoutTextareas();
+});
+/* Self-healing: when this document transitions from hidden (0 size) to
+   visible, re-measure textareas automatically — independent of the shell.
+   Covers the case where the app first rendered inside a hidden iframe. */
+(function(){
+  var seenVisible = false;
+  function checkVisible(){
+    var visible = document.body && document.body.clientHeight > 0 &&
+                  document.documentElement.clientWidth > 0;
+    if (visible && !seenVisible){ seenVisible = true; relayoutTextareas(); }
+  }
+  if (typeof ResizeObserver === "function"){
+    try { new ResizeObserver(checkVisible).observe(document.documentElement); } catch(_){}
+  }
+  window.addEventListener("resize", checkVisible);
+  document.addEventListener("visibilitychange", checkVisible);
+  // initial + a few delayed attempts to catch first layout
+  checkVisible();
+  [60, 200, 500].forEach(function(ms){ setTimeout(checkVisible, ms); });
+})();
+/* Fallback: if this document becomes visible via layout, relayout once. */
+if (typeof requestAnimationFrame === "function"){
+  requestAnimationFrame(function(){ if (document.body.clientHeight) relayoutTextareas(); });
+}
+
+/* ---------------- output helpers ---------------- */
+function checkedItems(key){
+  return state[key].filter(i => i.checked && i.text.trim()).map(i => i.text.trim());
+}
+function scopeItems(){
+  return state.scope
+    .filter(i => i.checked && i.text.trim())
+    .map(i => ({
+      text: i.text.trim(),
+      subs: i.subs.filter(s => s.checked && s.text.trim()).map(s => s.text.trim())
+    }));
+}
+function incexcItems(mode){
+  return state.incexc.filter(i => i.mode === mode && i.text.trim()).map(i => i.text.trim());
+}
+function letterFor(n){ // 0 -> A, 25 -> Z, 26 -> AA
+  let s = "";
+  n += 1;
+  while (n > 0){ n--; s = String.fromCharCode(65 + (n % 26)) + s; n = Math.floor(n / 26); }
+  return s;
+}
+function fmtDate(iso){
+  if (!iso) return "";
+  const [y,m,d] = iso.split("-").map(Number);
+  return new Date(y, m-1, d).toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
+}
+function jobHeader(){
+  return {
+    customer: document.getElementById("jobCustomer").value.trim(),
+    recipient:"",
+    address:  "",
+    quote:    document.getElementById("jobQuote").value.trim(),
+    date:     fmtDate(document.getElementById("jobDate").value),
+    intro:    document.getElementById("jobIntro").value.trim(),
+    signature:document.getElementById("jobSignature").value.replace(/\s+$/,"")
+  };
+}
+function setStatus(msg, ok){
+  const s = document.getElementById("status");
+  s.textContent = msg;
+  s.className = ok ? "ok" : "";
+  if (msg) setTimeout(() => { s.textContent = ""; s.className = ""; }, 4000);
+}
+
+/* ---------------- Word generation (WordprocessingML via JSZip) ---------------- */
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+                  .replace(/"/g,"&quot;").replace(/'/g,"&apos;");
+}
+// run properties: Calibri 11pt by default
+function rPr(o={}){
+  return `<w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/>` +
+         (o.bold ? "<w:b/>" : "") +
+         (o.underline ? `<w:u w:val="single"/>` : "") +
+         (o.color ? `<w:color w:val="${o.color}"/>` : "") +
+         `<w:sz w:val="${o.size || 22}"/><w:szCs w:val="${o.size || 22}"/></w:rPr>`;
+}
+function textRun(t, o={}){
+  return `<w:r>${rPr(o)}<w:t xml:space="preserve">${esc(t)}</w:t></w:r>`;
+}
+// plain paragraph
+function xPara(runsXml, { before=0, after=120 } = {}){
+  return `<w:p><w:pPr><w:spacing w:before="${before}" w:after="${after}"/></w:pPr>${runsXml}</w:p>`;
+}
+// numbered/lettered list paragraph with hanging indent (label + tab + text)
+function xListPara(label, text){
+  return `<w:p><w:pPr>` +
+         `<w:tabs><w:tab w:val="left" w:pos="720"/></w:tabs>` +
+         `<w:spacing w:after="120"/>` +
+         `<w:ind w:left="720" w:hanging="720"/>` +
+         `</w:pPr>` +
+         textRun(label) +
+         `<w:r>${rPr()}<w:tab/></w:r>` +
+         textRun(text) +
+         `</w:p>`;
+}
+// second-level sub-item paragraph (a., b., …) indented under its parent
+function xSubListPara(label, text){
+  return `<w:p><w:pPr>` +
+         `<w:tabs><w:tab w:val="left" w:pos="1440"/></w:tabs>` +
+         `<w:spacing w:after="120"/>` +
+         `<w:ind w:left="1440" w:hanging="720"/>` +
+         `</w:pPr>` +
+         textRun(label) +
+         `<w:r>${rPr()}<w:tab/></w:r>` +
+         textRun(text) +
+         `</w:p>`;
+}
+function xHeading(t){
+  return xPara(textRun(t, { bold:true, underline:true }), { before:200, after:140 });
+}
+// bulleted paragraph (• + tab + text) with hanging indent
+function xBulletPara(text){
+  return `<w:p><w:pPr>` +
+         `<w:tabs><w:tab w:val="left" w:pos="720"/></w:tabs>` +
+         `<w:spacing w:after="120"/>` +
+         `<w:ind w:left="720" w:hanging="720"/>` +
+         `</w:pPr>` +
+         textRun("\u2022") +
+         `<w:r>${rPr()}<w:tab/></w:r>` +
+         textRun(text) +
+         `</w:p>`;
+}
+
+function buildDocumentXml(){
+  const h = jobHeader();
+  const body = [];
+
+  if (h.customer) body.push(xPara(textRun(h.customer, { bold:true, size:26 }), { after:40 }));
+  if (h.address)  body.push(xPara(textRun(h.address), { after:40 }));
+  const qd = [h.quote ? "Quote No. " + h.quote : "", h.date].filter(Boolean).join("    |    ");
+  if (qd) body.push(xPara(textRun(qd, { color:"555555" }), { after:200 }));
+  if (h.intro) body.push(xPara(textRun(h.intro), { after:200 }));
+
+  const scope = scopeItems();
+  body.push(xHeading("SCOPE OF WORK:"));
+  scope.forEach((it,i) => {
+    body.push(xListPara((i+1) + ".", it.text));
+    it.subs.forEach((s,j) => body.push(xSubListPara(letterFor(j).toLowerCase() + ".", s)));
+  });
+
+  const notes = checkedItems("notes");
+  if (notes.length){
+    body.push(xHeading("NOTES:"));
+    notes.forEach((t,i) => body.push(xListPara(letterFor(i) + ".", t)));
+  }
+  const inc = incexcItems("inc");
+  if (inc.length){
+    body.push(xHeading("INCLUDING:"));
+    inc.forEach((t,i) => body.push(xListPara((i+1) + ".", t)));
+  }
+  const exc = incexcItems("exc");
+  if (exc.length){
+    body.push(xHeading("EXCLUDING:"));
+    exc.forEach((t,i) => body.push(xListPara((i+1) + ".", t)));
+  }
+
+  const quals = checkedItems("quals");
+  if (quals.length){
+    body.push(xHeading("QUALIFICATIONS:"));
+    quals.forEach((t,i) => body.push(xListPara((i+1) + ".", t)));
+  }
+  const resp = checkedItems("resp");
+  if (resp.length){
+    body.push(xHeading("Customer Responsibilities"));
+    body.push(xPara(textRun("The customer is responsible for the following:"), { after:120 }));
+    resp.forEach(t => body.push(xBulletPara(t)));
+  }
+  const billing = checkedItems("billing");
+  if (billing.length){
+    body.push(xHeading("Billing & Payment Terms"));
+    billing.forEach(t => body.push(xBulletPara(t)));
+  }
+
+  const closing = checkedItems("closing");
+  if (closing.length || h.signature){
+    if (h.recipient) body.push(xPara(textRun(h.recipient + ","), { before:200, after:120 }));
+    closing.forEach(t => body.push(xPara(textRun(t), { after:120 })));
+    if (h.signature){
+      const sig = h.signature.split("\n");
+      sig.forEach((line, i) => body.push(xPara(textRun(line), { before: i === 0 ? 120 : 0, after:0 })));
+    }
+  }
+
+  // US Letter, 0.75" margins
+  const sectPr =
+    `<w:sectPr><w:pgSz w:w="12240" w:h="15840"/>` +
+    `<w:pgMar w:top="1080" w:right="1080" w:bottom="1080" w:left="1080" w:header="720" w:footer="720" w:gutter="0"/>` +
+    `</w:sectPr>`;
+
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+    `<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">` +
+    `<w:body>${body.join("")}${sectPr}</w:body></w:document>`;
+}
+
+const CONTENT_TYPES =
+  `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+  `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">` +
+  `<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>` +
+  `<Default Extension="xml" ContentType="application/xml"/>` +
+  `<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>` +
+  `</Types>`;
+
+const ROOT_RELS =
+  `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+  `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">` +
+  `<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>` +
+  `</Relationships>`;
+
+const DOC_RELS =
+  `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+  `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>`;
+
+async function generateWordProposal(silent){
+  const scope = scopeItems();
+  if (!scope.length){ if(!silent) setStatus("Select at least one Scope of Work item."); return false; }
+  if (typeof JSZip === "undefined"){
+    if(!silent) setStatus("Document library failed to load — check internet connection and reload.");
+    return false;
+  }
+  try {
+    const zip = new JSZip();
+    zip.file("[Content_Types].xml", CONTENT_TYPES);
+    zip.folder("_rels").file(".rels", ROOT_RELS);
+    const word = zip.folder("word");
+    word.file("document.xml", buildDocumentXml());
+    word.folder("_rels").file("document.xml.rels", DOC_RELS);
+
+    const blob = await zip.generateAsync({
+      type:"blob",
+      mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    });
+    const h = jobHeader();
+    const name = (h.quote || h.customer || "FDEC_Proposal").replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"_") || "FDEC_Proposal";
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name + "_Proposal.docx";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+    if(!silent) setStatus("Word proposal downloaded.", true);
+    return true;
+  } catch (err){
+    console.error(err);
+    if(!silent) setStatus("Error generating document — see console.");
+    return false;
+  }
+}
+document.getElementById("btnWord").addEventListener("click", () => generateWordProposal(false));
+
+/* ---------------- Plain-text copy (for pasting into ServiceTrade) ---------------- */
+document.getElementById("btnCopy").addEventListener("click", async () => {
+  const scope = scopeItems();
+  if (!scope.length){ setStatus("Select at least one Scope of Work item."); return; }
+  const h = jobHeader();
+  const L = [];
+  if (h.intro) L.push(h.intro, "");
+  L.push("SCOPE OF WORK:", "");
+  scope.forEach((it,i) => {
+    L.push(`${i+1}. ${it.text}`);
+    it.subs.forEach((s,j) => L.push(`     ${letterFor(j).toLowerCase()}. ${s}`));
+  });
+  const notes = checkedItems("notes");
+  if (notes.length){
+    L.push("", "NOTES:", "");
+    notes.forEach((t,i) => L.push(`${letterFor(i)}. ${t}`));
+  }
+  const inc = incexcItems("inc");
+  if (inc.length){
+    L.push("", "INCLUDING:", "");
+    inc.forEach((t,i) => L.push(`${i+1}. ${t}`));
+  }
+  const exc = incexcItems("exc");
+  if (exc.length){
+    L.push("", "EXCLUDING:", "");
+    exc.forEach((t,i) => L.push(`${i+1}. ${t}`));
+  }
+  const quals = checkedItems("quals");
+  if (quals.length){
+    L.push("", "QUALIFICATIONS:", "");
+    quals.forEach((t,i) => L.push(`${i+1}. ${t}`));
+  }
+  const resp = checkedItems("resp");
+  if (resp.length){
+    L.push("", "Customer Responsibilities", "", "The customer is responsible for the following:");
+    resp.forEach(t => L.push(`- ${t}`));
+  }
+  const billing = checkedItems("billing");
+  if (billing.length){
+    L.push("", "Billing & Payment Terms", "");
+    billing.forEach(t => L.push(`- ${t}`));
+  }
+  const closing = checkedItems("closing");
+  if (closing.length || h.signature){
+    L.push("");
+    if (h.recipient) L.push(h.recipient + ",", "");
+    closing.forEach(t => L.push(t, ""));
+    if (h.signature) L.push(h.signature.replace(/\s+$/,""));
+  }
+  try {
+    await navigator.clipboard.writeText(L.join("\n"));
+    setStatus("Copied to clipboard — paste into ServiceTrade.", true);
+  } catch {
+    setStatus("Clipboard blocked by browser — use the Word download instead.");
+  }
+});
+
+/* ---------------- Formatted HTML (for the combined PDF export) ---------------- */
+/* Builds a clean, print-ready HTML document body from the same section data
+   used by the Word/plain-text exports, so the proposal reads as a finished
+   document (not the editor UI) inside the combined PDF. */
+function buildProposalHTML(){
+  const h = jobHeader();
+  const P = [];
+  const head = [];
+  if (h.customer) head.push(`<div class="pp-cust">${esc(h.customer)}</div>`);
+  const meta = [];
+  if (h.quote) meta.push("Quote " + esc(h.quote));
+  if (h.date)  meta.push(esc(h.date));
+  if (meta.length) head.push(`<div class="pp-meta">${meta.join(" &nbsp;·&nbsp; ")}</div>`);
+  if (head.length) P.push(`<div class="pp-head">${head.join("")}</div>`);
+
+  if (h.intro) P.push(`<p class="pp-intro">${esc(h.intro)}</p>`);
+
+  const scope = scopeItems();
+  if (scope.length){
+    P.push(`<h3 class="pp-h">SCOPE OF WORK</h3>`);
+    let li = "";
+    scope.forEach(it => {
+      let subs = "";
+      if (it.subs && it.subs.length){
+        subs = "<ol class='pp-sub' type='a'>" + it.subs.map(s => `<li>${esc(s)}</li>`).join("") + "</ol>";
+      }
+      li += `<li>${esc(it.text)}${subs}</li>`;
+    });
+    P.push(`<ol class="pp-ol">${li}</ol>`);
+  }
+  const notes = checkedItems("notes");
+  if (notes.length){
+    P.push(`<h3 class="pp-h">NOTES</h3><ol class="pp-ol" type="A">` +
+      notes.map(t => `<li>${esc(t)}</li>`).join("") + `</ol>`);
+  }
+  const inc = incexcItems("inc");
+  if (inc.length){
+    P.push(`<h3 class="pp-h">INCLUDING</h3><ol class="pp-ol">` +
+      inc.map(t => `<li>${esc(t)}</li>`).join("") + `</ol>`);
+  }
+  const exc = incexcItems("exc");
+  if (exc.length){
+    P.push(`<h3 class="pp-h">EXCLUDING</h3><ol class="pp-ol">` +
+      exc.map(t => `<li>${esc(t)}</li>`).join("") + `</ol>`);
+  }
+  const quals = checkedItems("quals");
+  if (quals.length){
+    P.push(`<h3 class="pp-h">QUALIFICATIONS</h3><ol class="pp-ol">` +
+      quals.map(t => `<li>${esc(t)}</li>`).join("") + `</ol>`);
+  }
+  const resp = checkedItems("resp");
+  if (resp.length){
+    P.push(`<h3 class="pp-h">Customer Responsibilities</h3>` +
+      `<p class="pp-lead">The customer is responsible for the following:</p>` +
+      `<ul class="pp-ul">` + resp.map(t => `<li>${esc(t)}</li>`).join("") + `</ul>`);
+  }
+  const billing = checkedItems("billing");
+  if (billing.length){
+    P.push(`<h3 class="pp-h">Billing &amp; Payment Terms</h3><ul class="pp-ul">` +
+      billing.map(t => `<li>${esc(t)}</li>`).join("") + `</ul>`);
+  }
+  const closing = checkedItems("closing");
+  if (closing.length || h.signature){
+    let c = `<div class="pp-closing">`;
+    closing.forEach(t => c += `<p>${esc(t)}</p>`);
+    if (h.signature){
+      c += `<p class="pp-sig">` + esc(h.signature).replace(/\n/g,"<br>") + `</p>`;
+    }
+    c += `</div>`;
+    P.push(c);
+  }
+  return P.join("\n");
+}
+
+/* Scoped CSS for the proposal section of the combined PDF. */
+const PROPOSAL_PRINT_CSS = `
+  .pp-wrap{font:12.5px/1.5 Georgia,"Times New Roman",serif; color:#111; max-width:7.2in; margin:0 auto}
+  .pp-head{border-bottom:2px solid #3281b9; padding-bottom:8px; margin-bottom:14px}
+  .pp-cust{font-size:17px; font-weight:700; color:#010039}
+  .pp-meta{font-size:11px; color:#555; margin-top:3px}
+  .pp-intro{margin:0 0 14px}
+  .pp-h{font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+        color:#3281b9; border-bottom:1px solid #ccc; padding-bottom:2px; margin:16px 0 8px}
   .pp-ol,.pp-ul{margin:0 0 10px; padding-left:24px}
   .pp-ol>li,.pp-ul>li{margin:4px 0}
   .pp-sub{margin:4px 0 4px; padding-left:20px}
@@ -2669,6 +5309,8 @@ function loadApps(){
   }
   load("view-quote", "src-quote");
   load("view-proposal", "src-proposal");
+  load("view-annual", "src-annual");
+  load("view-install", "src-install");
 }
 
 function unlockSuite(){
@@ -2696,141 +5338,200 @@ document.addEventListener("keydown", function(e){
   }
 });
 
+/* All views, in order. Each maps a key to its iframe id and tab id. */
+var VIEWS = [
+  { key:'quote',    frame:'view-quote',    tab:'tab-quote'    },
+  { key:'proposal', frame:'view-proposal', tab:'tab-proposal' },
+  { key:'annual',   frame:'view-annual',   tab:'tab-annual'   },
+  { key:'install',  frame:'view-install',  tab:'tab-install'  }
+];
+
 function showView(which){
-  var q = document.getElementById('view-quote');
-  var p = document.getElementById('view-proposal');
-  var tq = document.getElementById('tab-quote');
-  var tp = document.getElementById('tab-proposal');
-  var showQuote = which === 'quote';
-  q.hidden = !showQuote;
-  p.hidden = showQuote;
-  tq.classList.toggle('active', showQuote);
-  tp.classList.toggle('active', !showQuote);
-  /* When opening the Proposal tab, ask the Quoting frame to re-broadcast
-     its current down payment so the note is up to date. */
-  if (!showQuote && q && q.contentWindow){
-    q.contentWindow.postMessage({ fdec:true, type:'request-sync' }, '*');
-  }
-  /* The proposal renders while hidden, so its auto-sizing textareas collapse
-     to zero height. Tell it to re-measure now that it is visible. */
-  if (!showQuote && p && p.contentWindow){
-    p.contentWindow.postMessage({ fdec:true, type:'relayout' }, '*');
+  VIEWS.forEach(function(v){
+    var active = v.key === which;
+    var frame = document.getElementById(v.frame);
+    var tab = document.getElementById(v.tab);
+    if (frame) frame.hidden = !active;
+    if (tab) tab.classList.toggle('active', active);
+    // When a verbiage page becomes visible, tell it to re-measure its
+    // auto-sizing textareas (they collapse to 0px while hidden).
+    if (active && v.key !== 'quote' && frame && frame.contentWindow){
+      frame.contentWindow.postMessage({ fdec:true, type:'relayout' }, '*');
+    }
+  });
+  // When leaving the quote, ask it to re-broadcast the down payment AND the
+  // shared Job Name / Quote # / Date so the verbiage pages stay in sync.
+  if (which !== 'quote'){
+    var q = document.getElementById('view-quote');
+    if (q && q.contentWindow){
+      q.contentWindow.postMessage({ fdec:true, type:'request-sync' }, '*');
+      q.contentWindow.postMessage({ fdec:true, type:'send-jobinfo' }, '*');
+    }
   }
 }
 
 /* Relay FDEC cross-app messages (e.g. down payment total) from the
-   Quoting iframe into the Proposal iframe so the proposal can auto-fill
-   its down payment note live as the quote is edited. */
+   Quoting iframe into the verbiage pages so they can auto-fill their
+   down payment note live as the quote is edited. Export replies are
+   resolved by their globally-unique reqId. */
 window.addEventListener('message', function(e){
   var d = e && e.data;
   if (!d || d.fdec !== true) return;
-  // Resolve any pending export request replies.
-  if (d.type === 'quote-html' && pending['q'+d.reqId]){ pending['q'+d.reqId](d); delete pending['q'+d.reqId]; return; }
-  if (d.type === 'proposal-html' && pending['p'+d.reqId]){ pending['p'+d.reqId](d); delete pending['p'+d.reqId]; return; }
-  // Otherwise relay quoting -> proposal (down payment sync, etc.)
-  var p = document.getElementById('view-proposal');
-  if (p && p.contentWindow) p.contentWindow.postMessage(d, '*');
+  // Resolve any pending export request reply (keyed by reqId alone, so any
+  // page — quote or a verbiage page — can answer its own request).
+  if ((d.type === 'quote-html' || d.type === 'proposal-html') && d.reqId != null && pending[d.reqId]){
+    pending[d.reqId](d); delete pending[d.reqId]; return;
+  }
+  // Shared Job Name / Quote # / Date: the Repair Verbiage (proposal) page is
+  // Shared Job Name / Quote # / Date: the Quoting Template is the master.
+  // Relay its jobinfo to every verbiage page but never back to the quote.
+  if (d.type === 'jobinfo'){
+    ['view-proposal','view-annual','view-install'].forEach(function(id){
+      var f = document.getElementById(id);
+      if (f && f.contentWindow) f.contentWindow.postMessage(d, '*');
+    });
+    return;
+  }
+  // A follower asking for current values -> tell the master (quote) to re-broadcast.
+  if (d.type === 'request-jobinfo'){
+    var m = document.getElementById('view-quote');
+    if (m && m.contentWindow) m.contentWindow.postMessage({ fdec:true, type:'send-jobinfo' }, '*');
+    return;
+  }
+  // Otherwise relay quoting -> all verbiage pages (down payment sync, etc.)
+  ['view-proposal','view-annual','view-install'].forEach(function(id){
+    var f = document.getElementById(id);
+    if (f && f.contentWindow) f.contentWindow.postMessage(d, '*');
+  });
 });
 
 /* ============================================================
    EXPORT FULL PACKAGE
-   1. Ask each iframe for its print-ready HTML + CSS.
-   2. Combine into one document (quote page 1, proposal page 2).
-   3. Print it (browser "Save as PDF" -> one combined PDF).
-   4. Simultaneously trigger the proposal's Word (.docx) download.
+   Opens a dialog to pick which pages to include, then:
+   1. Asks each selected iframe for its print-ready HTML + CSS.
+   2. Combines them into ONE document (page breaks between pages).
+   3. Prints it (browser "Save as PDF" -> one combined PDF).
+   4. Triggers each selected verbiage page's Word (.docx) download.
    ============================================================ */
 var pending = {};
 var reqSeq = 0;
 
-function askFrame(prefix, iframeId, type){
+/* Registry of exportable pages. 'kind' selects which request the page
+   answers: quote pages answer get-quote-html, verbiage pages answer
+   get-proposal-html and can also produce a Word download. */
+var EXPORT_PAGES = [
+  { id:'quote',    frame:'view-quote',    check:'xm-quote',    kind:'quote',    label:'Quoting Template' },
+  { id:'proposal', frame:'view-proposal', check:'xm-proposal', kind:'verbiage', label:'Repair Verbiage' },
+  { id:'annual',   frame:'view-annual',   check:'xm-annual',   kind:'verbiage', label:'Annual Inspection' },
+  { id:'install',  frame:'view-install',  check:'xm-install',  kind:'verbiage', label:'New Install' }
+];
+
+function exportFullPackage(){ openExportModal(); }
+function openExportModal(){ document.getElementById('exportModal').hidden = false; }
+function closeExportModal(){ document.getElementById('exportModal').hidden = true; }
+
+function askFrame(iframeId, type){
   return new Promise(function(resolve){
     var id = ++reqSeq;
     var frame = document.getElementById(iframeId);
     if (!frame || !frame.contentWindow){ resolve({ error:'frame-unavailable' }); return; }
-    pending[prefix+id] = resolve;
+    pending[id] = resolve;
     frame.contentWindow.postMessage({ fdec:true, type:type, reqId:id }, '*');
-    // safety timeout
     setTimeout(function(){
-      if (pending[prefix+id]){ delete pending[prefix+id]; resolve({ error:'timeout' }); }
-    }, 4000);
+      if (pending[id]){ delete pending[id]; resolve({ error:'timeout' }); }
+    }, 5000);
   });
 }
 
-function exportFullPackage(){
-  var btn = document.getElementById('btn-export');
-  btn.disabled = true;
-  var original = btn.textContent;
-  btn.textContent = 'Preparing…';
+function runExport(){
+  // Which pages are selected?
+  var selected = EXPORT_PAGES.filter(function(p){
+    var cb = document.getElementById(p.check);
+    return cb && cb.checked;
+  });
+  if (!selected.length){ alert('Select at least one page to export.'); return; }
 
-  Promise.all([
-    askFrame('q', 'view-quote', 'get-quote-html'),
-    askFrame('p', 'view-proposal', 'get-proposal-html')
-  ]).then(function(res){
-    var q = res[0] || {}, p = res[1] || {};
+  var goBtn = document.getElementById('xm-go');
+  goBtn.disabled = true;
+  var goText = goBtn.textContent;
+  goBtn.textContent = 'Preparing…';
 
-    if (p.error === 'no-scope'){
-      alert('Select at least one Scope of Work item on the Proposal & Verbiage page before exporting.');
+  // Request print HTML from each selected page.
+  var reqs = selected.map(function(p){
+    var type = p.kind === 'quote' ? 'get-quote-html' : 'get-proposal-html';
+    return askFrame(p.frame, type).then(function(res){ return { page:p, res:res||{} }; });
+  });
+
+  Promise.all(reqs).then(function(results){
+    // Guard: verbiage pages need a scope selection.
+    var missing = results.filter(function(r){ return r.res.error === 'no-scope'; });
+    if (missing.length){
+      alert('Select at least one Scope of Work item on: ' +
+            missing.map(function(r){ return r.page.label; }).join(', ') +
+            ' — or uncheck those pages before exporting.');
       return;
     }
 
-    // Trigger the Word download from the proposal (runs independently).
-    var pf = document.getElementById('view-proposal');
-    if (pf && pf.contentWindow){
-      pf.contentWindow.postMessage({ fdec:true, type:'download-proposal-word' }, '*');
-    }
+    // Trigger Word downloads for each selected verbiage page (independent).
+    selected.forEach(function(p){
+      if (p.kind === 'verbiage'){
+        var f = document.getElementById(p.frame);
+        if (f && f.contentWindow) f.contentWindow.postMessage({ fdec:true, type:'download-proposal-word' }, '*');
+      }
+    });
 
-    // Build the combined print document.
-    var quoteSection = q && q.html
-      ? '<section class="pkg-page pkg-quote"><style>'+ (q.css||'') +'</style>'+ q.html +'</section>'
-      : '<section class="pkg-page"><p style="color:#900">Quote content unavailable.</p></section>';
-    var proposalSection = p && p.html
-      ? '<section class="pkg-page pkg-proposal"><div class="pp-wrap">'+ p.html +'</div></section>'
-      : '';
-    var proposalCss = (p && p.css) || '';
+    // Build combined print document — one section per selected page.
+    var sections = [];
+    var extraCss = [];
+    results.forEach(function(r, i){
+      var res = r.res, page = r.page;
+      var breakCls = i === 0 ? 'pkg-first' : 'pkg-break';
+      if (page.kind === 'quote'){
+        var body = res.html
+          ? '<style>'+ (res.css||'') +'</style>'+ res.html
+          : '<p style="color:#900">Quote content unavailable.</p>';
+        sections.push('<section class="pkg-page '+breakCls+'">'+ body +'</section>');
+      } else {
+        if (res.css) extraCss.push(res.css);
+        var body2 = res.html
+          ? '<div class="pp-wrap">'+ res.html +'</div>'
+          : '<p style="color:#900">'+ page.label +' content unavailable.</p>';
+        sections.push('<section class="pkg-page '+breakCls+'">'+ body2 +'</section>');
+      }
+    });
 
     var docHtml =
       '<!DOCTYPE html><html><head><meta charset="utf-8"><title>FDEC Full Package</title>'+
       '<style>'+
       '  @page{ margin:0.5in; }'+
       '  html,body{ margin:0; padding:0; background:#fff; }'+
-      '  .pkg-page{ padding:0 0 0 0; }'+
-      '  .pkg-proposal{ page-break-before:always; }'+
-      '  @media print{ .pkg-proposal{ page-break-before:always; } }'+
-         proposalCss +
+      '  .pkg-break{ page-break-before:always; }'+
+      '  @media print{ .pkg-break{ page-break-before:always; } }'+
+         extraCss.join('\n') +
       '</style></head><body>'+
-        quoteSection + proposalSection +
+        sections.join('') +
       '</body></html>';
 
-    // Print via a hidden iframe so the suite UI is untouched.
     var printFrame = document.createElement('iframe');
-    printFrame.style.position = 'fixed';
-    printFrame.style.right = '0';
-    printFrame.style.bottom = '0';
-    printFrame.style.width = '0';
-    printFrame.style.height = '0';
-    printFrame.style.border = '0';
+    printFrame.style.position='fixed'; printFrame.style.right='0'; printFrame.style.bottom='0';
+    printFrame.style.width='0'; printFrame.style.height='0'; printFrame.style.border='0';
     document.body.appendChild(printFrame);
-
     var pdoc = printFrame.contentWindow.document;
-    pdoc.open();
-    pdoc.write(docHtml);
-    pdoc.close();
+    pdoc.open(); pdoc.write(docHtml); pdoc.close();
 
-    // Give the browser a moment to lay out, then print.
     var done = function(){
       try { printFrame.contentWindow.focus(); printFrame.contentWindow.print(); }
       catch(err){ console.error(err); alert('Could not open the print dialog: '+err); }
-      // Clean up after the dialog is handled.
       setTimeout(function(){ if (printFrame && printFrame.parentNode) printFrame.parentNode.removeChild(printFrame); }, 1500);
     };
-    if (printFrame.contentWindow.document.readyState === 'complete') setTimeout(done, 350);
-    else printFrame.onload = function(){ setTimeout(done, 350); };
+    if (printFrame.contentWindow.document.readyState === 'complete') setTimeout(done, 400);
+    else printFrame.onload = function(){ setTimeout(done, 400); };
+
+    closeExportModal();
   }).catch(function(err){
-    console.error(err);
-    alert('Export failed: ' + err);
+    console.error(err); alert('Export failed: ' + err);
   }).then(function(){
-    btn.disabled = false;
-    btn.textContent = original;
+    goBtn.disabled = false; goBtn.textContent = goText;
   });
 }
 </script>
