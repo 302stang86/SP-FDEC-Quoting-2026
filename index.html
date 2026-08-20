@@ -57,6 +57,12 @@
   }
   .suitebar button.export:hover{background:#c2e9ee; color:#0d5b64; border-color:#6fc4cd}
   .suitebar button.export:disabled{opacity:.6; cursor:default}
+  .suitebar button.draft{
+    align-self:center; margin:0 3px; padding:8px 14px;
+    border:1px solid #26407a; border-radius:6px; background:#eef5fb; color:#12245c;
+    text-transform:none; letter-spacing:.02em; font-size:12.5px;
+  }
+  .suitebar button.draft:hover{background:#d1e8fc; color:#010039; border-color:#3281b9}
   .suitebar button.signout{
     align-self:center; margin:0 0 0 4px; padding:8px 14px;
     border:1px solid #26407a; border-radius:6px; background:#0a1a4a; color:#d1e8fc;
@@ -267,6 +273,9 @@
     <button id="tab-annual" type="button" onclick="showView('annual')">Annual Inspection</button>
     <button id="tab-install" type="button" onclick="showView('install')">New Install</button>
     <button id="btn-export" class="export" type="button" onclick="exportFullPackage()" title="Combined PDF of selected pages, plus the Word proposal">Export Full Package</button>
+    <button id="btn-savedraft" class="draft" type="button" onclick="saveSuiteDraft()" title="Save all pages as one draft file">Save Draft</button>
+    <button id="btn-loaddraft" class="draft" type="button" onclick="document.getElementById('suiteDraftFile').click()" title="Load a saved suite draft">Load Draft</button>
+    <input type="file" id="suiteDraftFile" accept=".json,.fdecsuite,application/json" style="display:none" onchange="loadSuiteDraftFile(this)">
     <button id="btn-signout" class="signout" type="button" onclick="doSignOut()" title="Sign out">Sign Out</button>
   </nav>
 </div>
@@ -443,8 +452,10 @@
     border-right:1px solid var(--line); padding-right:8px; margin-right:2px;
   }
   .mk-item input{width:64px; text-align:right; flex:none; font-size:16px; padding:8px 6px}
-  .ratetable{max-width:480px; margin-bottom:4px}
-  .ratetable input{width:98px}
+  .ratetable{width:100%; max-width:100%; margin-bottom:4px}
+  .ratetable input{width:100%; max-width:110px}
+  .ratecols{gap:0 24px}
+  h4.ratehd{margin:2px 0 8px; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--red); font-weight:700}
   select.lvl{padding:8px 6px; font-size:16px}
   .mp-note{font-size:13px; color:var(--steel)}
   /* print */
@@ -486,10 +497,21 @@
     <summary>Markups &amp; Rates</summary>
     <div class="body">
       <h3 class="sub">Hourly Rates by Technician Level</h3>
-      <table class="ratetable"><thead>
-        <tr><th>Class</th><th class="num">Level 1</th><th class="num">Level 2</th><th class="num">Level 3</th></tr>
-      </thead><tbody id="rateTable"></tbody></table>
-      <p class="hint" style="margin-bottom:14px">Labor lines start at Level 2 (book rates). Every rate in this template is editable.</p>
+      <div class="cols2 ratecols">
+        <div>
+          <h4 class="ratehd">Sprinkler Technician</h4>
+          <table class="ratetable"><thead>
+            <tr><th>Class</th><th class="num">Level 1</th><th class="num">Level 2</th><th class="num">Level 3</th></tr>
+          </thead><tbody id="rateTable"></tbody></table>
+        </div>
+        <div>
+          <h4 class="ratehd">Fire Alarm Technician</h4>
+          <table class="ratetable"><thead>
+            <tr><th>Class</th><th class="num">Level 1</th><th class="num">Level 2</th><th class="num">Level 3</th></tr>
+          </thead><tbody id="rateTableFA"></tbody></table>
+        </div>
+      </div>
+      <p class="hint" style="margin-bottom:14px">Labor lines start at Level 2 (book rates). Sprinkler and Fire Alarm rates are independent — every rate is editable.</p>
       <h3 class="sub">Markups</h3>
       <div class="mkgrid">
         <div class="mk-item"><label>Vendor-quoted material markup</label><input class="qty mk" data-key="material" type="number" min="0" step="1" value="110">%</div>
@@ -733,16 +755,27 @@
 "use strict";
 /* ================= RATE DATA (2026 Quoting Book) ================= */
 const RATE_DEFAULTS = {
-  ST: {1:138.00, 2:124.20, 3:110.40},
-  OT: {1:186.30, 2:167.67, 3:149.04},
-  DT: {1:235.98, 2:212.38, 3:188.78},
-  AD: {1:124.20, 2:124.20, 3:124.20}
+  ST: {1:150.00, 2:135.00, 3:120.00},
+  OT: {1:195.00, 2:175.00, 3:155.00},
+  DT: {1:245.00, 2:220.00, 3:195.00},
+  AD: {1:130.00, 2:130.00, 3:130.00}
 };
+/* Fire Alarm technician rates — independently editable; same starting values. */
+const RATE_DEFAULTS_FA = {
+  ST: {1:150.00, 2:135.00, 3:120.00},
+  OT: {1:195.00, 2:175.00, 3:155.00},
+  DT: {1:245.00, 2:220.00, 3:195.00},
+  AD: {1:130.00, 2:130.00, 3:130.00}
+};
+const RATE_TABLES = { sp: RATE_DEFAULTS, fa: RATE_DEFAULTS_FA };
 const CLASS_NAMES = { ST:'Straight time', OT:'Overtime', DT:'Double time', AD:'Admin' };
-function rateFor(lvl, cls){
-  const el = document.querySelector(`input.hr[data-lvl="${lvl}"][data-cls="${cls}"]`);
+/* Look up a rate for a level+class within a department table ('sp' or 'fa'). */
+function rateFor(lvl, cls, dept){
+  dept = dept || 'sp';
+  const el = document.querySelector(`input.hr[data-tbl="${dept}"][data-lvl="${lvl}"][data-cls="${cls}"]`);
   const v = el ? parseFloat(el.value) : NaN;
-  return isFinite(v) && v >= 0 ? v : RATE_DEFAULTS[cls][lvl] || RATE_DEFAULTS[cls][2];
+  const table = RATE_TABLES[dept] || RATE_DEFAULTS;
+  return isFinite(v) && v >= 0 ? v : table[cls][lvl] || table[cls][2];
 }
 
 
@@ -847,14 +880,19 @@ function addCustomMaterial(name, price, qty){
 
 /* ================= BUILD ================= */
 (function(){
-  const tb = $('rateTable');
-  ['ST','OT','DT','AD'].forEach(cls => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${CLASS_NAMES[cls]}</td>` + [1,2,3].map(l =>
-      `<td class="num"><input class="rate hr" type="number" min="0" step="0.01" data-lvl="${l}" data-cls="${cls}" value="${RATE_DEFAULTS[cls][l]}"></td>`
-    ).join('');
-    tb.appendChild(tr);
-  });
+  const build = (tbodyId, dept, table) => {
+    const tb = $(tbodyId);
+    if (!tb) return;
+    ['ST','OT','DT','AD'].forEach(cls => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${CLASS_NAMES[cls]}</td>` + [1,2,3].map(l =>
+        `<td class="num"><input class="rate hr" type="number" min="0" step="0.01" data-tbl="${dept}" data-lvl="${l}" data-cls="${cls}" value="${table[cls][l]}"></td>`
+      ).join('');
+      tb.appendChild(tr);
+    });
+  };
+  build('rateTable', 'sp', RATE_DEFAULTS);
+  build('rateTableFA', 'fa', RATE_DEFAULTS_FA);
 })();
 buildQtyTable('trucks','trucks',TRUCKS,true);
 buildQtyTable('perdiem','perdiem',PERDIEM,true);
@@ -866,7 +904,9 @@ buildQtyTable('backflow','backflow',BACKFLOW,true);
 buildQtyTable('firePump','firePump',FIREPUMP,true);
 buildQtyTable('sampleTest','sampleTest',SAMPLES,true);
 
-function laborRows(tbodyId, prefix, classes){
+function laborRows(tbodyId, prefix, classes, dept){
+  dept = dept || 'sp';
+  const table = RATE_TABLES[dept] || RATE_DEFAULTS;
   const tb = $(tbodyId);
   classes.forEach(c => {
     const tr = document.createElement('tr');
@@ -874,15 +914,15 @@ function laborRows(tbodyId, prefix, classes){
       <td><select class="lvl" id="${prefix}${c[0]}Lvl" data-save>
         <option value="1">Lvl 1</option><option value="2" selected>Lvl 2</option><option value="3">Lvl 3</option>
       </select></td>
-      <td class="num ratecell">${money(RATE_DEFAULTS[c[0]][2])}</td>
+      <td class="num ratecell">${money(table[c[0]][2])}</td>
       <td class="num"><input class="qty" type="number" min="0" step="0.5" id="${prefix}${c[0]}"></td>
       <td class="num rowtot">$0.00</td>`;
     tb.appendChild(tr);
   });
 }
-laborRows('laborSP','sp',[['ST','Straight time'],['OT','Overtime'],['DT','Double time'],['AD','Admin hours']]);
-laborRows('laborShop','shop',[['ST','Straight time'],['OT','Overtime'],['DT','Double time']]);
-laborRows('laborFA','fa',[['ST','Straight time'],['OT','Overtime'],['DT','Double time']]);
+laborRows('laborSP','sp',[['ST','Straight time'],['OT','Overtime'],['DT','Double time'],['AD','Admin hours']],'sp');
+laborRows('laborShop','shop',[['ST','Straight time'],['OT','Overtime'],['DT','Double time']],'sp');
+laborRows('laborFA','fa',[['ST','Straight time'],['OT','Overtime'],['DT','Double time']],'fa');
 
 for (let i=0;i<6;i++) addCustomMaterial();
 for (let i=0;i<2;i++) addPoRow();
@@ -932,19 +972,19 @@ function recalc(ev){
     syncTrucksFromMp();
   }
   /* labor */
-  const laborLine = (id, key) => {
+  const laborLine = (id, key, dept) => {
     const inp = $(id);
     const tr = inp.closest('tr');
-    const rate = rateFor($(id + 'Lvl').value, key);
+    const rate = rateFor($(id + 'Lvl').value, key, dept || 'sp');
     tr.querySelector('.ratecell').textContent = money(rate);
     const line = num(inp) * rate;
     tr.querySelector('.rowtot').textContent = money(line);
     return line;
   };
-  const spST = laborLine('spST','ST') + laborLine('shopST','ST') + laborLine('spAD','AD');
-  const spOT = laborLine('spOT','OT') + laborLine('shopOT','OT');
-  const spDT = laborLine('spDT','DT') + laborLine('shopDT','DT');
-  const faST = laborLine('faST','ST'), faOT = laborLine('faOT','OT'), faDT = laborLine('faDT','DT');
+  const spST = laborLine('spST','ST','sp') + laborLine('shopST','ST','sp') + laborLine('spAD','AD','sp');
+  const spOT = laborLine('spOT','OT','sp') + laborLine('shopOT','OT','sp');
+  const spDT = laborLine('spDT','DT','sp') + laborLine('shopDT','DT','sp');
+  const faST = laborLine('faST','ST','fa'), faOT = laborLine('faOT','OT','fa'), faDT = laborLine('faDT','DT','fa');
 
   /* qty groups */
   const truckCosts = [];
@@ -1188,7 +1228,7 @@ function collectDraft(){
     const key = el.id ||
       (el.dataset && el.dataset.g != null ? `g:${el.dataset.g}:${el.dataset.i}:${el.dataset.f}` : '') ||
       (el.dataset && el.dataset.key ? `mk:${el.dataset.key}` : '') ||
-      (el.dataset && el.dataset.lvl ? `rate:${el.dataset.cls}:${el.dataset.lvl}` : '');
+      (el.dataset && el.dataset.lvl ? `rate:${el.dataset.tbl || 'sp'}:${el.dataset.cls}:${el.dataset.lvl}` : '');
     if (!key) return;
     d.fields[key] = el.value;
   });
@@ -1257,7 +1297,7 @@ function applyDraft(d){
     const key = el.id ||
       (el.dataset && el.dataset.g != null ? `g:${el.dataset.g}:${el.dataset.i}:${el.dataset.f}` : '') ||
       (el.dataset && el.dataset.key ? `mk:${el.dataset.key}` : '') ||
-      (el.dataset && el.dataset.lvl ? `rate:${el.dataset.cls}:${el.dataset.lvl}` : '');
+      (el.dataset && el.dataset.lvl ? `rate:${el.dataset.tbl || 'sp'}:${el.dataset.cls}:${el.dataset.lvl}` : '');
     if (key && key in d.fields) el.value = d.fields[key];
   });
 
@@ -1371,6 +1411,20 @@ window.addEventListener('message', function(e){
     // The Quoting Template is the master for Job Name / Quote # / Date.
     // Broadcast current values so the verbiage pages can follow.
     broadcastJobInfo();
+    return;
+  }
+  if (d.type === 'get-draft'){
+    // Return this page's draft state so the shell can bundle a suite draft.
+    var payload = null, gerr = null;
+    try { payload = collectDraft(); } catch(ex){ gerr = String(ex && ex.message || ex); }
+    if (window.parent && window.parent !== window){
+      window.parent.postMessage({ fdec:true, type:'draft-data', page:'quote', reqId:d.reqId, data:payload, error:gerr }, '*');
+    }
+    return;
+  }
+  if (d.type === 'load-draft'){
+    // Apply an incoming draft slice for this page.
+    try { if (d.data) applyDraft(d.data); } catch(ex){ console.error(ex); }
     return;
   }
   if (d.type === 'get-quote-html'){
@@ -1787,6 +1841,9 @@ const APP_META = {
   author: "Mitch Peebles",
   version: "2.0"
 };
+/* Identifies this page within the suite draft bundle. The generated clone
+   pages override this value (annual / install). */
+const SUITE_PAGE_ID = "proposal";
 
 /* ============================================================
    VERBIAGE LIBRARY — edit freely; app numbers/letters items
@@ -2648,6 +2705,45 @@ function collectState(){
   };
 }
 
+/* Apply a saved draft slice (job fields + sections) to this page and
+   re-render. Used by the suite-level Load Draft. */
+function applySuiteDraft(saved){
+  if (!saved) return;
+  try {
+    if (saved.job){
+      document.getElementById("jobCustomer").value = saved.job.customer || "";
+      document.getElementById("jobQuote").value    = saved.job.quote    || "";
+      if (saved.job.date) document.getElementById("jobDate").value = saved.job.date;
+      if (saved.job.intro != null) document.getElementById("jobIntro").value = saved.job.intro;
+      if (saved.job.signature != null) document.getElementById("jobSignature").value = saved.job.signature;
+    }
+    if (saved.sections){
+      for (const key of ["scope","notes","quals","resp","billing","closing","incexc"]){
+        if (Array.isArray(saved.sections[key])) state[key] = saved.sections[key];
+      }
+      state.scope.forEach(i => { if (!Array.isArray(i.subs)) i.subs = []; });
+    }
+    ["scope","notes","quals","resp","billing","closing","incexc"].forEach(render);
+    relayoutTextareas();
+    setStatus("Draft loaded.", true);
+  } catch(e){ console.error("applySuiteDraft failed:", e); }
+}
+
+/* Suite draft messages: return this page's state, or apply an incoming one. */
+window.addEventListener("message", function(e){
+  var d = e && e.data;
+  if (!d || d.fdec !== true) return;
+  if (d.type === "get-draft"){
+    var payload = null, gerr = null;
+    try { payload = collectState(); } catch(ex){ gerr = String(ex && ex.message || ex); }
+    if (window.parent && window.parent !== window){
+      window.parent.postMessage({ fdec:true, type:"draft-data", page: SUITE_PAGE_ID, reqId:d.reqId, data:payload, error:gerr }, "*");
+    }
+  } else if (d.type === "load-draft" && d.page === SUITE_PAGE_ID){
+    applySuiteDraft(d.data);
+  }
+});
+
 document.getElementById("btnSave").addEventListener("click", () => {
   try {
     // JSON payload; escape "</" so it can't terminate the script tag
@@ -3085,6 +3181,9 @@ const APP_META = {
   author: "Mitch Peebles",
   version: "2.0"
 };
+/* Identifies this page within the suite draft bundle. The generated clone
+   pages override this value (annual / install). */
+const SUITE_PAGE_ID = "annual";
 
 /* ============================================================
    VERBIAGE LIBRARY — edit freely; app numbers/letters items
@@ -3929,6 +4028,45 @@ function collectState(){
   };
 }
 
+/* Apply a saved draft slice (job fields + sections) to this page and
+   re-render. Used by the suite-level Load Draft. */
+function applySuiteDraft(saved){
+  if (!saved) return;
+  try {
+    if (saved.job){
+      document.getElementById("jobCustomer").value = saved.job.customer || "";
+      document.getElementById("jobQuote").value    = saved.job.quote    || "";
+      if (saved.job.date) document.getElementById("jobDate").value = saved.job.date;
+      if (saved.job.intro != null) document.getElementById("jobIntro").value = saved.job.intro;
+      if (saved.job.signature != null) document.getElementById("jobSignature").value = saved.job.signature;
+    }
+    if (saved.sections){
+      for (const key of ["scope","notes","quals","resp","billing","closing","incexc"]){
+        if (Array.isArray(saved.sections[key])) state[key] = saved.sections[key];
+      }
+      state.scope.forEach(i => { if (!Array.isArray(i.subs)) i.subs = []; });
+    }
+    ["scope","notes","quals","resp","billing","closing","incexc"].forEach(render);
+    relayoutTextareas();
+    setStatus("Draft loaded.", true);
+  } catch(e){ console.error("applySuiteDraft failed:", e); }
+}
+
+/* Suite draft messages: return this page's state, or apply an incoming one. */
+window.addEventListener("message", function(e){
+  var d = e && e.data;
+  if (!d || d.fdec !== true) return;
+  if (d.type === "get-draft"){
+    var payload = null, gerr = null;
+    try { payload = collectState(); } catch(ex){ gerr = String(ex && ex.message || ex); }
+    if (window.parent && window.parent !== window){
+      window.parent.postMessage({ fdec:true, type:"draft-data", page: SUITE_PAGE_ID, reqId:d.reqId, data:payload, error:gerr }, "*");
+    }
+  } else if (d.type === "load-draft" && d.page === SUITE_PAGE_ID){
+    applySuiteDraft(d.data);
+  }
+});
+
 document.getElementById("btnSave").addEventListener("click", () => {
   try {
     // JSON payload; escape "</" so it can't terminate the script tag
@@ -4366,6 +4504,9 @@ const APP_META = {
   author: "Mitch Peebles",
   version: "2.0"
 };
+/* Identifies this page within the suite draft bundle. The generated clone
+   pages override this value (annual / install). */
+const SUITE_PAGE_ID = "install";
 
 /* ============================================================
    VERBIAGE LIBRARY — edit freely; app numbers/letters items
@@ -5188,6 +5329,45 @@ function collectState(){
   };
 }
 
+/* Apply a saved draft slice (job fields + sections) to this page and
+   re-render. Used by the suite-level Load Draft. */
+function applySuiteDraft(saved){
+  if (!saved) return;
+  try {
+    if (saved.job){
+      document.getElementById("jobCustomer").value = saved.job.customer || "";
+      document.getElementById("jobQuote").value    = saved.job.quote    || "";
+      if (saved.job.date) document.getElementById("jobDate").value = saved.job.date;
+      if (saved.job.intro != null) document.getElementById("jobIntro").value = saved.job.intro;
+      if (saved.job.signature != null) document.getElementById("jobSignature").value = saved.job.signature;
+    }
+    if (saved.sections){
+      for (const key of ["scope","notes","quals","resp","billing","closing","incexc"]){
+        if (Array.isArray(saved.sections[key])) state[key] = saved.sections[key];
+      }
+      state.scope.forEach(i => { if (!Array.isArray(i.subs)) i.subs = []; });
+    }
+    ["scope","notes","quals","resp","billing","closing","incexc"].forEach(render);
+    relayoutTextareas();
+    setStatus("Draft loaded.", true);
+  } catch(e){ console.error("applySuiteDraft failed:", e); }
+}
+
+/* Suite draft messages: return this page's state, or apply an incoming one. */
+window.addEventListener("message", function(e){
+  var d = e && e.data;
+  if (!d || d.fdec !== true) return;
+  if (d.type === "get-draft"){
+    var payload = null, gerr = null;
+    try { payload = collectState(); } catch(ex){ gerr = String(ex && ex.message || ex); }
+    if (window.parent && window.parent !== window){
+      window.parent.postMessage({ fdec:true, type:"draft-data", page: SUITE_PAGE_ID, reqId:d.reqId, data:payload, error:gerr }, "*");
+    }
+  } else if (d.type === "load-draft" && d.page === SUITE_PAGE_ID){
+    applySuiteDraft(d.data);
+  }
+});
+
 document.getElementById("btnSave").addEventListener("click", () => {
   try {
     // JSON payload; escape "</" so it can't terminate the script tag
@@ -5491,7 +5671,7 @@ window.addEventListener('message', function(e){
   if (!d || d.fdec !== true) return;
   // Resolve any pending export request reply (keyed by reqId alone, so any
   // page — quote or a verbiage page — can answer its own request).
-  if ((d.type === 'quote-html' || d.type === 'proposal-html') && d.reqId != null && pending[d.reqId]){
+  if ((d.type === 'quote-html' || d.type === 'proposal-html' || d.type === 'draft-data') && d.reqId != null && pending[d.reqId]){
     pending[d.reqId](d); delete pending[d.reqId]; return;
   }
   // Shared Job Name / Quote # / Date: the Repair Verbiage (proposal) page is
@@ -5645,6 +5825,92 @@ function runExport(){
   }).then(function(){
     goBtn.disabled = false; goBtn.textContent = goText;
   });
+}
+
+/* ============================================================
+   SUITE DRAFT — save & load ALL pages in one file.
+   Save: ask every page for its draft state, bundle into one JSON
+         file, and download it.
+   Load: read the file and push each page's slice back into its
+         iframe so all four pages are restored together.
+   ============================================================ */
+var DRAFT_PAGES = [
+  { id:'quote',    frame:'view-quote'    },
+  { id:'proposal', frame:'view-proposal' },
+  { id:'annual',   frame:'view-annual'   },
+  { id:'install',  frame:'view-install'  }
+];
+
+function askDraft(iframeId){
+  return new Promise(function(resolve){
+    var id = ++reqSeq;
+    var frame = document.getElementById(iframeId);
+    if (!frame || !frame.contentWindow){ resolve({ error:'frame-unavailable' }); return; }
+    pending[id] = resolve;
+    frame.contentWindow.postMessage({ fdec:true, type:'get-draft', reqId:id }, '*');
+    setTimeout(function(){ if (pending[id]){ delete pending[id]; resolve({ error:'timeout' }); } }, 5000);
+  });
+}
+
+function saveSuiteDraft(){
+  var btn = document.getElementById('btn-savedraft');
+  btn.disabled = true; var t = btn.textContent; btn.textContent = 'Saving…';
+
+  Promise.all(DRAFT_PAGES.map(function(p){
+    return askDraft(p.frame).then(function(res){ return { id:p.id, res:res||{} }; });
+  })).then(function(results){
+    var bundle = {
+      meta: { app:'FDEC Quoting & Proposal Suite', kind:'suite-draft', version:1, savedAt:new Date().toISOString() },
+      pages: {}
+    };
+    results.forEach(function(r){
+      if (r.res && r.res.data) bundle.pages[r.id] = r.res.data;
+    });
+
+    // Name the file from the quote's job info when available.
+    var q = bundle.pages.quote && bundle.pages.quote.fields ? bundle.pages.quote.fields : {};
+    var namePart = (q.quoteNo || q.jobName || '').toString().replace(/[^\w\- ]+/g,'').trim().replace(/\s+/g,'_');
+    var stamp = new Date().toISOString().slice(0,10);
+    var fname = 'FDEC_Suite_Draft' + (namePart ? '_' + namePart : '') + '_' + stamp + '.json';
+
+    var blob = new Blob([JSON.stringify(bundle)], { type:'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = fname;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  }).catch(function(err){
+    console.error(err); alert('Could not save the suite draft: ' + err);
+  }).then(function(){
+    btn.disabled = false; btn.textContent = t;
+  });
+}
+
+function loadSuiteDraftFile(input){
+  var file = input.files && input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var bundle = null;
+    try { bundle = JSON.parse(e.target.result); } catch(_){}
+    input.value = '';
+    if (!bundle || !bundle.pages){
+      alert('That file is not a valid FDEC suite draft.');
+      return;
+    }
+    // Push each page's slice back to its iframe.
+    DRAFT_PAGES.forEach(function(p){
+      var slice = bundle.pages[p.id];
+      if (!slice) return;
+      var frame = document.getElementById(p.frame);
+      if (frame && frame.contentWindow){
+        frame.contentWindow.postMessage({ fdec:true, type:'load-draft', page:p.id, data:slice }, '*');
+      }
+    });
+    var when = bundle.meta && bundle.meta.savedAt ? new Date(bundle.meta.savedAt).toLocaleString() : '';
+    alert('Suite draft loaded' + (when ? ' (saved ' + when + ')' : '') + '. All pages have been restored.');
+  };
+  reader.readAsText(file);
 }
 </script>
 
