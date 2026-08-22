@@ -129,138 +129,9 @@
     .suitebar button{min-height:44px}
   }
 
-  /* ---------------- Auth gate ---------------- */
-  #authGate{
-    position:fixed; inset:0; z-index:1000;
-    background:linear-gradient(160deg,#010039 0%,#0a1a4a 60%,#12245c 100%);
-    display:flex; align-items:center; justify-content:center;
-    padding:20px;
-    padding:max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
-    overflow-y:auto; -webkit-overflow-scrolling:touch;
-  }
-  #authGate[hidden]{display:none}
-  .auth-card{
-    width:100%; max-width:400px; background:#fff; border-radius:12px;
-    box-shadow:0 18px 50px rgba(0,0,0,.35); overflow:hidden;
-    margin:auto;
-  }
-  .auth-head{
-    background:var(--navy); color:#fff; padding:20px 24px 16px;
-    border-bottom:4px solid var(--red);
-  }
-  .auth-head b{display:block; font-size:16px; letter-spacing:.03em}
-  .auth-head span{display:block; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:4px}
-  .auth-tabs{display:flex; border-bottom:1px solid var(--line)}
-  .auth-tabs button{
-    flex:1; font:inherit; font-size:13px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
-    background:#f4f6f8; color:#7c8896; border:none; cursor:pointer; padding:14px 0; min-height:46px;
-    border-bottom:3px solid transparent;
-  }
-  .auth-tabs button.active{background:#fff; color:var(--navy); border-bottom-color:var(--red)}
-  .auth-body{padding:22px 24px 24px}
-  .auth-body[hidden]{display:none}
-  .auth-field{display:block; margin-bottom:14px}
-  .auth-field label{display:block; font-size:12px; font-weight:600; color:#5a6673; margin-bottom:5px; letter-spacing:.02em}
-  .auth-field input{
-    width:100%; font:inherit; font-size:16px; padding:11px 12px;
-    border:1px solid var(--line); border-radius:6px; background:#fcfcfd;
-  }
-  .auth-field input:focus{border-color:var(--red); outline:none; background:#fff}
-  .auth-row{display:flex; align-items:center; gap:8px; margin:2px 0 16px; font-size:13px; color:#5a6673}
-  .auth-row input{width:20px; height:20px; accent-color:var(--red)}
-  .auth-btn{
-    width:100%; font:inherit; font-size:16px; font-weight:700; letter-spacing:.03em;
-    background:var(--red); color:#fff; border:none; border-radius:6px;
-    padding:14px 0; min-height:48px; cursor:pointer;
-  }
-  .auth-btn:hover{background:#256a9c}
-  .auth-btn:disabled{opacity:.5; cursor:default}
-  .auth-msg{font-size:12.5px; margin-top:12px; min-height:16px; line-height:1.4}
-  .auth-msg.err{color:var(--red)}
-  .auth-msg.ok{color:#0190a0}
-  /* password strength meter */
-  .pw-meter{margin:-4px 0 6px}
-  .pw-bars{display:flex; gap:5px; margin-bottom:5px}
-  .pw-bars span{flex:1; height:5px; border-radius:3px; background:#e3e6ea; transition:background .15s}
-  .pw-bars.weak   span:nth-child(1){background:#d64545}
-  .pw-bars.medium span:nth-child(1),
-  .pw-bars.medium span:nth-child(2){background:#e0a53a}
-  .pw-bars.strong span{background:#0aa6b5}
-  .pw-label{font-size:11.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase}
-  .pw-label.weak{color:#d64545}
-  .pw-label.medium{color:#c98a1e}
-  .pw-label.strong{color:#0aa6b5}
-  .pw-rules{list-style:none; margin:8px 0 4px; padding:0; font-size:11.5px; color:#8a94a0}
-  .pw-rules li{margin:3px 0; padding-left:18px; position:relative}
-  .pw-rules li::before{content:"\2022"; position:absolute; left:4px; color:#c2c8d0}
-  .pw-rules li.met{color:#0aa6b5}
-  .pw-rules li.met::before{content:"\2713"; left:2px; color:#0aa6b5; font-weight:700}
-  .auth-foot{font-size:10.5px; color:#9aa4af; text-align:center; padding:0 24px 18px}
 </style>
 </head>
 <body>
-
-<div id="authGate">
-  <div class="auth-card">
-    <div class="auth-head">
-      <b>Fire Defense Equipment Company, Inc.</b>
-      <span>Quoting &amp; Proposal Suite &middot; Secure Access</span>
-    </div>
-    <div class="auth-tabs">
-      <button id="authTabLogin" class="active" type="button" onclick="authShow('login')">Sign In</button>
-      <button id="authTabReg" type="button" onclick="authShow('register')">Register</button>
-    </div>
-
-    <!-- LOGIN -->
-    <div id="authLogin" class="auth-body">
-      <label class="auth-field">
-        <label>Username</label>
-        <input id="loginUser" type="text" autocomplete="username" placeholder="Your username">
-      </label>
-      <label class="auth-field">
-        <label>Password</label>
-        <input id="loginPass" type="password" autocomplete="current-password" placeholder="Your password">
-      </label>
-      <div class="auth-row">
-        <input id="loginRemember" type="checkbox">
-        <label for="loginRemember" style="margin:0; font-weight:400; cursor:pointer">Keep me signed in on this device</label>
-      </div>
-      <button id="loginBtn" class="auth-btn" type="button" onclick="doLogin()">Sign In</button>
-      <div id="loginMsg" class="auth-msg"></div>
-    </div>
-
-    <!-- REGISTER -->
-    <div id="authRegister" class="auth-body" hidden>
-      <label class="auth-field">
-        <label>Username</label>
-        <input id="regUser" type="text" autocomplete="username" placeholder="Choose a username">
-      </label>
-      <label class="auth-field">
-        <label>Password</label>
-        <input id="regPass" type="password" autocomplete="new-password" placeholder="Create a password" oninput="onRegPassInput()">
-      </label>
-      <div class="pw-meter">
-        <div class="pw-bars" id="pwBars"><span></span><span></span><span></span></div>
-        <div class="pw-label" id="pwLabel">&nbsp;</div>
-        <ul class="pw-rules" id="pwRules">
-          <li data-rule="len">8–12 characters</li>
-          <li data-rule="upper">1 capital letter</li>
-          <li data-rule="lower">1 alphabetical (lowercase) letter</li>
-          <li data-rule="num">1 number</li>
-          <li data-rule="special">1 special character</li>
-        </ul>
-      </div>
-      <label class="auth-field">
-        <label>Confirm Password</label>
-        <input id="regPass2" type="password" autocomplete="new-password" placeholder="Re-enter password" oninput="onRegPassInput()">
-      </label>
-      <button id="regBtn" class="auth-btn" type="button" onclick="doRegister()">Create Account</button>
-      <div id="regMsg" class="auth-msg"></div>
-    </div>
-
-    <div class="auth-foot">Accounts are stored only in this browser on this device.</div>
-  </div>
-</div>
 
 <div class="suitebar">
   <div class="brand">
@@ -276,7 +147,6 @@
     <button id="btn-savedraft" class="draft" type="button" onclick="saveSuiteDraft()" title="Save all pages as one draft file">Save Draft</button>
     <button id="btn-loaddraft" class="draft" type="button" onclick="document.getElementById('suiteDraftFile').click()" title="Load a saved suite draft">Load Draft</button>
     <input type="file" id="suiteDraftFile" accept=".json,.fdecsuite,application/json" style="display:none" onchange="loadSuiteDraftFile(this)">
-    <button id="btn-signout" class="signout" type="button" onclick="doSignOut()" title="Sign out">Sign Out</button>
   </nav>
 </div>
 
@@ -423,6 +293,11 @@
   /* Customer Total column (4th) bold across the whole table */
   #summaryTable td:nth-child(4),
   #summaryTable th:nth-child(4){font-weight:700}
+  /* Manpower / Tasks summary table */
+  #mpSummaryTable{margin-bottom:16px}
+  #mpSummaryTable td, #mpSummaryTable th{padding:6px 8px}
+  #mpSummaryTable tbody tr:nth-child(even) td{background:#f6f8fb}
+  #mpSummaryTable tfoot tr.mp-sum-tot td{border-top:2px solid var(--ink); font-weight:700}
   .totbar{
     position:fixed; left:0; right:0; bottom:0; background:var(--navy); color:#fff;
     display:flex; gap:26px; align-items:center; padding:12px 22px; font-size:14px;
@@ -456,6 +331,63 @@
   .ratetable input{width:100%; max-width:110px}
   .ratecols{gap:0 24px}
   h4.ratehd{margin:2px 0 8px; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--red); font-weight:700}
+
+  /* ---------------- Material catalog (collapsible) ---------------- */
+  .mat-cat{border:1px solid var(--line); border-radius:7px; margin-bottom:10px; overflow:hidden; background:#fff}
+  .mat-cat>.mat-cat-head{
+    display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none;
+    background:var(--navy); color:#fff; padding:10px 12px; font-weight:700; font-size:14px;
+  }
+  .mat-cat>.mat-cat-head .tw{transition:transform .15s; font-size:11px; width:12px; flex:none}
+  .mat-cat.collapsed>.mat-cat-head .tw{transform:rotate(-90deg)}
+  .mat-cat.collapsed>.mat-cat-body{display:none}
+  .mat-cat-head input.cat-name{
+    flex:1; font:inherit; font-weight:700; font-size:14px; color:#fff;
+    background:transparent; border:1px solid transparent; border-radius:4px; padding:3px 6px;
+  }
+  .mat-cat-head input.cat-name:focus{background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.4); outline:none}
+  .mat-cat-head .cat-count{font-size:11px; font-weight:600; color:var(--muted, #9fb0c2); white-space:nowrap}
+  .mat-cat-head .mat-del{background:none; border:none; color:#b9c4d4; cursor:pointer; font-size:18px; line-height:1; padding:2px 6px; flex:none}
+  .mat-cat-head .mat-del:hover{color:#fff}
+  .mat-cat-body{padding:8px 10px 10px}
+
+  .mat-sub{border:1px solid #e7ebf0; border-radius:6px; margin:8px 0; overflow:hidden}
+  .mat-sub>.mat-sub-head{
+    display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none;
+    background:var(--soft); padding:8px 10px; font-weight:600; font-size:13px; color:var(--ink);
+    border-left:3px solid var(--red);
+  }
+  .mat-sub>.mat-sub-head .tw{transition:transform .15s; font-size:10px; width:11px; flex:none; color:var(--steel)}
+  .mat-sub.collapsed>.mat-sub-head .tw{transform:rotate(-90deg)}
+  .mat-sub.collapsed>.mat-sub-body{display:none}
+  .mat-sub-head input.sub-name{
+    flex:1; font:inherit; font-weight:600; font-size:13px; color:var(--ink);
+    background:transparent; border:1px solid transparent; border-radius:4px; padding:3px 6px;
+  }
+  .mat-sub-head input.sub-name:focus{background:#fff; border-color:var(--line); outline:none}
+  .mat-sub-head .sub-count{font-size:11px; color:var(--steel); white-space:nowrap}
+  .mat-sub-head .mat-del{background:none; border:none; color:#b9bec5; cursor:pointer; font-size:16px; line-height:1; padding:2px 6px; flex:none}
+  .mat-sub-head .mat-del:hover{color:var(--red)}
+  .mat-sub-body{padding:4px 8px 8px}
+  .mat-sub-body table{width:100%}
+  .mat-sub-body th{font-size:10px; padding:4px 6px}
+  .mat-sub-body td{padding:3px 6px; border-bottom:1px solid #f0f2f5}
+  .mat-item input.mi-name{width:100%; border:1px solid transparent; background:transparent; border-radius:4px; padding:6px; font-size:15px}
+  .mat-item input.mi-name:hover{border-color:var(--line); background:#fff}
+  .mat-item input.mi-name:focus{border-color:var(--red); background:#fff; outline:none}
+  .mat-item.filled td{background:#eef7ef}
+  .mat-item .mat-del{background:none; border:none; color:#c7ccd3; cursor:pointer; font-size:15px; line-height:1; padding:2px 6px}
+  .mat-item .mat-del:hover{color:var(--red)}
+  .mat-addbtn{
+    font:inherit; font-size:12px; font-weight:600; margin:4px 4px 2px 0;
+    padding:5px 11px; border-radius:5px; cursor:pointer;
+    border:1px dashed var(--line); background:none; color:var(--steel);
+  }
+  .mat-addbtn:hover{border-color:var(--red); color:var(--red)}
+  @media(max-width:760px){
+    .mat-sub-body table{min-width:0}
+    .mat-cat-body, .mat-sub-body{overflow-x:auto}
+  }
   select.lvl{padding:8px 6px; font-size:16px}
   .mp-note{font-size:13px; color:var(--steel)}
   /* print */
@@ -626,10 +558,10 @@
       <button class="small noprint" type="button" onclick="addMoneyRow(&#39;vendorQuotes&#39;,&#39;Vendor&#39;)">+ Add vendor quote</button>
 
       <h3 class="sub">Itemized Material</h3>
-      <table><thead><tr><th>Item</th><th class="num">Unit Cost</th><th class="num">Qty</th><th class="num">Total</th></tr></thead>
-        <tbody id="materialItems"></tbody></table>
-      <button class="small noprint" style="margin-top:8px" type="button" onclick="addCustomMaterial()">+ Add item</button>
-      <p class="hint">Misc material uses the Misc material markup; vendor quotes use the Vendor-quoted material markup. Sales tax calculates on the customer material total.</p>
+      <div id="materialCatalog"></div>
+      <button class="small noprint" style="margin-top:10px" type="button" onclick="addMatCategory()">+ Add category</button>
+      <p class="hint">Enter a unit cost and quantity on any line to include it. Categories and subcategories collapse; you can add your own categories, subcategories, and items. Sales tax calculates on the customer material total.</p>
+      <table style="display:none"><tbody id="materialItems"></tbody></table>
     </div>
   </details>
 
@@ -716,6 +648,18 @@
   <details class="card" open="" id="sec-summary">
     <summary>Quote Summary</summary>
     <div class="body">
+      <div id="mpSummaryWrap" style="display:none">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap">
+          <h3 class="sub" style="margin:0">Manpower / Tasks</h3>
+          <button class="small noprint" type="button" onclick="copyManpower()">Copy for ServiceTrade</button>
+        </div>
+        <table id="mpSummaryTable"><thead>
+          <tr><th style="width:30%">Task / Phase</th><th>Dept</th><th class="num">Techs</th><th class="num">Hours Each</th><th>Rate Class</th><th class="num">Total Hours</th><th class="num">Trips</th></tr>
+        </thead><tbody id="mpSummaryBody"></tbody>
+        <tfoot><tr class="mp-sum-tot"><td colspan="5">Totals</td><td class="num" id="mpSummaryHours">0</td><td class="num" id="mpSummaryTrips">0</td></tr></tfoot>
+        </table>
+      </div>
+
       <h3 class="sub">Purchase Orders</h3>
       <table id="poTable"><thead>
         <tr><th style="width:26%">PO Number</th><th>Description</th><th class="noprint"></th></tr>
@@ -867,15 +811,231 @@ function addPoRow(no, desc){
   $('poRows').appendChild(tr);
 }
 
-function addCustomMaterial(name, price, qty){
-  const tb = $('materialItems');
+/* ================= MATERIAL CATALOG (collapsible) ================= */
+const MATERIAL_CATALOG = [
+  {name:"Grooved Fittings", subs:[
+    {name:"Grooved Couplings", items:["8\" Grooved Coupling", "6\" Grooved Coupling", "4\" Grooved Coupling", "3\" Grooved Coupling", "2-1/2\" Grooved Coupling", "2\" Grooved Coupling", "1-1/2\" Grooved Coupling", "1-1/4\" Grooved Coupling"]},
+    {name:"Grooved Elbows", items:["4\" 90° Elbow", "2\" 90° Elbow"]},
+    {name:"Grooved Caps", items:["4\" Cap", "2\" Cap"]},
+    {name:"Grooved Misc", items:["4\" Grooved Drain 90° Elbow", "2\" Grooved Drain 90° Elbow", "2\" x 24\" GxG Flex Drain Kit", "2\" x 36\" GxG Flex Drain Kit"]},
+  ]},
+  {name:"Mechanical Tees / TeeLocks", subs:[
+    {name:"6\" Run Mechanical Tees", items:["6\" x 2\" Mechanical Tee", "6\" x 1\" Mechanical Tee"]},
+    {name:"4\" Run Mechanical Tees", items:["4\" x 2\" Mechanical Tee", "4\" x 1\" Mechanical Tee"]},
+    {name:"2\" Run Mechanical Tees", items:["2\" x 1\" Mechanical Tee", "2\" x 3/4\" Mechanical Tee", "2\" x 1/2\" Mechanical Tee"]},
+    {name:"1-1/2\" Run Mechanical Tees", items:["1-1/2\" x 1\" Mechanical Tee", "1-1/2\" x 3/4\" Mechanical Tee", "1-1/2\" x 1/2\" Mechanical Tee"]},
+    {name:"1-1/4\" Run Mechanical Tees", items:["1-1/4\" x 1\" Mechanical Tee", "1-1/4\" x 3/4\" Mechanical Tee", "1-1/4\" x 1/2\" Mechanical Tee"]},
+  ]},
+  {name:"Flanged Components", subs:[
+    {name:"Grooved Flange Adapters", items:["6\" Grooved Flange Adapter", "4\" Grooved Flange Adapter"]},
+    {name:"Flange Bolt, Nut, and Gasket Kits", items:["6\" Flange Bolt, Nut, and Gasket Kit", "4\" Flange Bolt, Nut, and Gasket Kit"]},
+  ]},
+  {name:"Pipe and Strut", subs:[
+    {name:"Schedule 10 Pipe", items:["4\" Schedule 10 Pipe", "3\" Schedule 10 Pipe", "2-1/2\" Schedule 10 Pipe", "2\" Schedule 10 Pipe", "1-1/2\" Schedule 10 Pipe", "1-1/4\" Schedule 10 Pipe"]},
+    {name:"Schedule 40 Pipe", items:["4\" Schedule 40 Pipe", "2\" Schedule 40 Pipe", "1\" Schedule 40 Pipe"]},
+    {name:"Strut Channels", items:["1-5/8\" Slotted Strut Channel", "13/16\" Slotted Strut Channel"]},
+  ]},
+  {name:"Hardware", subs:[
+    {name:"All-Thread Rod (ATR)", items:["3/4\" All-Thread Rod (ATR)", "5/8\" All-Thread Rod (ATR)", "1/2\" All-Thread Rod (ATR)", "3/8\" All-Thread Rod (ATR)"]},
+    {name:"Fasteners and Anchors", items:["3/8\" Hex Nut", "3/8\" Hex Bolt", "3/8\" Flat Washer", "3/8\" Lock Washer", "3/8\" Toggle Wing"]},
+  ]},
+  {name:"FDC Material", subs:[
+    {name:"Fire Department Connections", items:["4\" x 2-1/2\" Siamese FDC NST", "4\" x 2-1/2\" Siamese FDC DET", "4\" Storz Straight FDC", "4\" Storz 22° Angle FDC", "4\" x 5\" Storz Straight FDC", "4\" x 5\" Storz 22° Angle FDC"]},
+    {name:"Signage", items:["4\" Red Aluminum Round FDC Sign"]},
+    {name:"Misc", items:["1/2\" Automatic Ball Drip", "2-1/2\" Red Aluminum Breakaway FDC Caps", "2-1/2\" NST Brass Plug", "2-1/2\" DET Brass Plug"]},
+  ]},
+  {name:"Threaded Fittings", subs:[
+    {name:"", items:[]},
+  ]},
+];
+
+/* Render the whole catalog into #materialCatalog. Each item row has a
+   name, unit-cost, qty, and line total. Only rows with qty>0 add to cost.
+   Categories and subcategories are collapsible; all are editable and new
+   ones can be added. */
+function matEsc(s){ return String(s==null?'':s).replace(/"/g,'&quot;'); }
+
+function buildMaterialCatalog(data){
+  const host = $('materialCatalog');
+  if (!host) return;
+  host.innerHTML = '';
+  (data || MATERIAL_CATALOG).forEach(cat => host.appendChild(renderMatCategory(cat)));
+}
+
+function renderMatCategory(cat){
+  const wrap = document.createElement('div');
+  wrap.className = 'mat-cat' + (cat._collapsed ? ' collapsed' : '');
+  const head = document.createElement('div');
+  head.className = 'mat-cat-head';
+  head.innerHTML =
+    `<span class="tw">&#9660;</span>` +
+    `<input class="cat-name" value="${matEsc(cat.name)}" placeholder="Category name">` +
+    `<span class="cat-count"></span>` +
+    `<button class="mat-del noprint" title="Remove category">&times;</button>`;
+  // toggle collapse when clicking the head (but not the name input or delete)
+  head.addEventListener('click', e => {
+    if (e.target.closest('input') || e.target.closest('.mat-del')) return;
+    wrap.classList.toggle('collapsed');
+  });
+  head.querySelector('.cat-name').addEventListener('input', e => { cat.name = e.target.value; });
+  head.querySelector('.mat-del').addEventListener('click', () => {
+    if (confirm('Remove this entire category and all its items?')){ wrap.remove(); recalc(); }
+  });
+  wrap.appendChild(head);
+
+  const body = document.createElement('div');
+  body.className = 'mat-cat-body';
+  (cat.subs || []).forEach(sub => body.appendChild(renderMatSub(sub)));
+  const addSub = document.createElement('button');
+  addSub.className = 'mat-addbtn noprint';
+  addSub.type = 'button';
+  addSub.textContent = '+ Add subcategory';
+  addSub.addEventListener('click', () => {
+    const sub = { name:'', items:[] };
+    const el = renderMatSub(sub);
+    body.insertBefore(el, addSub);
+    el.classList.remove('collapsed');
+    const ni = el.querySelector('.sub-name'); if (ni) ni.focus();
+    updateMatCounts();
+  });
+  body.appendChild(addSub);
+  wrap.appendChild(body);
+  return wrap;
+}
+
+function renderMatSub(sub){
+  const wrap = document.createElement('div');
+  wrap.className = 'mat-sub' + (sub._collapsed ? ' collapsed' : '');
+  const head = document.createElement('div');
+  head.className = 'mat-sub-head';
+  head.innerHTML =
+    `<span class="tw">&#9660;</span>` +
+    `<input class="sub-name" value="${matEsc(sub.name)}" placeholder="Subcategory name">` +
+    `<span class="sub-count"></span>` +
+    `<button class="mat-del noprint" title="Remove subcategory">&times;</button>`;
+  head.addEventListener('click', e => {
+    if (e.target.closest('input') || e.target.closest('.mat-del')) return;
+    wrap.classList.toggle('collapsed');
+  });
+  head.querySelector('.sub-name').addEventListener('input', e => { sub.name = e.target.value; });
+  head.querySelector('.mat-del').addEventListener('click', () => {
+    if (confirm('Remove this subcategory and all its items?')){ wrap.remove(); recalc(); }
+  });
+  wrap.appendChild(head);
+
+  const body = document.createElement('div');
+  body.className = 'mat-sub-body';
+  const table = document.createElement('table');
+  table.innerHTML = `<thead><tr><th>Item</th><th class="num">Unit Cost</th><th class="num">Qty</th><th class="num">Total</th><th></th></tr></thead>`;
+  const tb = document.createElement('tbody');
+  (sub.items || []).forEach(it => tb.appendChild(matItemRow(it)));
+  table.appendChild(tb);
+  body.appendChild(table);
+
+  const addItem = document.createElement('button');
+  addItem.className = 'mat-addbtn noprint';
+  addItem.type = 'button';
+  addItem.textContent = '+ Add item';
+  addItem.addEventListener('click', () => {
+    const tr = matItemRow('');
+    tb.appendChild(tr);
+    const ni = tr.querySelector('.mi-name'); if (ni) ni.focus();
+    updateMatCounts();
+  });
+  body.appendChild(addItem);
+  wrap.appendChild(body);
+  return wrap;
+}
+
+/* One material item row. `it` may be a string (name only) or an object
+   {name, cost, qty}. */
+function matItemRow(it){
+  const o = (typeof it === 'string') ? { name: it } : (it || {});
   const tr = document.createElement('tr');
-  tr.className = 'custom-mat';
-  tr.innerHTML = `<td><input class="wide cm-name" placeholder="Item" value="${(name||'').replace(/"/g,'&quot;')}"></td>
-    <td class="num"><input class="rate cm-price" type="number" min="0" step="0.01" value="${price||''}" placeholder="cost"></td>
-    <td class="num"><input class="qty cm-qty" type="number" min="0" step="1" value="${qty||''}"></td>
-    <td class="num rowtot">$0.00</td>`;
-  tb.appendChild(tr);
+  tr.className = 'mat-item';
+  tr.innerHTML =
+    `<td><input class="mi-name" value="${matEsc(o.name)}" placeholder="Item"></td>` +
+    `<td class="num"><input class="rate mi-cost" type="number" min="0" step="0.01" value="${o.cost!=null?o.cost:''}" placeholder="cost"></td>` +
+    `<td class="num"><input class="qty mi-qty" type="number" min="0" step="1" value="${o.qty!=null?o.qty:''}"></td>` +
+    `<td class="num rowtot">$0.00</td>` +
+    `<td class="num"><button class="mat-del noprint" title="Remove item">&times;</button></td>`;
+  tr.querySelector('.mat-del').addEventListener('click', () => { tr.remove(); recalc(); });
+  return tr;
+}
+
+function addMatCategory(){
+  const host = $('materialCatalog');
+  const cat = { name:'', subs:[{ name:'', items:[] }] };
+  const el = renderMatCategory(cat);
+  host.appendChild(el);
+  el.classList.remove('collapsed');
+  const ni = el.querySelector('.cat-name'); if (ni) ni.focus();
+  updateMatCounts();
+}
+
+/* Sum all catalog item rows into the material cost; also refresh per-row
+   totals and the category/subcategory counts. Returns the total cost. */
+function sumMaterialCatalog(){
+  let total = 0;
+  document.querySelectorAll('#materialCatalog .mat-item').forEach(tr => {
+    const cost = num(tr.querySelector('.mi-cost'));
+    const qty  = num(tr.querySelector('.mi-qty'));
+    const line = cost * qty;
+    tr.querySelector('.rowtot').textContent = money(line);
+    tr.classList.toggle('filled', line > 0);
+    total += line;
+  });
+  updateMatCounts();
+  return total;
+}
+
+function updateMatCounts(){
+  document.querySelectorAll('#materialCatalog .mat-sub').forEach(sub => {
+    const rows = sub.querySelectorAll('.mat-item');
+    const active = sub.querySelectorAll('.mat-item.filled').length;
+    const c = sub.querySelector('.sub-count');
+    if (c) c.textContent = active ? `${active} selected · ${rows.length}` : `${rows.length}`;
+  });
+  document.querySelectorAll('#materialCatalog .mat-cat').forEach(cat => {
+    const rows = cat.querySelectorAll('.mat-item');
+    const active = cat.querySelectorAll('.mat-item.filled').length;
+    const c = cat.querySelector('.cat-count');
+    if (c) c.textContent = active ? `${active} selected · ${rows.length} items` : `${rows.length} items`;
+  });
+}
+
+/* Collect the catalog state (structure + values) for drafts. */
+function collectMaterialCatalog(){
+  const out = [];
+  document.querySelectorAll('#materialCatalog .mat-cat').forEach(catEl => {
+    const cat = { name: (catEl.querySelector('.cat-name')||{}).value || '', collapsed: catEl.classList.contains('collapsed'), subs: [] };
+    catEl.querySelectorAll(':scope > .mat-cat-body > .mat-sub').forEach(subEl => {
+      const sub = { name: (subEl.querySelector('.sub-name')||{}).value || '', collapsed: subEl.classList.contains('collapsed'), items: [] };
+      subEl.querySelectorAll('.mat-item').forEach(tr => {
+        sub.items.push({
+          name: (tr.querySelector('.mi-name')||{}).value || '',
+          cost: (tr.querySelector('.mi-cost')||{}).value || '',
+          qty:  (tr.querySelector('.mi-qty')||{}).value || ''
+        });
+      });
+      cat.subs.push(sub);
+    });
+    out.push(cat);
+  });
+  return out;
+}
+
+/* Rebuild the catalog from saved draft state. */
+function applyMaterialCatalog(saved){
+  if (!Array.isArray(saved) || !saved.length){ buildMaterialCatalog(); return; }
+  const data = saved.map(c => ({
+    name: c.name, _collapsed: !!c.collapsed,
+    subs: (c.subs||[]).map(s => ({
+      name: s.name, _collapsed: !!s.collapsed,
+      items: (s.items||[]).map(i => ({ name:i.name, cost:i.cost, qty:i.qty }))
+    }))
+  }));
+  buildMaterialCatalog(data);
 }
 
 /* ================= BUILD ================= */
@@ -903,6 +1063,7 @@ buildQtyTable('itmAL','itmAL',ITM,true);
 buildQtyTable('backflow','backflow',BACKFLOW,true);
 buildQtyTable('firePump','firePump',FIREPUMP,true);
 buildQtyTable('sampleTest','sampleTest',SAMPLES,true);
+buildMaterialCatalog();
 
 function laborRows(tbodyId, prefix, classes, dept){
   dept = dept || 'sp';
@@ -924,7 +1085,6 @@ laborRows('laborSP','sp',[['ST','Straight time'],['OT','Overtime'],['DT','Double
 laborRows('laborShop','shop',[['ST','Straight time'],['OT','Overtime'],['DT','Double time']],'sp');
 laborRows('laborFA','fa',[['ST','Straight time'],['OT','Overtime'],['DT','Double time']],'fa');
 
-for (let i=0;i<6;i++) addCustomMaterial();
 for (let i=0;i<2;i++) addPoRow();
 addMoneyRow('vendorQuotes','Vendor','Galloup');
 addMoneyRow('vendorQuotes','Vendor','Viking');
@@ -1003,12 +1163,7 @@ function recalc(ev){
   const sampleCost = sumGroup('sampleTest', SAMPLES);
 
   /* materials */
-  let matItemCost = 0;
-  document.querySelectorAll('#materialItems tr.custom-mat').forEach(tr => {
-    const line = num(tr.querySelector('.cm-price')) * num(tr.querySelector('.cm-qty'));
-    tr.querySelector('.rowtot').textContent = money(line);
-    matItemCost += line;
-  });
+  const matItemCost = sumMaterialCatalog();
   const vendorCost = sumMoneyRows('vendorQuotes');
   const materialCost = matItemCost + vendorCost; /* total material cost (for section subtotal/tax base) */
   const rentalQuoteCost = sumMoneyRows('rentalQuotes');
@@ -1126,14 +1281,186 @@ function recalc(ev){
   $('mpTot').textContent = mp.ST+mp.OT+mp.DT+mp.AD;
   $('mpSPtrips').textContent = trips.SP; $('mpALtrips').textContent = trips.FA;
 
+  renderMpSummary();
   buildSelected();
+}
+
+/* Build the Manpower / Tasks table in the Quote Summary from the manpower
+   rows. Shows only rows that have real data (a task name or hours). */
+const MP_DEPT_NAMES = { SP:'Sprinkler', FA:'Fire Alarm' };
+const MP_CLASS_NAMES = { ST:'Straight Time', OT:'Overtime', DT:'Double Time', AD:'Admin' };
+function renderMpSummary(){
+  const body = $('mpSummaryBody');
+  const wrap = $('mpSummaryWrap');
+  if (!body || !wrap) return;
+  body.innerHTML = '';
+  let totHours = 0, totTrips = 0, shown = 0;
+  document.querySelectorAll('#mpRows tr').forEach(tr => {
+    const task = (tr.querySelector('.mp-task').value || '').trim();
+    const tech = num(tr.querySelector('.mp-tech'));
+    const hrsEach = num(tr.querySelector('.mp-hrs'));
+    const hours = tech * hrsEach;
+    // Skip empty rows (no task text and no hours).
+    if (!task && !hours) return;
+    const dept = tr.querySelector('.mp-dept').value;
+    const cls = tr.querySelector('.mp-class').value;
+    const rTrips = rowTrips(tr);
+    totHours += hours; totTrips += rTrips; shown++;
+    const row = document.createElement('tr');
+    row.innerHTML =
+      `<td>${(task || '—').replace(/</g,'&lt;')}</td>` +
+      `<td>${MP_DEPT_NAMES[dept] || dept}</td>` +
+      `<td class="num">${tech || 0}</td>` +
+      `<td class="num">${hrsEach || 0}</td>` +
+      `<td>${MP_CLASS_NAMES[cls] || cls}</td>` +
+      `<td class="num">${hours || 0}</td>` +
+      `<td class="num">${rTrips || 0}</td>`;
+    body.appendChild(row);
+  });
+  $('mpSummaryHours').textContent = totHours;
+  $('mpSummaryTrips').textContent = totTrips;
+  // Show the section (and its Copy button) when there are manpower tasks OR
+  // any labor/transportation/per-diem/hotel data worth copying.
+  const table = $('mpSummaryTable');
+  if (table) table.style.display = shown ? '' : 'none';
+  wrap.style.display = (shown || hasCopyableExtras()) ? '' : 'none';
+}
+
+/* True if there is Labor, Trucks, Per Diem, or Hotel data entered (used to
+   decide whether the Copy button should appear even with no manpower tasks). */
+function hasCopyableExtras(){
+  const laborIds = ['spST','spOT','spDT','spAD','shopST','shopOT','shopDT','faST','faOT','faDT'];
+  if (laborIds.some(id => $(id) && num($(id)) > 0)) return true;
+  if (document.querySelector('input[data-g="trucks"][data-f="qty"]') &&
+      [...document.querySelectorAll('input[data-g="trucks"][data-f="qty"]')].some(el => num(el) > 0)) return true;
+  if ([...document.querySelectorAll('input[data-g="perdiem"][data-f="qty"]')].some(el => num(el) > 0)) return true;
+  if ($('hotelCost') && num($('hotelCost')) > 0) return true;
+  return false;
+}
+
+/* Build a clean, readable plain-text version of the manpower tasks and copy
+   it to the clipboard — reads well when pasted into ServiceTrade, email, or
+   any app regardless of font. Also includes any labor, transportation, per
+   diem, and hotel entered in the Labor & Transportation sections. */
+function buildManpowerText(){
+  const out = [];
+  let any = false;
+
+  /* ---- Manpower / Tasks ---- */
+  const taskLines = [];
+  let totHours = 0, totTrips = 0;
+  document.querySelectorAll('#mpRows tr').forEach(tr => {
+    const task = (tr.querySelector('.mp-task').value || '').trim();
+    const tech = num(tr.querySelector('.mp-tech'));
+    const hrsEach = num(tr.querySelector('.mp-hrs'));
+    const hours = tech * hrsEach;
+    if (!task && !hours) return;
+    const dept = MP_DEPT_NAMES[tr.querySelector('.mp-dept').value] || tr.querySelector('.mp-dept').value;
+    const cls = MP_CLASS_NAMES[tr.querySelector('.mp-class').value] || tr.querySelector('.mp-class').value;
+    const rTrips = rowTrips(tr);
+    totHours += hours; totTrips += rTrips;
+    const techWord = tech === 1 ? 'tech' : 'techs';
+    const tripWord = rTrips === 1 ? 'trip' : 'trips';
+    taskLines.push(`\u2022 ${task || '(untitled task)'} \u2014 ${dept}, ${tech} ${techWord} \u00d7 ${hrsEach} hrs, ${cls} (${hours} hrs, ${rTrips} ${tripWord})`);
+  });
+  if (taskLines.length){
+    any = true;
+    out.push('MANPOWER / TASKS', '');
+    out.push(...taskLines);
+    out.push('', `Total: ${totHours} hours, ${totTrips} trips`);
+  }
+
+  /* ---- Labor (hours entered on the Labor tables) ---- */
+  const laborLines = [];
+  const laborGroups = [
+    ['sp',   'Sprinkler',        [['ST','Straight Time'],['OT','Overtime'],['DT','Double Time'],['AD','Admin']]],
+    ['shop', 'Associated Shop',  [['ST','Straight Time'],['OT','Overtime'],['DT','Double Time']]],
+    ['fa',   'Fire Alarm',       [['ST','Straight Time'],['OT','Overtime'],['DT','Double Time']]]
+  ];
+  laborGroups.forEach(([prefix, label, classes]) => {
+    classes.forEach(([cls, clsName]) => {
+      const hrsEl = $(prefix + cls);
+      const hrs = hrsEl ? num(hrsEl) : 0;
+      if (!hrs) return;
+      const lvlEl = $(prefix + cls + 'Lvl');
+      const lvl = lvlEl ? lvlEl.value : '2';
+      const hrWord = hrs === 1 ? 'hr' : 'hrs';
+      laborLines.push(`\u2022 ${label} \u2014 ${clsName} (Lvl ${lvl}): ${hrs} ${hrWord}`);
+    });
+  });
+  if (laborLines.length){
+    if (any) out.push('');
+    any = true;
+    out.push('LABOR', '');
+    out.push(...laborLines);
+  }
+
+  /* ---- Trucks ---- */
+  const truckLines = [];
+  TRUCKS.forEach((t, i) => {
+    const qtyEl = document.querySelector(`input[data-g="trucks"][data-i="${i}"][data-f="qty"]`);
+    const q = qtyEl ? num(qtyEl) : 0;
+    if (!q) return;
+    const tripWord = q === 1 ? 'trip' : 'trips';
+    truckLines.push(`\u2022 ${t[0]}: ${q} ${tripWord}`);
+  });
+  if (truckLines.length){
+    if (any) out.push('');
+    any = true;
+    out.push('TRUCKS', '');
+    out.push(...truckLines);
+  }
+
+  /* ---- Per Diem ---- */
+  const pdLines = [];
+  PERDIEM.forEach((p, i) => {
+    const qtyEl = document.querySelector(`input[data-g="perdiem"][data-i="${i}"][data-f="qty"]`);
+    const q = qtyEl ? num(qtyEl) : 0;
+    if (!q) return;
+    const dayWord = q === 1 ? 'day' : 'days';
+    pdLines.push(`\u2022 ${p[0]}: ${q} ${dayWord}`);
+  });
+  if (pdLines.length){
+    if (any) out.push('');
+    any = true;
+    out.push('PER DIEM', '');
+    out.push(...pdLines);
+  }
+
+  /* ---- Hotel ---- */
+  const hotel = num($('hotelCost'));
+  if (hotel){
+    if (any) out.push('');
+    any = true;
+    out.push('HOTEL', '');
+    out.push(`\u2022 Hotel: ${money(hotel)}`);
+  }
+
+  return any ? out.join('\n') : '';
+}
+
+function copyManpower(){
+  const text = buildManpowerText();
+  if (!text){ setStatus('Nothing to copy yet — add tasks, labor, trucks, per diem, or hotel.'); return; }
+  const done = () => setStatus('Copied — paste into ServiceTrade.');
+  const fail = () => {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      document.execCommand('copy'); ta.remove(); done();
+    } catch(_){ setStatus('Copy blocked by browser — select the table text manually.'); }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(fail);
+  } else { fail(); }
 }
 
 /* ================= SELECTED MATERIALS & EQUIPMENT ================= */
 function collectSelected(){
   const mats = [], equip = [];
-  document.querySelectorAll('#materialItems tr.custom-mat').forEach(tr => {
-    const q = num(tr.querySelector('.cm-qty')), n = tr.querySelector('.cm-name').value.trim();
+  document.querySelectorAll('#materialCatalog .mat-item').forEach(tr => {
+    const q = num(tr.querySelector('.mi-qty')), n = (tr.querySelector('.mi-name').value || '').trim();
     if (q && n) mats.push([n, q]);
   });
   document.querySelectorAll('input[data-g="eqFees"][data-f="qty"]').forEach(inp => {
@@ -1217,7 +1544,7 @@ function savePDF(){
 
 function collectDraft(){
   const d = { meta:{ app:'FDEC Quoting Template', author:'Mitch Peebles', version:'V4.0', savedAt:new Date().toISOString() },
-              fields:{}, dynamic:{ material:[], vendorQuotes:[], rentalQuotes:[], subQuotes:[], po:[], mp:[] } };
+              fields:{}, dynamic:{ materialCatalog:[], vendorQuotes:[], rentalQuotes:[], subQuotes:[], po:[], mp:[] } };
 
   /* All simple inputs & selects that carry a value, keyed where possible. */
   document.querySelectorAll('input, select, textarea').forEach(el => {
@@ -1233,14 +1560,8 @@ function collectDraft(){
     d.fields[key] = el.value;
   });
 
-  /* Itemized (misc) material rows */
-  document.querySelectorAll('#materialItems tr.custom-mat').forEach(tr => {
-    d.dynamic.material.push({
-      name: tr.querySelector('.cm-name').value,
-      price: tr.querySelector('.cm-price').value,
-      qty: tr.querySelector('.cm-qty').value
-    });
-  });
+  /* Material catalog (collapsible categories/subcategories/items) */
+  d.dynamic.materialCatalog = collectMaterialCatalog();
   /* Money-row groups */
   const grabMoney = id => [...document.querySelectorAll(`#${id} .listrow`)].map(r => ({
     name: r.querySelector('.moneyname').value, val: r.querySelector('.moneyval').value
@@ -1270,9 +1591,8 @@ function applyDraft(d){
   /* Rebuild dynamic rows to match the saved counts. */
   const clear = sel => { const c = document.querySelector(sel); if (c) c.innerHTML = ''; };
 
-  clear('#materialItems');
-  (d.dynamic.material || []).forEach(m => addCustomMaterial(m.name, m.price, m.qty));
-  if (!d.dynamic.material || !d.dynamic.material.length) for (let i=0;i<6;i++) addCustomMaterial();
+  /* Material catalog: rebuild from saved structure, or defaults if absent. */
+  applyMaterialCatalog(d.dynamic.materialCatalog);
 
   clear('#vendorQuotes');
   (d.dynamic.vendorQuotes || []).forEach(v => addMoneyRow('vendorQuotes','Vendor', v.name, v.val));
@@ -5446,153 +5766,9 @@ document.getElementById("btnSave").addEventListener("click", () => {
 
 <script>
 /* ============================================================
-   AUTH GATE  (browser-local, on this device)
-   NOTE: This is a front-end access gate, not server security.
-   Passwords are stored SHA-256 hashed in localStorage; anyone with
-   file access could still bypass it. Suitable as an internal gate.
+   Load the four app iframes on open. (Login removed — full access.)
    ============================================================ */
-var STORAGE_KEY = "fdec_suite_users_v1";
-var SESSION_KEY = "fdec_suite_session_v1";
-
-/* Storage helpers that fall back to in-memory if localStorage is blocked. */
-var memStore = {};
-function storeGet(k){
-  try { var v = localStorage.getItem(k); return v == null ? (k in memStore ? memStore[k] : null) : v; }
-  catch(_){ return k in memStore ? memStore[k] : null; }
-}
-function storeSet(k, v){
-  memStore[k] = v;
-  try { localStorage.setItem(k, v); } catch(_){}
-}
-function storeDel(k){
-  delete memStore[k];
-  try { localStorage.removeItem(k); } catch(_){}
-}
-
-function loadUsers(){
-  try { return JSON.parse(storeGet(STORAGE_KEY) || "{}"); } catch(_){ return {}; }
-}
-function saveUsers(u){ storeSet(STORAGE_KEY, JSON.stringify(u)); }
-
-/* SHA-256 hash (hex). Falls back to a simple hash if SubtleCrypto missing. */
-async function hashPassword(pw){
-  try {
-    var enc = new TextEncoder().encode(pw);
-    var buf = await crypto.subtle.digest("SHA-256", enc);
-    return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,"0"); }).join("");
-  } catch(_){
-    var h = 5381; for (var i=0;i<pw.length;i++){ h = ((h<<5)+h) + pw.charCodeAt(i); h |= 0; }
-    return "fallback_" + (h>>>0).toString(16);
-  }
-}
-
-/* Password policy: 8–12 chars, >=1 uppercase, >=1 lowercase letter,
-   >=1 number, >=1 special character. Returns the per-rule results. */
-function evalPassword(pw){
-  var rules = {
-    len:     pw.length >= 8 && pw.length <= 12,
-    upper:   /[A-Z]/.test(pw),
-    lower:   /[a-z]/.test(pw),
-    num:     /[0-9]/.test(pw),
-    special: /[^A-Za-z0-9]/.test(pw)
-  };
-  var met = 0; for (var k in rules){ if (rules[k]) met++; }
-  var allMet = met === 5;
-  var level = "weak";
-  if (allMet) level = "strong";
-  else if (met >= 3 && pw.length >= 6) level = "medium";
-  return { rules: rules, met: met, valid: allMet, level: level };
-}
-
-function authShow(which){
-  var login = which === "login";
-  document.getElementById("authLogin").hidden = !login;
-  document.getElementById("authRegister").hidden = login;
-  document.getElementById("authTabLogin").classList.toggle("active", login);
-  document.getElementById("authTabReg").classList.toggle("active", !login);
-  document.getElementById(login ? "loginMsg" : "regMsg").textContent = "";
-}
-
-function onRegPassInput(){
-  var pw = document.getElementById("regPass").value;
-  var r = evalPassword(pw);
-  var ul = document.getElementById("pwRules");
-  ul.querySelectorAll("li").forEach(function(li){
-    li.classList.toggle("met", !!r.rules[li.getAttribute("data-rule")]);
-  });
-  var bars = document.getElementById("pwBars");
-  var label = document.getElementById("pwLabel");
-  bars.classList.remove("weak","medium","strong");
-  label.classList.remove("weak","medium","strong");
-  if (!pw){ label.innerHTML = "&nbsp;"; return; }
-  bars.classList.add(r.level);
-  label.classList.add(r.level);
-  label.textContent = r.level === "strong" ? "Strong" : r.level === "medium" ? "Medium" : "Weak";
-}
-
-async function doRegister(){
-  var user = document.getElementById("regUser").value.trim();
-  var pw   = document.getElementById("regPass").value;
-  var pw2  = document.getElementById("regPass2").value;
-  var msg  = document.getElementById("regMsg");
-  msg.className = "auth-msg err";
-
-  if (!user){ msg.textContent = "Enter a username."; return; }
-  var users = loadUsers();
-  if (users[user.toLowerCase()]){ msg.textContent = "That username is already registered."; return; }
-  var r = evalPassword(pw);
-  if (!r.valid){ msg.textContent = "Password does not meet all requirements below."; return; }
-  if (pw !== pw2){ msg.textContent = "Passwords do not match."; return; }
-
-  var btn = document.getElementById("regBtn"); btn.disabled = true;
-  var hash = await hashPassword(pw);
-  users[user.toLowerCase()] = { name: user, hash: hash, created: new Date().toISOString() };
-  saveUsers(users);
-  btn.disabled = false;
-
-  document.getElementById("regUser").value = "";
-  document.getElementById("regPass").value = "";
-  document.getElementById("regPass2").value = "";
-  onRegPassInput();
-  authShow("login");
-  var lm = document.getElementById("loginMsg");
-  lm.className = "auth-msg ok";
-  lm.textContent = "Account created. Please sign in.";
-  document.getElementById("loginUser").value = user;
-  document.getElementById("loginPass").focus();
-}
-
-async function doLogin(){
-  var user = document.getElementById("loginUser").value.trim();
-  var pw   = document.getElementById("loginPass").value;
-  var msg  = document.getElementById("loginMsg");
-  msg.className = "auth-msg err";
-
-  if (!user || !pw){ msg.textContent = "Enter your username and password."; return; }
-  var users = loadUsers();
-  var rec = users[user.toLowerCase()];
-  if (!rec){ msg.textContent = "No account found for that username."; return; }
-  var hash = await hashPassword(pw);
-  if (hash !== rec.hash){ msg.textContent = "Incorrect password."; return; }
-
-  if (document.getElementById("loginRemember").checked){
-    storeSet(SESSION_KEY, JSON.stringify({ user: rec.name, at: Date.now() }));
-  } else {
-    storeDel(SESSION_KEY);
-  }
-  document.getElementById("loginPass").value = "";
-  unlockSuite();
-}
-
-function doSignOut(){
-  storeDel(SESSION_KEY);
-  location.reload();
-}
-
-var appsLoaded = false;
 function loadApps(){
-  if (appsLoaded) return;
-  appsLoaded = true;
   function unshield(s){ return s.split("<\\/script").join("</script"); }
   function load(iframeId, srcId){
     var raw = document.getElementById(srcId).textContent;
@@ -5604,31 +5780,7 @@ function loadApps(){
   load("view-annual", "src-annual");
   load("view-install", "src-install");
 }
-
-function unlockSuite(){
-  document.getElementById("authGate").hidden = true;
-  loadApps();
-}
-
-/* On open: if a remembered session exists, go straight in; else show gate. */
-(function initAuth(){
-  var sess = null;
-  try { sess = JSON.parse(storeGet(SESSION_KEY) || "null"); } catch(_){}
-  if (sess && sess.user){ unlockSuite(); }
-  else {
-    document.getElementById("authGate").hidden = false;
-    authShow("login");
-  }
-})();
-
-/* Allow Enter to submit each form. */
-document.addEventListener("keydown", function(e){
-  if (e.key !== "Enter") return;
-  if (!document.getElementById("authGate").hidden){
-    if (!document.getElementById("authRegister").hidden) doRegister();
-    else doLogin();
-  }
-});
+loadApps();
 
 /* All views, in order. Each maps a key to its iframe id and tab id. */
 var VIEWS = [
