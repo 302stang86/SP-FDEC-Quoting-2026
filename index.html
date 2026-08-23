@@ -676,13 +676,6 @@
   <div><span class="lab">Potential Profit</span><span class="val profit" id="barProfit">$0.00</span></div>
   <div><span class="lab">Tax (MI <span class="mklbl" data-mk="tax">6</span>%)</span><span class="val" id="barTax">$0.00</span></div>
   <div><span class="lab">Downpayment (<span class="mklbl" data-mk="down">30</span>%)</span><span class="val" id="barDown">$0.00</span></div>
-  <div class="grow">
-    <button type="button" onclick="saveDraft()">Save Draft</button>
-    <button type="button" onclick="document.getElementById('draftFile').click()">Load Draft</button>
-    <button type="button" onclick="savePDF()">Save as PDF</button>
-    <button class="primary" type="button" onclick="window.print()">Print</button>
-    <input type="file" id="draftFile" accept=".html,text/html" style="display:none" onchange="loadDraftFile(this)">
-  </div>
 </div>
 
 <script>
@@ -796,38 +789,183 @@ function addMpRow(d){
 /* ================= MATERIAL CATALOG (collapsible) ================= */
 const MATERIAL_CATALOG = [
   {name:"Grooved Fittings", subs:[
-    {name:"Grooved Couplings", items:["8\" Grooved Coupling", "6\" Grooved Coupling", "4\" Grooved Coupling", "3\" Grooved Coupling", "2-1/2\" Grooved Coupling", "2\" Grooved Coupling", "1-1/2\" Grooved Coupling", "1-1/4\" Grooved Coupling"]},
-    {name:"Grooved Elbows", items:["4\" 90° Elbow", "2\" 90° Elbow"]},
-    {name:"Grooved Caps", items:["4\" Cap", "2\" Cap"]},
-    {name:"Grooved Misc", items:["4\" Grooved Drain 90° Elbow", "2\" Grooved Drain 90° Elbow", "2\" x 24\" GxG Flex Drain Kit", "2\" x 36\" GxG Flex Drain Kit"]},
+    {name:"Grooved Couplings", items:[
+      {name:"8\" Grooved Coupling", cost:"28.73"},
+      {name:"6\" Grooved Coupling", cost:"16.03"},
+      {name:"4\" Grooved Coupling", cost:"10.12"},
+      {name:"3\" Grooved Coupling", cost:"7.99"},
+      {name:"2-1/2\" Grooved Coupling", cost:"6.95"},
+      {name:"2\" Grooved Coupling", cost:"6.58"},
+      {name:"1-1/2\" Grooved Coupling", cost:"5.41"},
+      {name:"1-1/4\" Grooved Coupling", cost:"5.08"},
+    ]},
+    {name:"Grooved Elbows", items:[
+      {name:"4\" 90° Elbow", cost:"13.86"},
+      {name:"2\" 90° Elbow", cost:"6.19"},
+    ]},
+    {name:"Grooved Caps", items:[
+      {name:"4\" Cap", cost:"6.92"},
+      {name:"2\" Cap", cost:"3.65"},
+    ]},
+    {name:"Grooved Misc", items:[
+      {name:"4\" Grooved Drain 90° Elbow", cost:"22.01"},
+      {name:"2\" Grooved Drain 90° Elbow", cost:"9.13"},
+      {name:"2\"  GxG Flex Drain Kit", cost:"111.77"},
+    ]},
   ]},
   {name:"Mechanical Tees / TeeLocks", subs:[
-    {name:"6\" Run Mechanical Tees", items:["6\" x 2\" Mechanical Tee", "6\" x 1\" Mechanical Tee"]},
-    {name:"4\" Run Mechanical Tees", items:["4\" x 2\" Mechanical Tee", "4\" x 1\" Mechanical Tee"]},
-    {name:"2\" Run Mechanical Tees", items:["2\" x 1\" Mechanical Tee", "2\" x 3/4\" Mechanical Tee", "2\" x 1/2\" Mechanical Tee"]},
-    {name:"1-1/2\" Run Mechanical Tees", items:["1-1/2\" x 1\" Mechanical Tee", "1-1/2\" x 3/4\" Mechanical Tee", "1-1/2\" x 1/2\" Mechanical Tee"]},
-    {name:"1-1/4\" Run Mechanical Tees", items:["1-1/4\" x 1\" Mechanical Tee", "1-1/4\" x 3/4\" Mechanical Tee", "1-1/4\" x 1/2\" Mechanical Tee"]},
+    {name:"6\" Run Mechanical Tees", items:[
+      {name:"6\" x 2\" Mechanical Tee", cost:"19.95"},
+    ]},
+    {name:"4\" Run Mechanical Tees", items:[
+      {name:"4\" x 2\" Mechanical Tee", cost:"13.19"},
+      {name:"4\" x 1\" Mechanical Tee", cost:"11.33"},
+    ]},
+    {name:"2\" Run Mechanical Tees", items:[
+      {name:"2\" x 1\" Mechanical Tee"},
+      {name:"2\" x 3/4\" Mechanical Tee"},
+      {name:"2\" x 1/2\" Mechanical Tee"},
+    ]},
+    {name:"1-1/2\" Run Mechanical Tees", items:[
+      {name:"1-1/2\" x 1\" Mechanical Tee"},
+      {name:"1-1/2\" x 3/4\" Mechanical Tee"},
+      {name:"1-1/2\" x 1/2\" Mechanical Tee"},
+    ]},
+    {name:"1-1/4\" Run Mechanical Tees", items:[
+      {name:"1-1/4\" x 1\" Mechanical Tee"},
+      {name:"1-1/4\" x 3/4\" Mechanical Tee"},
+      {name:"1-1/4\" x 1/2\" Mechanical Tee"},
+    ]},
   ]},
   {name:"Flanged Components", subs:[
-    {name:"Grooved Flange Adapters", items:["6\" Grooved Flange Adapter", "4\" Grooved Flange Adapter"]},
-    {name:"Flange Bolt, Nut, and Gasket Kits", items:["6\" Flange Bolt, Nut, and Gasket Kit", "4\" Flange Bolt, Nut, and Gasket Kit"]},
+    {name:"Grooved Flange Adapters", items:[
+      {name:"6\" Grooved Flange Adapter", cost:"35.35"},
+      {name:"4\" Grooved Flange Adapter", cost:"25.23"},
+      {name:"4\" Grooved Flange Adapter W/NBG", cost:"69.63"},
+    ]},
+    {name:"Flange Bolt, Nut, and Gasket Kits", items:[
+      {name:"6\" Flange Bolt, Nut, and Gasket Kit", cost:"23.35"},
+      {name:"4\" Flange Bolt, Nut, and Gasket Kit", cost:"16.14"},
+    ]},
   ]},
   {name:"Pipe and Strut", subs:[
-    {name:"Schedule 10 Pipe", items:["4\" Schedule 10 Pipe", "3\" Schedule 10 Pipe", "2-1/2\" Schedule 10 Pipe", "2\" Schedule 10 Pipe", "1-1/2\" Schedule 10 Pipe", "1-1/4\" Schedule 10 Pipe"]},
-    {name:"Schedule 40 Pipe", items:["4\" Schedule 40 Pipe", "2\" Schedule 40 Pipe", "1\" Schedule 40 Pipe"]},
-    {name:"Strut Channels", items:["1-5/8\" Slotted Strut Channel", "13/16\" Slotted Strut Channel"]},
+    {name:"Schedule 10 Pipe", items:[
+      {name:"4\" Schedule 10 Pipe"},
+      {name:"3\" Schedule 10 Pipe"},
+      {name:"2-1/2\" Schedule 10 Pipe"},
+      {name:"2\" Schedule 10 Pipe"},
+      {name:"1-1/2\" Schedule 10 Pipe"},
+      {name:"1-1/4\" Schedule 10 Pipe"},
+    ]},
+    {name:"Schedule 40 Pipe", items:[
+      {name:"4\" Schedule 40 Pipe"},
+      {name:"2\" Schedule 40 Pipe"},
+      {name:"1\" Schedule 40 Pipe"},
+    ]},
+    {name:"Strut Channels", items:[
+      {name:"1-5/8\" Slotted Strut Channel"},
+      {name:"13/16\" Slotted Strut Channel"},
+    ]},
   ]},
   {name:"Hardware", subs:[
-    {name:"All-Thread Rod (ATR)", items:["3/4\" All-Thread Rod (ATR)", "5/8\" All-Thread Rod (ATR)", "1/2\" All-Thread Rod (ATR)", "3/8\" All-Thread Rod (ATR)"]},
-    {name:"Fasteners and Anchors", items:["3/8\" Hex Nut", "3/8\" Hex Bolt", "3/8\" Flat Washer", "3/8\" Lock Washer", "3/8\" Toggle Wing"]},
+    {name:"All-Thread Rod (ATR)", items:[
+      {name:"3/4\" All-Thread Rod (ATR)"},
+      {name:"5/8\" All-Thread Rod (ATR)"},
+      {name:"1/2\" All-Thread Rod (ATR)"},
+      {name:"3/8\" All-Thread Rod (ATR)"},
+    ]},
+    {name:"Fasteners and Anchors", items:[
+      {name:"3/8\" Hex Nut"},
+      {name:"3/8\" Hex Bolt"},
+      {name:"3/8\" Flat Washer"},
+      {name:"3/8\" Lock Washer"},
+      {name:"3/8\" Toggle Wing"},
+    ]},
   ]},
   {name:"FDC Material", subs:[
-    {name:"Fire Department Connections", items:["4\" x 2-1/2\" Siamese FDC NST", "4\" x 2-1/2\" Siamese FDC DET", "4\" Storz Straight FDC", "4\" Storz 22° Angle FDC", "4\" x 5\" Storz Straight FDC", "4\" x 5\" Storz 22° Angle FDC"]},
-    {name:"Signage", items:["4\" Red Aluminum Round FDC Sign"]},
-    {name:"Misc", items:["1/2\" Automatic Ball Drip", "2-1/2\" Red Aluminum Breakaway FDC Caps", "2-1/2\" NST Brass Plug", "2-1/2\" DET Brass Plug"]},
+    {name:"Fire Department Connections", items:[
+      {name:"4\" x 2-1/2\" Siamese FDC NST", cost:"165"},
+      {name:"4\" x 2-1/2\" Siamese FDC DET", cost:"165"},
+      {name:"4\" Storz Straight FDC", cost:"91.91"},
+      {name:"4\" Storz 30° Angle FDC", cost:"179.42"},
+      {name:"4\" x 5\" Storz Straight FDC", cost:"136.94"},
+      {name:"4\" x 5\" Storz 22° Angle FDC", cost:"244.54"},
+      {name:"2-1/2\" Single Snoot FDC NST Kit", cost:"102.07"},
+      {name:"4\" Storz Cap", cost:"98.76"},
+      {name:"5\" Storz Cap", cost:"124.67"},
+    ]},
+    {name:"Signage", items:[
+      {name:"4\" Red Aluminum Round FDC Sign", cost:"12"},
+    ]},
+    {name:"Misc", items:[
+      {name:"1/2\" Automatic Ball Drip", cost:"20.17"},
+      {name:"2-1/2\" Red Aluminum Breakaway FDC Caps", cost:"6.64"},
+      {name:"2-1/2\" NST Brass Plug", cost:"23.84"},
+      {name:"2-1/2\" DET Brass Plug", cost:"26"},
+    ]},
   ]},
-  {name:"Threaded Fittings", subs:[
-    {name:"", items:[]},
+  {name:"Sprinklers and Accessories", subs:[
+    {name:"Sprinklers", items:[
+      {name:"Misc Sprinkler", cost:"9.00"},
+    ]},
+    {name:"Spare Head Boxes", items:[
+      {name:"6 Count Spare Head Cabinet", cost:"10.33"},
+      {name:"12 Count Spare Head Cabinet", cost:"12.14"},
+      {name:"6 Count Spare Head Cabinet Tall", cost:"16.81"},
+    ]},
+    {name:"Escutcheons and Concealed Coverplates", items:[
+      {name:"Misc Escutcheon", cost:"5"},
+    ]},
+    {name:"Head guards", items:[
+      {name:"Red One Piece Head Guard", cost:"2.96"},
+      {name:"Red Two Piece 1/2\" Head Guard", cost:"4.43"},
+      {name:"Red Two Piece 3/4\" Head Guard", cost:"4.43"},
+    ]},
+    {name:"Brass Nipple Extensions \"Length x NPT\"", items:[
+      {name:"1/2\" x 1/2\" Brass Nipple Extension", cost:"3.77"},
+      {name:"3/4\" x 1/2\" Brass Nipple Extension", cost:"3.35"},
+      {name:"1\" x 1/2\" Brass Nipple Extension", cost:"4.32"},
+      {name:"1/2\" x 3/4\" Brass Nipple Extension", cost:"3.47"},
+      {name:"3/4\" x 3/4\" Brass Nipple Extension", cost:"4.62"},
+      {name:"3/4\" x 3/4\" Brass Nipple Extension", cost:"5.56"},
+    ]},
+  ]},
+  {name:"Sprinkler Riser", subs:[
+    {name:"System Signage and Tags", items:[
+      {name:"6\" x 2\" System Sign W/Chain", cost:"6.10"},
+      {name:"Aluminum Numerical Tags 1-20", cost:"15"},
+      {name:"FDEC Information Sticker", cost:"5"},
+      {name:"FDEC Spare Cabinet Sticker", cost:"5"},
+    ]},
+    {name:"Valve Locks and Chain", items:[
+      {name:"Master Lock Keyed Alike (197)", cost:"14.74"},
+      {name:"Argco Keyed Alike", cost:"8.14"},
+      {name:"Valve Chain Per Foot", cost:"1.5"},
+    ]},
+    {name:"Check Valves", items:[
+      {name:"4\" Grooved Check Valve Argco", cost:"124.44"},
+      {name:"4\" Grooved Check Valve Tyco"},
+      {name:"1/2\" Threaded Check Valve", cost:"14.24"},
+      {name:"3/4\" Threaded Check Valve", cost:"17.42"},
+      {name:"1\" Threaded Check Valve", cost:"21.77"},
+      {name:"2\" Threaded Check Valve", cost:"66.55"},
+    ]},
+    {name:"Control Valves", items:[
+      {name:"4\" BVG W/Tamper", cost:"168.86"},
+      {name:"6\" BVG W/Tamper", cost:"229.92"},
+      {name:"2\" Angle Main Drain Valve", cost:"98.17"},
+    ]},
+    {name:"Ball Valves And ITV's", items:[
+      {name:"1\" Test and Drain", cost:"94.48"},
+      {name:"1\" Test and Drain Angle"},
+      {name:"1\" FP Ball Valve", cost:"24.99"},
+      {name:"3/4\" FP Ball Valve", cost:"17.24"},
+      {name:"1/2\" FP Ball Valve", cost:"10.64"},
+      {name:"1/4\" FP Ball Valve", cost:"10.42"},
+      {name:"1\" ITV Sight Glass K=5.6", cost:"27.58"},
+      {name:"1\" Sight Glass", cost:"26.58"},
+      {name:"1\" Drum Drip Assembly", cost:"109.75"},
+    ]},
   ]},
 ];
 
@@ -846,7 +984,10 @@ function buildMaterialCatalog(data){
 
 function renderMatCategory(cat){
   const wrap = document.createElement('div');
-  wrap.className = 'mat-cat' + (cat._collapsed ? ' collapsed' : '');
+  // Categories start collapsed by default; only expanded when saved state
+  // explicitly marks them open (cat._collapsed === false).
+  const collapsed = (cat._collapsed !== false);
+  wrap.className = 'mat-cat' + (collapsed ? ' collapsed' : '');
   const head = document.createElement('div');
   head.className = 'mat-cat-head';
   head.innerHTML =
@@ -2145,7 +2286,6 @@ Mp1@firedefense.com</textarea>
 <div class="actionbar">
   <button class="primary" id="btnWord">Generate Word Proposal (.docx)</button>
   <button class="secondary" id="btnCopy">Copy as Plain Text</button>
-  <button class="secondary" id="btnSave">Save Draft (.html)</button>
   <span id="status" class=""></span>
 </div>
 
@@ -3060,7 +3200,8 @@ window.addEventListener("message", function(e){
   }
 });
 
-document.getElementById("btnSave").addEventListener("click", () => {
+var _btnSave = document.getElementById("btnSave");
+if (_btnSave) _btnSave.addEventListener("click", () => {
   try {
     // JSON payload; escape "</" so it can't terminate the script tag
     const json = JSON.stringify(collectState()).replace(/<\//g, "<\\/");
@@ -3485,7 +3626,6 @@ Mp1@firedefense.com</textarea>
 <div class="actionbar">
   <button class="primary" id="btnWord">Generate Word Proposal (.docx)</button>
   <button class="secondary" id="btnCopy">Copy as Plain Text</button>
-  <button class="secondary" id="btnSave">Save Draft (.html)</button>
   <span id="status" class=""></span>
 </div>
 
@@ -4383,7 +4523,8 @@ window.addEventListener("message", function(e){
   }
 });
 
-document.getElementById("btnSave").addEventListener("click", () => {
+var _btnSave = document.getElementById("btnSave");
+if (_btnSave) _btnSave.addEventListener("click", () => {
   try {
     // JSON payload; escape "</" so it can't terminate the script tag
     const json = JSON.stringify(collectState()).replace(/<\//g, "<\\/");
@@ -4808,7 +4949,6 @@ Mp1@firedefense.com</textarea>
 <div class="actionbar">
   <button class="primary" id="btnWord">Generate Word Proposal (.docx)</button>
   <button class="secondary" id="btnCopy">Copy as Plain Text</button>
-  <button class="secondary" id="btnSave">Save Draft (.html)</button>
   <span id="status" class=""></span>
 </div>
 
@@ -5684,7 +5824,8 @@ window.addEventListener("message", function(e){
   }
 });
 
-document.getElementById("btnSave").addEventListener("click", () => {
+var _btnSave = document.getElementById("btnSave");
+if (_btnSave) _btnSave.addEventListener("click", () => {
   try {
     // JSON payload; escape "</" so it can't terminate the script tag
     const json = JSON.stringify(collectState()).replace(/<\//g, "<\\/");
