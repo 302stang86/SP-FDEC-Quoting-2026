@@ -290,9 +290,9 @@
   #summaryTable tr.lineitem:nth-child(3n+1) td{background:#ffffff}
   #summaryTable tr.lineitem:nth-child(3n+2) td{background:#f3f4f6}
   #summaryTable tr.lineitem:nth-child(3n)   td{background:#d1e8fc}
-  /* Customer Total column (4th) bold across the whole table */
-  #summaryTable td:nth-child(4),
-  #summaryTable th:nth-child(4){font-weight:700}
+  /* Customer Total column (3rd) bold across the whole table */
+  #summaryTable td:nth-child(3),
+  #summaryTable th:nth-child(3){font-weight:700}
   /* Manpower / Tasks summary table */
   #mpSummaryTable{margin-bottom:16px}
   #mpSummaryTable td, #mpSummaryTable th{padding:6px 8px}
@@ -636,14 +636,6 @@
   </details>
 
   <!-- SELECTED MATERIALS -->
-  <details class="card" open="" id="sec-selected">
-    <summary>Selected Materials &amp; Equipment</summary>
-    <div class="body">
-      <p class="hint" style="margin:0 0 8px">Builds automatically from every quantity entered above.</p>
-      <div id="selectedOut"><p class="empty">No materials or equipment selected yet.</p></div>
-    </div>
-  </details>
-
   <!-- SUMMARY -->
   <details class="card" open="" id="sec-summary">
     <summary>Quote Summary</summary>
@@ -660,20 +652,18 @@
         </table>
       </div>
 
-      <h3 class="sub">Purchase Orders</h3>
-      <table id="poTable"><thead>
-        <tr><th style="width:26%">PO Number</th><th>Description</th><th class="noprint"></th></tr>
-      </thead><tbody id="poRows"></tbody></table>
-      <button class="small noprint" style="margin:8px 0 4px" type="button" onclick="addPoRow()">+ Add PO</button>
+      <h3 class="sub">Selected Materials &amp; Equipment</h3>
+      <p class="hint" style="margin:0 0 8px">Builds automatically from every quantity entered above.</p>
+      <div id="selectedOut"><p class="empty">No materials or equipment selected yet.</p></div>
 
       <h3 class="sub" style="margin-top:16px">Totals</h3>
       <table id="summaryTable">
-        <thead><tr><th>Line</th><th class="num">Our Cost</th><th class="num">Markup</th><th class="num">Customer Total</th></tr></thead>
-        <tbody id="summaryBody"><tr><td colspan="4" class="empty">Nothing quoted yet — enter hours or quantities above.</td></tr><tr class="grand"><td>Grand totals</td><td class="num">$0.00</td>
-      <td class="num"></td><td class="num">$0.00</td></tr><tr class="grand profit"><td>Potential profit</td><td class="num"></td>
-      <td class="num"></td><td class="num">$0.00</td></tr><tr class="grand"><td>Tax (material + ITM at 6%)</td><td class="num"></td>
-      <td class="num"></td><td class="num">$0.00</td></tr><tr class="grand"><td>Downpayment (30%)</td><td class="num"></td>
-      <td class="num"></td><td class="num">$0.00</td></tr></tbody>
+        <thead><tr><th>Line</th><th class="num">Our Cost</th><th class="num">Customer Total</th></tr></thead>
+        <tbody id="summaryBody"><tr><td colspan="3" class="empty">Nothing quoted yet — enter hours or quantities above.</td></tr><tr class="grand"><td>Grand totals</td><td class="num">$0.00</td>
+      <td class="num">$0.00</td></tr><tr class="grand profit"><td>Potential profit</td><td class="num"></td>
+      <td class="num">$0.00</td></tr><tr class="grand"><td>Tax (material + ITM at 6%)</td><td class="num"></td>
+      <td class="num">$0.00</td></tr><tr class="grand"><td>Downpayment (30%)</td><td class="num"></td>
+      <td class="num">$0.00</td></tr></tbody>
       </table>
     </div>
   </details>
@@ -803,14 +793,6 @@ function addMpRow(d){
   if (d.dept) tr.querySelector('.mp-dept').value = d.dept;
 }
 
-function addPoRow(no, desc){
-  const tr = document.createElement('tr');
-  tr.innerHTML = `<td><input class="wide po-no" placeholder="PO #" value="${(no||'').replace(/"/g,'&quot;')}"></td>
-    <td><input class="wide po-desc" placeholder="Description" value="${(desc||'').replace(/"/g,'&quot;')}"></td>
-    <td class="noprint"><button class="small" type="button" onclick="this.closest('tr').remove()">&times;</button></td>`;
-  $('poRows').appendChild(tr);
-}
-
 /* ================= MATERIAL CATALOG (collapsible) ================= */
 const MATERIAL_CATALOG = [
   {name:"Grooved Fittings", subs:[
@@ -905,7 +887,10 @@ function renderMatCategory(cat){
 
 function renderMatSub(sub){
   const wrap = document.createElement('div');
-  wrap.className = 'mat-sub' + (sub._collapsed ? ' collapsed' : '');
+  // Subcategories start collapsed by default; only expanded when the saved
+  // state explicitly marks them open (sub._collapsed === false).
+  const collapsed = (sub._collapsed !== false);
+  wrap.className = 'mat-sub' + (collapsed ? ' collapsed' : '');
   const head = document.createElement('div');
   head.className = 'mat-sub-head';
   head.innerHTML =
@@ -1085,7 +1070,6 @@ laborRows('laborSP','sp',[['ST','Straight time'],['OT','Overtime'],['DT','Double
 laborRows('laborShop','shop',[['ST','Straight time'],['OT','Overtime'],['DT','Double time']],'sp');
 laborRows('laborFA','fa',[['ST','Straight time'],['OT','Overtime'],['DT','Double time']],'fa');
 
-for (let i=0;i<2;i++) addPoRow();
 addMoneyRow('vendorQuotes','Vendor','Galloup');
 addMoneyRow('vendorQuotes','Vendor','Viking');
 addMoneyRow('vendorQuotes','Vendor','Macomb');
@@ -1166,6 +1150,10 @@ function recalc(ev){
   const matItemCost = sumMaterialCatalog();
   const vendorCost = sumMoneyRows('vendorQuotes');
   const materialCost = matItemCost + vendorCost; /* total material cost (for section subtotal/tax base) */
+  /* Combined material line: itemized (misc) + vendor-quoted, each keeping its
+     own markup. Show a blended markup % that reflects the actual dollars. */
+  const matCustTotal = matItemCost*(1+P.miscmat) + vendorCost*(1+P.material);
+  const matBlendedPct = materialCost > 0 ? fmtPct((matCustTotal / materialCost) - 1) : null;
   const rentalQuoteCost = sumMoneyRows('rentalQuotes');
   const subQuoteCost = sumMoneyRows('subQuotes');
   const hotelCost = num($('hotelCost'));
@@ -1190,8 +1178,7 @@ function recalc(ev){
     ['(SP) transportation', truckCosts[0]||0, null, truckCosts[0]||0],
     ['(FA) transportation', truckCosts[1]||0, null, truckCosts[1]||0],
     ['Box truck', truckCosts[2]||0, null, truckCosts[2]||0],
-    ['Misc material', matItemCost, fmtPct(P.miscmat), matItemCost*(1+P.miscmat)],
-    ['Vendor-quoted material', vendorCost, fmtPct(P.material), vendorCost*(1+P.material)],
+    ['Materials', matItemCost + vendorCost, matBlendedPct, matItemCost*(1+P.miscmat) + vendorCost*(1+P.material)],
     ['FDEC lift & equipment rental', fdecRentalCost, null, fdecRentalCost],
     ['FDEC equipment fees', eqFeesCost, fmtPct(P.eqfees), eqFeesCost*(1+P.eqfees)],
     ['Hotel', hotelCost, fmtPct(P.hotel), hotelCost*(1+P.hotel)],
@@ -1217,12 +1204,12 @@ function recalc(ev){
     const tr = document.createElement('tr');
     tr.className = 'lineitem';
     tr.innerHTML = `<td>${l[0]}</td><td class="num">${money(l[1])}</td>
-      <td class="num">${l[2]||'—'}</td><td class="num">${money(l[3])}</td>`;
+      <td class="num">${money(l[3])}</td>`;
     tb.appendChild(tr);
   });
   if (!shown){
     const tr = document.createElement('tr');
-    tr.innerHTML = '<td colspan="4" class="empty">Nothing quoted yet — enter hours or quantities above.</td>';
+    tr.innerHTML = '<td colspan="3" class="empty">Nothing quoted yet — enter hours or quantities above.</td>';
     tb.appendChild(tr);
   }
   [['Grand totals', grandCost, '', grandCust, 'grand'],
@@ -1232,7 +1219,7 @@ function recalc(ev){
     const tr = document.createElement('tr');
     tr.className = l[4];
     tr.innerHTML = `<td>${l[0]}</td><td class="num">${l[1]===''?'':money(l[1])}</td>
-      <td class="num"></td><td class="num">${money(l[3])}</td>`;
+      <td class="num">${money(l[3])}</td>`;
     tb.appendChild(tr);
   });
 
@@ -1335,6 +1322,8 @@ function hasCopyableExtras(){
       [...document.querySelectorAll('input[data-g="trucks"][data-f="qty"]')].some(el => num(el) > 0)) return true;
   if ([...document.querySelectorAll('input[data-g="perdiem"][data-f="qty"]')].some(el => num(el) > 0)) return true;
   if ($('hotelCost') && num($('hotelCost')) > 0) return true;
+  const sel = collectSelected();
+  if (sel.mats.length || sel.equip.length) return true;
   return false;
 }
 
@@ -1434,6 +1423,21 @@ function buildManpowerText(){
     any = true;
     out.push('HOTEL', '');
     out.push(`\u2022 Hotel: ${money(hotel)}`);
+  }
+
+  /* ---- Selected Materials & Equipment ---- */
+  const sel = collectSelected();
+  if (sel.mats.length){
+    if (any) out.push('');
+    any = true;
+    out.push('MATERIALS', '');
+    sel.mats.forEach(m => out.push(`\u2022 (${m[1]}) ${m[0]}`));
+  }
+  if (sel.equip.length){
+    if (any) out.push('');
+    any = true;
+    out.push('EQUIPMENT', '');
+    sel.equip.forEach(m => out.push(`\u2022 (${m[1]}) ${m[0]}`));
   }
 
   return any ? out.join('\n') : '';
@@ -1569,10 +1573,6 @@ function collectDraft(){
   d.dynamic.vendorQuotes = grabMoney('vendorQuotes');
   d.dynamic.rentalQuotes = grabMoney('rentalQuotes');
   d.dynamic.subQuotes   = grabMoney('subQuotes');
-  /* PO rows */
-  document.querySelectorAll('#poRows tr').forEach(tr => {
-    d.dynamic.po.push({ no: tr.querySelector('.po-no').value, desc: tr.querySelector('.po-desc').value });
-  });
   /* Manpower rows */
   document.querySelectorAll('#mpRows tr').forEach(tr => {
     d.dynamic.mp.push({
@@ -1600,10 +1600,6 @@ function applyDraft(d){
   (d.dynamic.rentalQuotes || []).forEach(v => addMoneyRow('rentalQuotes','Rental vendor', v.name, v.val));
   clear('#subQuotes');
   (d.dynamic.subQuotes || []).forEach(v => addMoneyRow('subQuotes','Subcontractor', v.name, v.val));
-
-  clear('#poRows');
-  (d.dynamic.po || []).forEach(p => addPoRow(p.no, p.desc));
-  if (!d.dynamic.po || !d.dynamic.po.length) for (let i=0;i<2;i++) addPoRow();
 
   clear('#mpRows');
   (d.dynamic.mp || []).forEach(m => addMpRow(m));
@@ -1777,11 +1773,11 @@ window.addEventListener('message', function(e){
       });
       // Remove interactive-only elements from the clone.
       wrap.querySelectorAll('.noprint, button, .totbar').forEach(el => el.remove());
-      // For the exported PDF, keep ONLY the Selected Materials & Equipment
-      // and Quote Summary sections. Remove all other collapsible sections
-      // so their titles don't clutter the printout, and force the two we
-      // keep to be open.
-      var KEEP = { 'sec-selected':1, 'sec-summary':1 };
+      // For the exported PDF, keep ONLY the Quote Summary section (which now
+      // contains the Manpower/Tasks, Selected Materials & Equipment, and
+      // Totals). Remove all other collapsible sections so their titles don't
+      // clutter the printout, and force the kept one open.
+      var KEEP = { 'sec-summary':1 };
       wrap.querySelectorAll('details').forEach(function(el){
         if (KEEP[el.id]){ el.setAttribute('open','open'); }
         else { el.remove(); }
