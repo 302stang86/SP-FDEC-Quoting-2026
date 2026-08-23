@@ -63,6 +63,36 @@
     text-transform:none; letter-spacing:.02em; font-size:12.5px;
   }
   .suitebar button.draft:hover{background:#d1e8fc; color:#010039; border-color:#3281b9}
+  .autosave-note{
+    align-self:center; margin-left:10px; font-size:11.5px; color:#9fb8d6;
+    white-space:nowrap; transition:opacity .4s; font-style:italic;
+  }
+  .closewarn-toggle{
+    align-self:center; margin-left:10px; display:flex; align-items:center; gap:6px;
+    font-size:11.5px; color:#c7d7ec; white-space:nowrap; cursor:pointer; user-select:none;
+  }
+  .closewarn-toggle input{width:15px; height:15px; accent-color:#3281b9; cursor:pointer; margin:0}
+  @media(max-width:900px){ .closewarn-toggle span{display:none} }
+  .restore-banner{
+    flex:none; display:flex; align-items:center; justify-content:space-between; gap:12px;
+    background:#fff7ed; border-bottom:1px solid #f0c088; color:#8a5a12;
+    padding:9px 16px; font-size:13.5px;
+    padding-left:max(16px, env(safe-area-inset-left));
+    padding-right:max(16px, env(safe-area-inset-right));
+  }
+  .restore-banner .rb-actions{display:flex; gap:8px; flex:none}
+  .restore-banner button{
+    font:inherit; font-size:13px; font-weight:700; border-radius:6px; cursor:pointer;
+    padding:7px 14px; min-height:38px; border:1px solid transparent;
+  }
+  .restore-banner .rb-restore{background:#c67b12; color:#fff}
+  .restore-banner .rb-restore:hover{background:#a8650c}
+  .restore-banner .rb-dismiss{background:#fff; border-color:#e2c79a; color:#8a5a12}
+  .restore-banner .rb-dismiss:hover{background:#f6ecdd}
+  @media(max-width:640px){
+    .restore-banner{flex-wrap:wrap; gap:8px}
+    .autosave-note{display:none}
+  }
   .suitebar button.signout{
     align-self:center; margin:0 0 0 4px; padding:8px 14px;
     border:1px solid #26407a; border-radius:6px; background:#0a1a4a; color:#d1e8fc;
@@ -147,7 +177,20 @@
     <button id="btn-savedraft" class="draft" type="button" onclick="saveSuiteDraft()" title="Save all pages as one draft file">Save Draft</button>
     <button id="btn-loaddraft" class="draft" type="button" onclick="document.getElementById('suiteDraftFile').click()" title="Load a saved suite draft">Load Draft</button>
     <input type="file" id="suiteDraftFile" accept=".json,.fdecsuite,application/json" style="display:none" onchange="loadSuiteDraftFile(this)">
+    <label id="closeWarnToggle" class="closewarn-toggle" title="Warn me before closing if there are unsaved changes">
+      <input type="checkbox" id="closeWarnChk" checked onchange="_closeWarnEnabled = this.checked">
+      <span>Warn before closing</span>
+    </label>
+    <span id="autosaveNote" class="autosave-note" style="opacity:0"></span>
   </nav>
+</div>
+
+<div id="restoreBanner" class="restore-banner" style="display:none">
+  <span class="rb-text"></span>
+  <span class="rb-actions">
+    <button type="button" class="rb-restore">Restore</button>
+    <button type="button" class="rb-dismiss">Dismiss</button>
+  </span>
 </div>
 
 <div class="views">
@@ -240,6 +283,10 @@
   input.wide{width:100%; padding:9px 8px; border:1px solid var(--line); border-radius:5px; font-size:16px}
   input.money{width:120px}
   .hint{font-size:12px; color:var(--steel); margin:6px 0 0}
+  .copyright-notice{
+    font-size:11px; color:var(--steel); text-align:center; font-style:italic;
+    margin:26px auto 8px; padding-top:12px; border-top:1px solid var(--line); max-width:1100px;
+  }
   .cols2{display:grid; grid-template-columns:1fr 1fr; gap:0 28px}
   @media(max-width:760px){
     .cols2{grid-template-columns:1fr}
@@ -293,6 +340,17 @@
   /* Customer Total column (3rd) bold across the whole table */
   #summaryTable td:nth-child(3),
   #summaryTable th:nth-child(3){font-weight:700}
+  /* Sanity-check flags */
+  .sanity-flags{display:flex; flex-direction:column; gap:6px; margin:6px 0 4px}
+  .sanity-flag{
+    display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.35;
+    padding:8px 11px; border-radius:6px; border:1px solid;
+  }
+  .sanity-flag .ico{flex:none; font-weight:700; font-size:13px; line-height:1.35}
+  .sanity-flag.warn{background:#fff7ed; border-color:#f0c088; color:#8a5a12}
+  .sanity-flag.warn .ico{color:#c67b12}
+  .sanity-flag.info{background:#eef5fb; border-color:#bcd6ef; color:#2a5578}
+  .sanity-flag.info .ico{color:#3281b9}
   /* Manpower / Tasks summary table */
   #mpSummaryTable{margin-bottom:16px}
   #mpSummaryTable td, #mpSummaryTable th{padding:6px 8px}
@@ -384,6 +442,20 @@
     border:1px dashed var(--line); background:none; color:var(--steel);
   }
   .mat-addbtn:hover{border-color:var(--red); color:var(--red)}
+
+  /* Structure lock: when the catalog is locked, hide the add/delete controls
+     and stop the category/subcategory NAME fields from being edited. Item
+     cost/qty inputs stay fully editable so quoting is unaffected. */
+  #materialCatalog.structure-locked .mat-del,
+  #materialCatalog.structure-locked .mat-addbtn{display:none !important}
+  #materialCatalog.structure-locked input.cat-name,
+  #materialCatalog.structure-locked input.sub-name{
+    pointer-events:none; cursor:default;
+  }
+  /* Visual cue that structural editing is unlocked. */
+  #materialCatalog:not(.structure-locked) input.cat-name{background:rgba(255,255,255,.10)}
+  #materialCatalog:not(.structure-locked) input.sub-name{background:#fff; border-color:var(--line)}
+  button#matEditToggle.editing{background:var(--red); color:#fff; border-color:var(--red)}
   @media(max-width:760px){
     .mat-sub-body table{min-width:0}
     .mat-cat-body, .mat-sub-body{overflow-x:auto}
@@ -557,10 +629,14 @@
       <div id="vendorQuotes"></div>
       <button class="small noprint" type="button" onclick="addMoneyRow(&#39;vendorQuotes&#39;,&#39;Vendor&#39;)">+ Add vendor quote</button>
 
-      <h3 class="sub">Itemized Material</h3>
-      <div id="materialCatalog"></div>
-      <button class="small noprint" style="margin-top:10px" type="button" onclick="addMatCategory()">+ Add category</button>
-      <p class="hint">Enter a unit cost and quantity on any line to include it. Categories and subcategories collapse; you can add your own categories, subcategories, and items. Sales tax calculates on the customer material total.</p>
+      <h3 class="sub">Itemized Material <span style="font-style:italic; font-weight:400; text-transform:none; letter-spacing:normal; color:var(--steel)">(Most Pricing is from Argco.com)</span></h3>
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px">
+        <button id="matEditToggle" class="small noprint" type="button" onclick="toggleMatEdit()">Edit categories</button>
+        <span id="matEditHint" class="hint" style="margin:0">Editing categories is locked. Item costs and quantities are always editable.</span>
+      </div>
+      <div id="materialCatalog" class="structure-locked"></div>
+      <button id="matAddCatBtn" class="small noprint" style="margin-top:10px; display:none" type="button" onclick="addMatCategory()">+ Add category</button>
+      <p class="hint">Enter a unit cost and quantity on any line to include it. Sales tax calculates on the customer material total.</p>
       <table style="display:none"><tbody id="materialItems"></tbody></table>
     </div>
   </details>
@@ -656,6 +732,8 @@
       <p class="hint" style="margin:0 0 8px">Builds automatically from every quantity entered above.</p>
       <div id="selectedOut"><p class="empty">No materials or equipment selected yet.</p></div>
 
+      <div id="sanityFlags" class="sanity-flags" style="display:none"></div>
+
       <h3 class="sub" style="margin-top:16px">Totals</h3>
       <table id="summaryTable">
         <thead><tr><th>Line</th><th class="num">Our Cost</th><th class="num">Customer Total</th></tr></thead>
@@ -667,6 +745,8 @@
       </table>
     </div>
   </details>
+
+  <p class="copyright-notice">&copy; 2026 Mitchell Peebles. Licensed to Fire Defense Equipment Company, Inc. for internal use.</p>
 
 </div>
 
@@ -980,6 +1060,8 @@ function buildMaterialCatalog(data){
   if (!host) return;
   host.innerHTML = '';
   (data || MATERIAL_CATALOG).forEach(cat => host.appendChild(renderMatCategory(cat)));
+  // Re-apply the current lock state to the freshly-rendered name inputs.
+  syncMatLock(!host.classList.contains('structure-locked'));
 }
 
 function renderMatCategory(cat){
@@ -1097,6 +1179,36 @@ function addMatCategory(){
   el.classList.remove('collapsed');
   const ni = el.querySelector('.cat-name'); if (ni) ni.focus();
   updateMatCounts();
+}
+
+/* Lock/unlock editing of category & subcategory structure (names, add,
+   delete). Item cost/qty always stay editable. A single button flips it. */
+function toggleMatEdit(){
+  const host = $('materialCatalog');
+  if (!host) return;
+  const nowEditing = host.classList.toggle('structure-locked') === false;
+  syncMatLock(nowEditing);
+}
+
+/* Apply the current lock state to controls that need a real attribute
+   (readOnly on the name fields, the show/hide of the top "+ Add category"
+   button, and the toggle button's label). CSS handles the rest. */
+function syncMatLock(editing){
+  const host = $('materialCatalog');
+  if (!host) return;
+  // If called without an explicit value, derive from the current class.
+  if (editing === undefined) editing = !host.classList.contains('structure-locked');
+  host.querySelectorAll('input.cat-name, input.sub-name').forEach(inp => { inp.readOnly = !editing; });
+  const addCat = $('matAddCatBtn'); if (addCat) addCat.style.display = editing ? '' : 'none';
+  const btn = $('matEditToggle');
+  if (btn){
+    btn.textContent = editing ? 'Done editing' : 'Edit categories';
+    btn.classList.toggle('editing', editing);
+  }
+  const hint = $('matEditHint');
+  if (hint) hint.textContent = editing
+    ? 'Editing on — rename, add, or remove categories, subcategories, and items.'
+    : 'Editing categories is locked. Item costs and quantities are always editable.';
 }
 
 /* Sum all catalog item rows into the material cost; also refresh per-row
@@ -1411,6 +1523,80 @@ function recalc(ev){
 
   renderMpSummary();
   buildSelected();
+
+  /* Non-blocking sanity checks to catch common omissions before a quote
+     goes out. These never block anything — just gentle nudges. */
+  renderSanityFlags({
+    grandCost, grandCust, profit,
+    matCost: matItemCost + vendorCost,
+    laborCost: spST + spOT + spDT + faST + faOT + faDT,
+    mpHours: mp.ST + mp.OT + mp.DT + mp.AD,
+    trips: (trips.SP || 0) + (trips.FA || 0),
+    hotel: hotelCost, perdiem: perdiemCost,
+    hasAnyMaterialQty: !!document.querySelector('#materialCatalog .mat-item.filled')
+  });
+
+  /* Auto-save this quote to the suite (crash protection). Debounced so we
+     don't hammer storage on every keystroke. */
+  scheduleAutosave();
+}
+
+/* ---- Auto-save (crash protection) ------------------------------------
+   Posts the current quote draft to the suite shell, which persists it to
+   its own (stable) localStorage. Debounced so rapid edits don't thrash.
+   Silent no-op when opened as a standalone file with no parent frame. */
+var _autosaveTimer = null;
+function scheduleAutosave(){
+  if (!(window.parent && window.parent !== window)) return;
+  clearTimeout(_autosaveTimer);
+  _autosaveTimer = setTimeout(function(){
+    try {
+      var draft = collectDraft();
+      window.parent.postMessage({ fdec:true, type:'autosave', page:'quote', data:draft }, '*');
+    } catch(_){}
+  }, 1200);
+}
+
+/* ---- Sanity flags ---------------------------------------------------- */
+function renderSanityFlags(s){
+  const host = $('sanityFlags');
+  if (!host) return;
+  const flags = [];
+  const warn = msg => flags.push(['warn', msg]);
+  const info = msg => flags.push(['info', msg]);
+
+  // Only bother once something has been quoted.
+  const quoted = s.grandCust > 0 || s.grandCost > 0;
+  const hasLabor = s.laborCost > 0 || s.mpHours > 0;
+  if (quoted){
+    if (s.matCost > 0 && !hasLabor)
+      warn('Materials are entered but no labor — did you forget to add manpower or labor hours?');
+    if (hasLabor && s.matCost === 0 && !s.hasAnyMaterialQty)
+      info('Labor is entered but no materials — confirm this job needs no parts.');
+    if (hasLabor && s.trips === 0)
+      info('Labor is entered but no trips/trucks — confirm transportation isn\u2019t needed.');
+    if (s.hotel > 0 && s.perdiem === 0)
+      info('A hotel cost is entered but no per diem — overnight jobs usually include per diem.');
+    if (s.grandCust > 0){
+      const margin = s.profit / s.grandCust;
+      if (s.profit < 0)
+        warn('This quote is priced below cost (negative margin) — check markups and rates.');
+      else if (margin < 0.10)
+        warn('Margin is under 10% (' + fmtPct(margin) + ') — this quote may be underpriced.');
+      else if (margin > 0.75)
+        info('Margin is over 75% (' + fmtPct(margin) + ') — double-check quantities and markups.');
+    }
+  }
+
+  host.innerHTML = '';
+  if (!flags.length){ host.style.display = 'none'; return; }
+  flags.forEach(([kind, msg]) => {
+    const div = document.createElement('div');
+    div.className = 'sanity-flag ' + kind;
+    div.innerHTML = '<span class="ico">' + (kind === 'warn' ? '\u26A0' : '\u2139') + '</span><span>' + msg + '</span>';
+    host.appendChild(div);
+  });
+  host.style.display = '';
 }
 
 /* Build the Manpower / Tasks table in the Quote Summary from the manpower
@@ -1984,6 +2170,10 @@ window.addEventListener('message', function(e){
   header h1 span{color:#8fa8c9;font-weight:400}
   header .sub{font-size:12.5px;color:#8fa8c9;text-transform:uppercase;letter-spacing:1.2px}
   main{max-width:1060px;margin:0 auto;padding:22px 18px 120px}
+  .copyright-notice{
+    font-size:11px; color:var(--steel); text-align:center; font-style:italic;
+    margin:30px auto 0; padding-top:12px; border-top:1px solid var(--line);
+  }
 
   section.card{
     background:var(--panel);
@@ -2280,6 +2470,8 @@ Mp1@firedefense.com</textarea>
       </label>
     </div>
   </section>
+
+  <p class="copyright-notice">&copy; 2026 Mitchell Peebles. Licensed to Fire Defense Equipment Company, Inc. for internal use.</p>
 
 </main>
 
@@ -2677,6 +2869,25 @@ var IS_JOBINFO_MASTER = false;
     // Broadcast the initial values (incl. today's date) once the shell is ready.
     setTimeout(broadcastJobInfo, 150);
   }
+
+  /* Auto-save this page to the suite shell (crash protection), debounced.
+     Silent no-op when opened standalone. */
+  var _autosaveTimer = null;
+  function scheduleAutosave(){
+    if (!(window.parent && window.parent !== window)) return;
+    clearTimeout(_autosaveTimer);
+    _autosaveTimer = setTimeout(function(){
+      try {
+        window.parent.postMessage({ fdec:true, type:'autosave', page:SUITE_PAGE_ID, data:collectState() }, '*');
+      } catch(_){}
+    }, 1200);
+  }
+  document.addEventListener("input", scheduleAutosave);
+  document.addEventListener("change", scheduleAutosave);
+  document.addEventListener("click", function(e){
+    // Catch add/remove/toggle actions that change state without an input event.
+    if (e.target.closest("button")) setTimeout(scheduleAutosave, 50);
+  });
   // Everyone: accept incoming job-info from the shell. The shell only relays
   // to followers, so the master won't receive its own broadcast.
   window.addEventListener("message", function(e){
@@ -3324,6 +3535,10 @@ if (_btnSave) _btnSave.addEventListener("click", () => {
   header h1 span{color:#8fa8c9;font-weight:400}
   header .sub{font-size:12.5px;color:#8fa8c9;text-transform:uppercase;letter-spacing:1.2px}
   main{max-width:1060px;margin:0 auto;padding:22px 18px 120px}
+  .copyright-notice{
+    font-size:11px; color:var(--steel); text-align:center; font-style:italic;
+    margin:30px auto 0; padding-top:12px; border-top:1px solid var(--line);
+  }
 
   section.card{
     background:var(--panel);
@@ -3620,6 +3835,8 @@ Mp1@firedefense.com</textarea>
       </label>
     </div>
   </section>
+
+  <p class="copyright-notice">&copy; 2026 Mitchell Peebles. Licensed to Fire Defense Equipment Company, Inc. for internal use.</p>
 
 </main>
 
@@ -4000,6 +4217,25 @@ var IS_JOBINFO_MASTER = false;
     // Broadcast the initial values (incl. today's date) once the shell is ready.
     setTimeout(broadcastJobInfo, 150);
   }
+
+  /* Auto-save this page to the suite shell (crash protection), debounced.
+     Silent no-op when opened standalone. */
+  var _autosaveTimer = null;
+  function scheduleAutosave(){
+    if (!(window.parent && window.parent !== window)) return;
+    clearTimeout(_autosaveTimer);
+    _autosaveTimer = setTimeout(function(){
+      try {
+        window.parent.postMessage({ fdec:true, type:'autosave', page:SUITE_PAGE_ID, data:collectState() }, '*');
+      } catch(_){}
+    }, 1200);
+  }
+  document.addEventListener("input", scheduleAutosave);
+  document.addEventListener("change", scheduleAutosave);
+  document.addEventListener("click", function(e){
+    // Catch add/remove/toggle actions that change state without an input event.
+    if (e.target.closest("button")) setTimeout(scheduleAutosave, 50);
+  });
   // Everyone: accept incoming job-info from the shell. The shell only relays
   // to followers, so the master won't receive its own broadcast.
   window.addEventListener("message", function(e){
@@ -4647,6 +4883,10 @@ if (_btnSave) _btnSave.addEventListener("click", () => {
   header h1 span{color:#8fa8c9;font-weight:400}
   header .sub{font-size:12.5px;color:#8fa8c9;text-transform:uppercase;letter-spacing:1.2px}
   main{max-width:1060px;margin:0 auto;padding:22px 18px 120px}
+  .copyright-notice{
+    font-size:11px; color:var(--steel); text-align:center; font-style:italic;
+    margin:30px auto 0; padding-top:12px; border-top:1px solid var(--line);
+  }
 
   section.card{
     background:var(--panel);
@@ -4943,6 +5183,8 @@ Mp1@firedefense.com</textarea>
       </label>
     </div>
   </section>
+
+  <p class="copyright-notice">&copy; 2026 Mitchell Peebles. Licensed to Fire Defense Equipment Company, Inc. for internal use.</p>
 
 </main>
 
@@ -5301,6 +5543,25 @@ var IS_JOBINFO_MASTER = false;
     // Broadcast the initial values (incl. today's date) once the shell is ready.
     setTimeout(broadcastJobInfo, 150);
   }
+
+  /* Auto-save this page to the suite shell (crash protection), debounced.
+     Silent no-op when opened standalone. */
+  var _autosaveTimer = null;
+  function scheduleAutosave(){
+    if (!(window.parent && window.parent !== window)) return;
+    clearTimeout(_autosaveTimer);
+    _autosaveTimer = setTimeout(function(){
+      try {
+        window.parent.postMessage({ fdec:true, type:'autosave', page:SUITE_PAGE_ID, data:collectState() }, '*');
+      } catch(_){}
+    }, 1200);
+  }
+  document.addEventListener("input", scheduleAutosave);
+  document.addEventListener("change", scheduleAutosave);
+  document.addEventListener("click", function(e){
+    // Catch add/remove/toggle actions that change state without an input event.
+    if (e.target.closest("button")) setTimeout(scheduleAutosave, 50);
+  });
   // Everyone: accept incoming job-info from the shell. The shell only relays
   // to followers, so the master won't receive its own broadcast.
   window.addEventListener("message", function(e){
@@ -5919,6 +6180,105 @@ function loadApps(){
 }
 loadApps();
 
+/* ============================================================
+   AUTO-SAVE (crash protection)
+   Pages post their current draft to the shell; the shell persists it here
+   in localStorage (a stable origin, unlike the blob-URL iframes). On the
+   next open, if a recent auto-save exists, offer to restore it. This is a
+   safety net — it does not replace the explicit Save Draft file.
+   ============================================================ */
+var AUTOSAVE_KEY = 'fdec_suite_autosave_v1';
+var _autosaveState = null, _autosaveWriteTimer = null;
+
+/* Unsaved-changes tracking for the close warning. Autosaves that arrive in
+   the first few seconds after load are the pages initializing, not real
+   edits, so they don't count as "unsaved changes". */
+var _suiteDirty = false;
+var _closeWarnEnabled = true;
+var _loadGraceUntil = Date.now() + 4000;
+
+function markDirty(){
+  if (Date.now() < _loadGraceUntil) return;   // ignore initial-load autosaves
+  _suiteDirty = true;
+}
+function markClean(){ _suiteDirty = false; }
+
+function autosaveStore(page, data){
+  try {
+    if (!_autosaveState) _autosaveState = { pages:{}, savedAt:null };
+    _autosaveState.pages[page] = data;
+    _autosaveState.savedAt = new Date().toISOString();
+    clearTimeout(_autosaveWriteTimer);
+    _autosaveWriteTimer = setTimeout(function(){
+      try { localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(_autosaveState)); }
+      catch(_){/* storage full or blocked — ignore */}
+    }, 400);
+    updateAutosaveIndicator();
+    markDirty();
+  } catch(_){}
+}
+
+/* Warn before leaving if there are unsaved changes and the option is on.
+   The browser shows its own generic confirmation ("Leave site? Changes you
+   made may not be saved"); the exact wording can't be customized. */
+window.addEventListener('beforeunload', function(e){
+  if (_closeWarnEnabled && _suiteDirty){
+    e.preventDefault();
+    e.returnValue = '';   // required for the prompt to appear in most browsers
+    return '';
+  }
+});
+
+function updateAutosaveIndicator(){
+  var el = document.getElementById('autosaveNote');
+  if (!el || !_autosaveState || !_autosaveState.savedAt) return;
+  var t = new Date(_autosaveState.savedAt);
+  el.textContent = 'Auto-saved ' + t.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  el.style.opacity = '1';
+  clearTimeout(el._fade);
+  el._fade = setTimeout(function(){ el.style.opacity = '0.55'; }, 2500);
+}
+
+function checkAutosaveRestore(){
+  var raw = null;
+  try { raw = localStorage.getItem(AUTOSAVE_KEY); } catch(_){ return; }
+  if (!raw) return;
+  var saved = null;
+  try { saved = JSON.parse(raw); } catch(_){ return; }
+  if (!saved || !saved.pages || !saved.savedAt) return;
+
+  var when = new Date(saved.savedAt);
+  var mins = Math.round((Date.now() - when.getTime()) / 60000);
+  var ago = mins < 1 ? 'less than a minute ago'
+          : mins < 60 ? (mins + (mins === 1 ? ' minute' : ' minutes') + ' ago')
+          : when.toLocaleString();
+  showRestoreBanner(saved, ago);
+}
+
+function showRestoreBanner(saved, ago){
+  var bar = document.getElementById('restoreBanner');
+  if (!bar) return;
+  bar.querySelector('.rb-text').textContent = 'A previous session was auto-saved (' + ago + '). Restore it?';
+  bar.style.display = 'flex';
+  bar.querySelector('.rb-restore').onclick = function(){
+    DRAFT_PAGES.forEach(function(p){
+      var slice = saved.pages[p.id];
+      if (!slice) return;
+      var frame = document.getElementById(p.frame);
+      if (frame && frame.contentWindow){
+        frame.contentWindow.postMessage({ fdec:true, type:'load-draft', page:p.id, data:slice }, '*');
+      }
+    });
+    _autosaveState = saved;
+    _loadGraceUntil = Date.now() + 2000;  // don't let the restore's echo mark dirty
+    markClean();
+    bar.style.display = 'none';
+  };
+  bar.querySelector('.rb-dismiss').onclick = function(){ bar.style.display = 'none'; };
+}
+
+window.addEventListener('load', function(){ setTimeout(checkAutosaveRestore, 1200); });
+
 /* All views, in order. Each maps a key to its iframe id and tab id. */
 var VIEWS = [
   { key:'quote',    frame:'view-quote',    tab:'tab-quote'    },
@@ -5977,6 +6337,12 @@ window.addEventListener('message', function(e){
   if (d.type === 'request-jobinfo'){
     var m = document.getElementById('view-quote');
     if (m && m.contentWindow) m.contentWindow.postMessage({ fdec:true, type:'send-jobinfo' }, '*');
+    return;
+  }
+  // Auto-save: a page sent its current draft. Persist to the shell's own
+  // (stable) localStorage so we can offer to restore after a crash/close.
+  if (d.type === 'autosave' && d.page){
+    autosaveStore(d.page, d.data);
     return;
   }
   // Otherwise relay quoting -> all verbiage pages (down payment sync, etc.)
@@ -6168,6 +6534,7 @@ function saveSuiteDraft(){
     a.download = fname;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+    markClean();   // draft saved — no unsaved changes to warn about
   }).catch(function(err){
     console.error(err); alert('Could not save the suite draft: ' + err);
   }).then(function(){
@@ -6197,6 +6564,8 @@ function loadSuiteDraftFile(input){
       }
     });
     var when = bundle.meta && bundle.meta.savedAt ? new Date(bundle.meta.savedAt).toLocaleString() : '';
+    _loadGraceUntil = Date.now() + 2000;  // loaded state isn't an unsaved edit
+    markClean();
     alert('Suite draft loaded' + (when ? ' (saved ' + when + ')' : '') + '. All pages have been restored.');
   };
   reader.readAsText(file);
