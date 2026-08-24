@@ -456,6 +456,38 @@
   #materialCatalog:not(.structure-locked) input.cat-name{background:rgba(255,255,255,.10)}
   #materialCatalog:not(.structure-locked) input.sub-name{background:#fff; border-color:var(--line)}
   button#matEditToggle.editing{background:var(--red); color:#fff; border-color:var(--red)}
+
+  /* ---- Quick Add search ---- */
+  .quickadd{position:relative; margin-bottom:10px; max-width:560px}
+  .qa-box{display:flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:8px; background:#fff; padding:2px 10px}
+  .qa-box:focus-within{border-color:var(--red); box-shadow:0 0 0 2px rgba(210,60,60,.12)}
+  .qa-ico{font-size:14px; opacity:.55; flex:none}
+  .qa-box input{flex:1; border:none; outline:none; font-size:16px; padding:10px 2px; background:transparent}
+  .qa-clear{border:none; background:none; color:#9aa4af; font-size:20px; line-height:1; cursor:pointer; padding:2px 4px; flex:none}
+  .qa-clear:hover{color:var(--red)}
+  .qa-results{
+    position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:40;
+    background:#fff; border:1px solid var(--line); border-radius:8px;
+    box-shadow:0 12px 30px rgba(0,0,0,.14); max-height:340px; overflow-y:auto; padding:4px;
+  }
+  .qa-item{
+    display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:6px; cursor:pointer;
+  }
+  .qa-item:hover, .qa-item.active{background:var(--soft)}
+  .qa-item .qa-name{flex:1; font-size:14px; color:var(--ink)}
+  .qa-item .qa-path{font-size:11px; color:var(--steel); display:block; margin-top:1px}
+  .qa-item .qa-price{font-size:13px; color:var(--steel); font-variant-numeric:tabular-nums; white-space:nowrap}
+  .qa-item .qa-inq{font-size:11px; color:#1a7a3c; font-weight:700; white-space:nowrap}
+  .qa-empty{padding:12px 12px; font-size:13px; color:var(--steel)}
+  .qa-empty b{color:var(--ink)}
+  .qa-addnew{
+    margin-top:4px; display:flex; align-items:center; gap:8px; padding:10px; border-top:1px solid var(--line);
+    cursor:pointer; border-radius:6px; font-size:13px; color:var(--red); font-weight:600;
+  }
+  .qa-addnew:hover{background:#fdf0f0}
+  /* brief highlight pulse when a row is quick-added */
+  @keyframes qaPulse{0%{background:#fff6cc}100%{background:transparent}}
+  .mat-item.qa-pulse td{animation:qaPulse 1.6s ease-out}
   @media(max-width:760px){
     .mat-sub-body table{min-width:0}
     .mat-cat-body, .mat-sub-body{overflow-x:auto}
@@ -630,6 +662,15 @@
       <button class="small noprint" type="button" onclick="addMoneyRow(&#39;vendorQuotes&#39;,&#39;Vendor&#39;)">+ Add vendor quote</button>
 
       <h3 class="sub">Itemized Material <span style="font-style:italic; font-weight:400; text-transform:none; letter-spacing:normal; color:var(--steel)">(Most Pricing is from Argco.com)</span></h3>
+      <div class="quickadd noprint" id="quickAdd">
+        <div class="qa-box">
+          <span class="qa-ico">&#128269;</span>
+          <input type="text" id="qaSearch" autocomplete="off" placeholder="Quick add \u2014 search materials (e.g. 4&quot; coupling, FDC, riser)\u2026"
+                 oninput="qaSearchInput()" onkeydown="qaKeydown(event)" onfocus="qaSearchInput()">
+          <button type="button" class="qa-clear" id="qaClear" onclick="qaClearSearch()" title="Clear" style="display:none">&times;</button>
+        </div>
+        <div class="qa-results" id="qaResults" style="display:none"></div>
+      </div>
       <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px">
         <button id="matEditToggle" class="small noprint" type="button" onclick="toggleMatEdit()">Edit categories</button>
         <span id="matEditHint" class="hint" style="margin:0">Editing categories is locked. Item costs and quantities are always editable.</span>
@@ -1181,6 +1222,177 @@ function addMatCategory(){
   updateMatCounts();
 }
 
+/* ==================== QUICK ADD (search + add a line) ====================
+   Type to search every item in the catalog; pick one to jump to it, set its
+   quantity to 1, and expand its section so you can adjust. If nothing
+   matches, offer to add the typed text as a new custom line. ============= */
+var _qaActive = -1, _qaMatches = [];
+
+/* Build a flat index of every catalog item row currently in the DOM, with
+   its category / subcategory names for display and matching. */
+function qaBuildIndex(){
+  var out = [];
+  document.querySelectorAll('#materialCatalog .mat-cat').forEach(function(catEl){
+    var catName = (catEl.querySelector('.cat-name') || {}).value || '';
+    catEl.querySelectorAll(':scope > .mat-cat-body > .mat-sub').forEach(function(subEl){
+      var subName = (subEl.querySelector('.sub-name') || {}).value || '';
+      subEl.querySelectorAll('.mat-item').forEach(function(tr){
+        var name = (tr.querySelector('.mi-name') || {}).value || '';
+        if (!name.trim()) return;
+        out.push({ name:name, cat:catName, sub:subName, row:tr,
+                   cost:(tr.querySelector('.mi-cost')||{}).value || '',
+                   hay:(name + ' ' + catName + ' ' + subName).toLowerCase() });
+      });
+    });
+  });
+  return out;
+}
+
+function qaSearchInput(){
+  var q = ($('qaSearch').value || '').trim();
+  $('qaClear').style.display = q ? '' : 'none';
+  var box = $('qaResults');
+  if (!q){ box.style.display = 'none'; box.innerHTML = ''; _qaMatches = []; _qaActive = -1; return; }
+
+  var terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+  var index = qaBuildIndex();
+  // An item matches if every search term appears somewhere in its name/path.
+  var matches = index.filter(function(it){ return terms.every(function(t){ return it.hay.indexOf(t) !== -1; }); });
+  // Rank: name-starts-with first, then name-contains, then path matches.
+  var ql = q.toLowerCase();
+  matches.sort(function(a, b){
+    var an = a.name.toLowerCase(), bn = b.name.toLowerCase();
+    var as = an.indexOf(ql) === 0 ? 0 : an.indexOf(ql) !== -1 ? 1 : 2;
+    var bs = bn.indexOf(ql) === 0 ? 0 : bn.indexOf(ql) !== -1 ? 1 : 2;
+    return as - bs || an.localeCompare(bn);
+  });
+  _qaMatches = matches.slice(0, 30);
+  _qaActive = _qaMatches.length ? 0 : -1;
+  qaRenderResults(q);
+}
+
+function qaRenderResults(q){
+  var box = $('qaResults');
+  box.innerHTML = '';
+  _qaMatches.forEach(function(it, i){
+    var filled = num(it.row.querySelector('.mi-qty')) > 0;
+    var div = document.createElement('div');
+    div.className = 'qa-item' + (i === _qaActive ? ' active' : '');
+    var path = [it.cat, it.sub].filter(Boolean).join(' \u203a ');
+    div.innerHTML =
+      '<span class="qa-name">' + qaEsc(it.name) +
+        (path ? '<span class="qa-path">' + qaEsc(path) + '</span>' : '') + '</span>' +
+      (filled ? '<span class="qa-inq">in quote</span>' :
+        (it.cost ? '<span class="qa-price">' + money(parseFloat(it.cost)) + '</span>' : ''));
+    div.addEventListener('mousedown', function(e){ e.preventDefault(); qaSelect(i); });
+    box.appendChild(div);
+  });
+  // "Add as new item" fallback.
+  var addNew = document.createElement('div');
+  addNew.className = 'qa-addnew';
+  addNew.innerHTML = '<span>+</span><span>Add \u201C' + qaEsc(q) + '\u201D as a new item</span>';
+  addNew.addEventListener('mousedown', function(e){ e.preventDefault(); qaAddNew(q); });
+  if (!_qaMatches.length){
+    var empty = document.createElement('div');
+    empty.className = 'qa-empty';
+    empty.innerHTML = 'No catalog match for <b>' + qaEsc(q) + '</b>.';
+    box.appendChild(empty);
+  }
+  box.appendChild(addNew);
+  box.style.display = '';
+}
+
+function qaEsc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+/* Activate a matched catalog row: expand its section, bump qty to at least 1,
+   scroll to it, focus the qty, and clear the search. */
+function qaSelect(i){
+  var it = _qaMatches[i];
+  if (!it || !it.row) return;
+  var tr = it.row;
+  // Expand the containing subcategory and category.
+  var sub = tr.closest('.mat-sub'); if (sub) sub.classList.remove('collapsed');
+  var cat = tr.closest('.mat-cat'); if (cat) cat.classList.remove('collapsed');
+  // Ensure a quantity so it counts toward the quote.
+  var qtyEl = tr.querySelector('.mi-qty');
+  if (qtyEl && !(num(qtyEl) > 0)) qtyEl.value = '1';
+  recalc();
+  qaClearSearch();
+  // Scroll into view + highlight.
+  tr.classList.remove('qa-pulse'); void tr.offsetWidth; tr.classList.add('qa-pulse');
+  qaScrollTo(tr);
+  // Return to the search bar, ready for the next item.
+  var sb = $('qaSearch'); if (sb) sb.focus();
+}
+
+/* Scroll a row into view, tolerating environments without scrollIntoView. */
+function qaScrollTo(el){
+  if (!el || typeof el.scrollIntoView !== 'function') return;
+  try { el.scrollIntoView({ behavior:'smooth', block:'center' }); }
+  catch(_){ try { el.scrollIntoView(); } catch(__){} }
+}
+
+/* Add the typed text as a brand-new line under a "Quick Add" category so it
+   flows into the quote just like any other item. */
+function qaAddNew(name){
+  name = (name || '').trim();
+  if (!name) return;
+  var host = $('materialCatalog');
+  // Find or create a "Quick Add" category.
+  var target = null;
+  host.querySelectorAll('.mat-cat').forEach(function(catEl){
+    if (((catEl.querySelector('.cat-name') || {}).value || '').trim().toLowerCase() === 'quick add') target = catEl;
+  });
+  if (!target){
+    target = renderMatCategory({ name:'Quick Add', subs:[{ name:'', items:[] }] });
+    host.appendChild(target);
+  }
+  target.classList.remove('collapsed');
+  var sub = target.querySelector('.mat-sub');
+  if (sub) sub.classList.remove('collapsed');
+  var tbody = sub ? sub.querySelector('tbody') : null;
+  if (!tbody) return;
+  var tr = matItemRow({ name:name, qty:'1' });
+  tbody.appendChild(tr);
+  recalc();
+  qaClearSearch();
+  tr.classList.add('qa-pulse');
+  qaScrollTo(tr);
+  // Return to the search bar, ready for the next item.
+  var sb = $('qaSearch'); if (sb) sb.focus();
+}
+
+function qaClearSearch(){
+  $('qaSearch').value = '';
+  $('qaClear').style.display = 'none';
+  var box = $('qaResults'); box.style.display = 'none'; box.innerHTML = '';
+  _qaMatches = []; _qaActive = -1;
+}
+
+/* Keyboard nav: up/down to move, Enter to pick, Esc to close. */
+function qaKeydown(e){
+  var box = $('qaResults');
+  if (box.style.display === 'none') return;
+  if (e.key === 'ArrowDown'){ e.preventDefault(); _qaActive = Math.min(_qaActive + 1, _qaMatches.length - 1); qaHighlight(); }
+  else if (e.key === 'ArrowUp'){ e.preventDefault(); _qaActive = Math.max(_qaActive - 1, 0); qaHighlight(); }
+  else if (e.key === 'Enter'){
+    e.preventDefault();
+    if (_qaActive >= 0 && _qaMatches[_qaActive]) qaSelect(_qaActive);
+    else qaAddNew($('qaSearch').value);
+  }
+  else if (e.key === 'Escape'){ qaClearSearch(); }
+}
+function qaHighlight(){
+  var items = $('qaResults').querySelectorAll('.qa-item');
+  items.forEach(function(el, i){ el.classList.toggle('active', i === _qaActive); });
+  if (items[_qaActive]) items[_qaActive].scrollIntoView({ block:'nearest' });
+}
+/* Close the results when clicking away. */
+document.addEventListener('mousedown', function(e){
+  var qa = $('quickAdd');
+  if (qa && !qa.contains(e.target)){ var box = $('qaResults'); if (box) box.style.display = 'none'; }
+});
+
 /* Lock/unlock editing of category & subcategory structure (names, add,
    delete). Item cost/qty always stay editable. A single button flips it. */
 function toggleMatEdit(){
@@ -1556,6 +1768,18 @@ function scheduleAutosave(){
     } catch(_){}
   }, 1200);
 }
+
+/* Tell the shell the moment the user starts working, so it can dismiss the
+   "restore previous session?" banner. Fires on focusing any field. */
+document.addEventListener('focusin', function(e){
+  var t = e.target;
+  if (!t) return;
+  if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT'){
+    if (window.parent && window.parent !== window){
+      try { window.parent.postMessage({ fdec:true, type:'user-active' }, '*'); } catch(_){}
+    }
+  }
+});
 
 /* ---- Sanity flags ---------------------------------------------------- */
 function renderSanityFlags(s){
@@ -2887,6 +3111,16 @@ var IS_JOBINFO_MASTER = false;
   document.addEventListener("click", function(e){
     // Catch add/remove/toggle actions that change state without an input event.
     if (e.target.closest("button")) setTimeout(scheduleAutosave, 50);
+  });
+  // Tell the shell when the user starts working, so it can dismiss the
+  // "restore previous session?" banner.
+  document.addEventListener("focusin", function(e){
+    var t = e.target;
+    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT")){
+      if (window.parent && window.parent !== window){
+        try { window.parent.postMessage({ fdec:true, type:"user-active" }, "*"); } catch(_){}
+      }
+    }
   });
   // Everyone: accept incoming job-info from the shell. The shell only relays
   // to followers, so the master won't receive its own broadcast.
@@ -4236,6 +4470,16 @@ var IS_JOBINFO_MASTER = false;
     // Catch add/remove/toggle actions that change state without an input event.
     if (e.target.closest("button")) setTimeout(scheduleAutosave, 50);
   });
+  // Tell the shell when the user starts working, so it can dismiss the
+  // "restore previous session?" banner.
+  document.addEventListener("focusin", function(e){
+    var t = e.target;
+    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT")){
+      if (window.parent && window.parent !== window){
+        try { window.parent.postMessage({ fdec:true, type:"user-active" }, "*"); } catch(_){}
+      }
+    }
+  });
   // Everyone: accept incoming job-info from the shell. The shell only relays
   // to followers, so the master won't receive its own broadcast.
   window.addEventListener("message", function(e){
@@ -5562,6 +5806,16 @@ var IS_JOBINFO_MASTER = false;
     // Catch add/remove/toggle actions that change state without an input event.
     if (e.target.closest("button")) setTimeout(scheduleAutosave, 50);
   });
+  // Tell the shell when the user starts working, so it can dismiss the
+  // "restore previous session?" banner.
+  document.addEventListener("focusin", function(e){
+    var t = e.target;
+    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT")){
+      if (window.parent && window.parent !== window){
+        try { window.parent.postMessage({ fdec:true, type:"user-active" }, "*"); } catch(_){}
+      }
+    }
+  });
   // Everyone: accept incoming job-info from the shell. The shell only relays
   // to followers, so the master won't receive its own broadcast.
   window.addEventListener("message", function(e){
@@ -6196,6 +6450,8 @@ var _autosaveState = null, _autosaveWriteTimer = null;
 var _suiteDirty = false;
 var _closeWarnEnabled = true;
 var _loadGraceUntil = Date.now() + 4000;
+/* Restore-banner auto-dismiss state. */
+var _restoreBannerOpen = false, _restoreTimeout = null, _restoreHide = null;
 
 function markDirty(){
   if (Date.now() < _loadGraceUntil) return;   // ignore initial-load autosaves
@@ -6260,6 +6516,31 @@ function showRestoreBanner(saved, ago){
   if (!bar) return;
   bar.querySelector('.rb-text').textContent = 'A previous session was auto-saved (' + ago + '). Restore it?';
   bar.style.display = 'flex';
+
+  // The banner auto-dismisses after 60 seconds, or as soon as the user starts
+  // working (focuses/edits any field). We keep the auto-save data intact so a
+  // later manual restore is still possible if wanted.
+  function hideBanner(){
+    if (!_restoreBannerOpen) return;
+    _restoreBannerOpen = false;
+    clearTimeout(_restoreTimeout);
+    document.removeEventListener('focusin', hideBanner, true);
+    document.removeEventListener('mousedown', maybeHideOnField, true);
+    bar.style.display = 'none';
+  }
+  // Only dismiss on interaction with an actual input/textarea/select (a field),
+  // not on clicking the Restore button itself.
+  function maybeHideOnField(e){
+    var t = e.target;
+    if (t && t.closest && t.closest('#restoreBanner')) return;   // ignore banner clicks
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')) hideBanner();
+  }
+  _restoreBannerOpen = true;
+  _restoreHide = hideBanner;
+  _restoreTimeout = setTimeout(hideBanner, 60000);            // 60-second timeout
+  document.addEventListener('focusin', maybeHideOnField, true);
+  document.addEventListener('mousedown', maybeHideOnField, true);
+
   bar.querySelector('.rb-restore').onclick = function(){
     DRAFT_PAGES.forEach(function(p){
       var slice = saved.pages[p.id];
@@ -6272,9 +6553,9 @@ function showRestoreBanner(saved, ago){
     _autosaveState = saved;
     _loadGraceUntil = Date.now() + 2000;  // don't let the restore's echo mark dirty
     markClean();
-    bar.style.display = 'none';
+    hideBanner();
   };
-  bar.querySelector('.rb-dismiss').onclick = function(){ bar.style.display = 'none'; };
+  bar.querySelector('.rb-dismiss').onclick = hideBanner;
 }
 
 window.addEventListener('load', function(){ setTimeout(checkAutosaveRestore, 1200); });
@@ -6339,9 +6620,17 @@ window.addEventListener('message', function(e){
     if (m && m.contentWindow) m.contentWindow.postMessage({ fdec:true, type:'send-jobinfo' }, '*');
     return;
   }
+  // A page reports the user started working (focused a field). Dismiss the
+  // restore banner so it doesn't linger while they type.
+  if (d.type === 'user-active'){
+    if (_restoreBannerOpen && _restoreHide) _restoreHide();
+    return;
+  }
   // Auto-save: a page sent its current draft. Persist to the shell's own
   // (stable) localStorage so we can offer to restore after a crash/close.
   if (d.type === 'autosave' && d.page){
+    // Editing counts as activity — clear the restore prompt if it's still up.
+    if (_restoreBannerOpen && _restoreHide) _restoreHide();
     autosaveStore(d.page, d.data);
     return;
   }
