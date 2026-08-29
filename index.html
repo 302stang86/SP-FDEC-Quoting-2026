@@ -909,67 +909,7 @@ function addMpRow(d){
 
 /* ================= MATERIAL CATALOG (collapsible) ================= */
 const MATERIAL_CATALOG = [
-  {name:"Grooved Fittings", subs:[
-    {name:"Grooved Couplings", items:[
-      {name:"8\" Grooved Coupling", cost:"28.73"},
-      {name:"6\" Grooved Coupling", cost:"16.03"},
-      {name:"4\" Grooved Coupling", cost:"10.12"},
-      {name:"3\" Grooved Coupling", cost:"7.99"},
-      {name:"2-1/2\" Grooved Coupling", cost:"6.95"},
-      {name:"2\" Grooved Coupling", cost:"6.58"},
-      {name:"1-1/2\" Grooved Coupling", cost:"5.41"},
-      {name:"1-1/4\" Grooved Coupling", cost:"5.08"},
-    ]},
-    {name:"Grooved Elbows", items:[
-      {name:"4\" 90° Elbow", cost:"13.86"},
-      {name:"2\" 90° Elbow", cost:"6.19"},
-    ]},
-    {name:"Grooved Caps", items:[
-      {name:"4\" Cap", cost:"6.92"},
-      {name:"2\" Cap", cost:"3.65"},
-    ]},
-    {name:"Grooved Misc", items:[
-      {name:"4\" Grooved Drain 90° Elbow", cost:"22.01"},
-      {name:"2\" Grooved Drain 90° Elbow", cost:"9.13"},
-      {name:"2\"  GxG Flex Drain Kit", cost:"111.77"},
-    ]},
-  ]},
-  {name:"Mechanical Tees / TeeLocks", subs:[
-    {name:"6\" Run Mechanical Tees", items:[
-      {name:"6\" x 2\" Mechanical Tee", cost:"19.95"},
-    ]},
-    {name:"4\" Run Mechanical Tees", items:[
-      {name:"4\" x 2\" Mechanical Tee", cost:"13.19"},
-      {name:"4\" x 1\" Mechanical Tee", cost:"11.33"},
-    ]},
-    {name:"2\" Run Mechanical Tees", items:[
-      {name:"2\" x 1\" Mechanical Tee"},
-      {name:"2\" x 3/4\" Mechanical Tee"},
-      {name:"2\" x 1/2\" Mechanical Tee"},
-    ]},
-    {name:"1-1/2\" Run Mechanical Tees", items:[
-      {name:"1-1/2\" x 1\" Mechanical Tee"},
-      {name:"1-1/2\" x 3/4\" Mechanical Tee"},
-      {name:"1-1/2\" x 1/2\" Mechanical Tee"},
-    ]},
-    {name:"1-1/4\" Run Mechanical Tees", items:[
-      {name:"1-1/4\" x 1\" Mechanical Tee"},
-      {name:"1-1/4\" x 3/4\" Mechanical Tee"},
-      {name:"1-1/4\" x 1/2\" Mechanical Tee"},
-    ]},
-  ]},
-  {name:"Flanged Components", subs:[
-    {name:"Grooved Flange Adapters", items:[
-      {name:"6\" Grooved Flange Adapter", cost:"35.35"},
-      {name:"4\" Grooved Flange Adapter", cost:"25.23"},
-      {name:"4\" Grooved Flange Adapter W/NBG", cost:"69.63"},
-    ]},
-    {name:"Flange Bolt, Nut, and Gasket Kits", items:[
-      {name:"6\" Flange Bolt, Nut, and Gasket Kit", cost:"23.35"},
-      {name:"4\" Flange Bolt, Nut, and Gasket Kit", cost:"16.14"},
-    ]},
-  ]},
-  {name:"Pipe and Strut", subs:[
+  {name:"Pipe & Strut", subs:[
     {name:"Schedule 10 Pipe", items:[
       {name:"4\" Schedule 10 Pipe"},
       {name:"3\" Schedule 10 Pipe"},
@@ -983,28 +923,108 @@ const MATERIAL_CATALOG = [
       {name:"2\" Schedule 40 Pipe"},
       {name:"1\" Schedule 40 Pipe"},
     ]},
-    {name:"Strut Channels", items:[
+    {name:"Strut Channel", items:[
       {name:"1-5/8\" Slotted Strut Channel"},
       {name:"13/16\" Slotted Strut Channel"},
     ]},
   ]},
-  {name:"Hardware", subs:[
-    {name:"All-Thread Rod (ATR)", items:[
-      {name:"3/4\" All-Thread Rod (ATR)"},
-      {name:"5/8\" All-Thread Rod (ATR)"},
-      {name:"1/2\" All-Thread Rod (ATR)"},
-      {name:"3/8\" All-Thread Rod (ATR)"},
-    ]},
-    {name:"Fasteners and Anchors", items:[
-      {name:"3/8\" Hex Nut"},
-      {name:"3/8\" Hex Bolt"},
-      {name:"3/8\" Flat Washer"},
-      {name:"3/8\" Lock Washer"},
-      {name:"3/8\" Toggle Wing"},
+  {name:"Grooved Couplings", subs:[
+    {name:"Couplings", items:[
+      {name:"8\" Grooved Coupling", cost:"28.73"},
+      {name:"6\" Grooved Coupling", cost:"16.03"},
+      {name:"4\" Grooved Coupling", cost:"10.12"},
+      {name:"3\" Grooved Coupling", cost:"7.99"},
+      {name:"2-1/2\" Grooved Coupling", cost:"6.95"},
+      {name:"2\" Grooved Coupling", cost:"6.58"},
+      {name:"1-1/2\" Grooved Coupling", cost:"5.41"},
+      {name:"1-1/4\" Grooved Coupling", cost:"5.08"},
     ]},
   ]},
-  {name:"FDC Material", subs:[
-    {name:"Fire Department Connections", items:[
+  {name:"Grooved Fittings", subs:[
+    {name:"Elbows", items:[
+      {name:"4\" 90° Elbow", cost:"13.86"},
+      {name:"2\" 90° Elbow", cost:"6.19"},
+    ]},
+    {name:"Caps", items:[
+      {name:"4\" Cap", cost:"6.92"},
+      {name:"2\" Cap", cost:"3.65"},
+    ]},
+    {name:"Drain Fittings", items:[
+      {name:"4\" Grooved Drain 90° Elbow", cost:"22.01"},
+      {name:"2\" Grooved Drain 90° Elbow", cost:"9.13"},
+      {name:"2\"  GxG Flex Drain Kit", cost:"111.77"},
+    ]},
+  ]},
+  {name:"Mechanical Tees / TeeLocks", subs:[
+    {name:"6\" Run", items:[
+      {name:"6\" x 2\" Mechanical Tee", cost:"19.95"},
+    ]},
+    {name:"4\" Run", items:[
+      {name:"4\" x 2\" Mechanical Tee", cost:"13.19"},
+      {name:"4\" x 1\" Mechanical Tee", cost:"11.33"},
+    ]},
+    {name:"2\" Run", items:[
+      {name:"2\" x 1\" Mechanical Tee"},
+      {name:"2\" x 3/4\" Mechanical Tee"},
+      {name:"2\" x 1/2\" Mechanical Tee"},
+    ]},
+    {name:"1-1/2\" Run", items:[
+      {name:"1-1/2\" x 1\" Mechanical Tee"},
+      {name:"1-1/2\" x 3/4\" Mechanical Tee"},
+      {name:"1-1/2\" x 1/2\" Mechanical Tee"},
+    ]},
+    {name:"1-1/4\" Run", items:[
+      {name:"1-1/4\" x 1\" Mechanical Tee"},
+      {name:"1-1/4\" x 3/4\" Mechanical Tee"},
+      {name:"1-1/4\" x 1/2\" Mechanical Tee"},
+    ]},
+  ]},
+  {name:"Flanges", subs:[
+    {name:"Flange Adapters", items:[
+      {name:"6\" Grooved Flange Adapter", cost:"35.35"},
+      {name:"4\" Grooved Flange Adapter", cost:"25.23"},
+      {name:"4\" Grooved Flange Adapter W/NBG", cost:"69.63"},
+    ]},
+    {name:"Bolt, Nut & Gasket Kits", items:[
+      {name:"6\" Flange Bolt, Nut, and Gasket Kit", cost:"23.35"},
+      {name:"4\" Flange Bolt, Nut, and Gasket Kit", cost:"16.14"},
+    ]},
+  ]},
+  {name:"Valves", subs:[
+    {name:"Check Valves", items:[
+      {name:"4\" Grooved Check Valve Argco", cost:"124.44"},
+      {name:"4\" Grooved Check Valve Tyco", cost:"299.79"},
+      {name:"1/2\" Threaded Check Valve", cost:"14.24"},
+      {name:"3/4\" Threaded Check Valve", cost:"17.42"},
+      {name:"1\" Threaded Check Valve", cost:"21.77"},
+      {name:"2\" Threaded Check Valve", cost:"66.55"},
+    ]},
+    {name:"Control & Drain Valves", items:[
+      {name:"4\" BVG W/Tamper", cost:"168.86"},
+      {name:"6\" BVG W/Tamper", cost:"229.92"},
+      {name:"2\" Angle Main Drain Valve", cost:"98.17"},
+    ]},
+    {name:"Test & Drain Valves", items:[
+      {name:"1\" Test and Drain", cost:"94.48"},
+      {name:"1\" Test and Drain Angle"},
+    ]},
+    {name:"Ball Valves", items:[
+      {name:"1\" FP Ball Valve", cost:"24.99"},
+      {name:"3/4\" FP Ball Valve", cost:"17.24"},
+      {name:"1/2\" FP Ball Valve", cost:"10.64"},
+      {name:"1/4\" FP Ball Valve", cost:"10.42"},
+    ]},
+    {name:"Sight Glass & Drum Drip", items:[
+      {name:"1\" ITV Sight Glass K=5.6", cost:"27.58"},
+      {name:"1\" Sight Glass", cost:"26.58"},
+      {name:"1\" Drum Drip Assembly", cost:"109.75"},
+    ]},
+    {name:"3-Way Gauge Valves", items:[
+      {name:"3-way valve", cost:"22"},
+    ]},
+  ]},
+  {name:"Fire Department Connections (FDC)", subs:[
+    {name:"Connections", items:[
       {name:"4\" x 2-1/2\" Siamese FDC NST", cost:"165"},
       {name:"4\" x 2-1/2\" Siamese FDC DET", cost:"165"},
       {name:"4\" Storz Straight FDC", cost:"91.91"},
@@ -1012,35 +1032,35 @@ const MATERIAL_CATALOG = [
       {name:"4\" x 5\" Storz Straight FDC", cost:"136.94"},
       {name:"4\" x 5\" Storz 22° Angle FDC", cost:"244.54"},
       {name:"2-1/2\" Single Snoot FDC NST Kit", cost:"102.07"},
+    ]},
+    {name:"Caps & Plugs", items:[
       {name:"4\" Storz Cap", cost:"98.76"},
       {name:"5\" Storz Cap", cost:"124.67"},
-    ]},
-    {name:"Signage", items:[
-      {name:"4\" Red Aluminum Round FDC Sign", cost:"12"},
-    ]},
-    {name:"Misc", items:[
-      {name:"1/2\" Automatic Ball Drip", cost:"20.17"},
       {name:"2-1/2\" Red Aluminum Breakaway FDC Caps", cost:"6.64"},
       {name:"2-1/2\" NST Brass Plug", cost:"23.84"},
       {name:"2-1/2\" DET Brass Plug", cost:"26"},
     ]},
+    {name:"Ball Drip & Signage", items:[
+      {name:"1/2\" Automatic Ball Drip", cost:"20.17"},
+      {name:"4\" Red Aluminum Round FDC Sign", cost:"12"},
+    ]},
   ]},
-  {name:"Sprinklers and Accessories", subs:[
+  {name:"Sprinklers & Head Accessories", subs:[
     {name:"Sprinklers", items:[
       {name:"Misc Sprinkler", cost:"9.00"},
     ]},
-    {name:"Spare Head Boxes", items:[
-      {name:"6 Count Spare Head Cabinet", cost:"10.33"},
-      {name:"12 Count Spare Head Cabinet", cost:"12.14"},
-      {name:"6 Count Spare Head Cabinet Tall", cost:"16.81"},
-    ]},
-    {name:"Escutcheons and Concealed Coverplates", items:[
+    {name:"Escutcheons & Cover Plates", items:[
       {name:"Misc Escutcheon", cost:"5"},
     ]},
-    {name:"Head guards", items:[
+    {name:"Head Guards", items:[
       {name:"Red One Piece Head Guard", cost:"2.96"},
       {name:"Red Two Piece 1/2\" Head Guard", cost:"4.43"},
       {name:"Red Two Piece 3/4\" Head Guard", cost:"4.43"},
+    ]},
+    {name:"Spare Head Cabinets", items:[
+      {name:"6 Count Spare Head Cabinet", cost:"10.33"},
+      {name:"12 Count Spare Head Cabinet", cost:"12.14"},
+      {name:"6 Count Spare Head Cabinet Tall", cost:"16.81"},
     ]},
     {name:"Brass Nipple Extensions \"Length x NPT\"", items:[
       {name:"1/2\" x 1/2\" Brass Nipple Extension", cost:"3.77"},
@@ -1051,41 +1071,58 @@ const MATERIAL_CATALOG = [
       {name:"3/4\" x 3/4\" Brass Nipple Extension", cost:"5.56"},
     ]},
   ]},
-  {name:"Sprinkler Riser", subs:[
-    {name:"System Signage and Tags", items:[
+  {name:"Gauges", subs:[
+    {name:"System Pressure Gauges", items:[
+      {name:"Water gauge", cost:"36"},
+      {name:"Air gauge", cost:"36"},
+      {name:"60oz gauge", cost:"36"},
+    ]},
+  ]},
+  {name:"Alarm & Supervisory Devices", subs:[
+    {name:"Waterflow Switches", items:[
+      {name:"Threaded water flow switch (size)"},
+      {name:"3\" waterflow switch potter", cost:"167.71"},
+      {name:"4\" water flow switch potter", cost:"167.71"},
+      {name:"6\" water flow switch potter", cost:"167.71"},
+      {name:"8\" water flow switch potter", cost:"186.82"},
+      {name:"Water flow pressure switch potter PS-10", cost:"112.00"},
+    ]},
+    {name:"Tamper (Supervisory) Switches", items:[
+      {name:"OS&Y -2 tamper switch", cost:"179.00"},
+      {name:"Loop-style tamper switch", cost:"216.18"},
+      {name:"Low air pressure witch potter PS-40", cost:"112"},
+    ]},
+    {name:"Bells, Horns & Strobes", items:[
+      {name:"6 ELEC BELL 120VAC IMPORT &  BBK-1", cost:"75"},
+      {name:"110v Horn and strobe W/weatherproof back box", cost:"30"},
+    ]},
+  ]},
+  {name:"Signage, Tags & Locks", subs:[
+    {name:"Signs & Tags", items:[
       {name:"6\" x 2\" System Sign W/Chain", cost:"6.10"},
       {name:"Aluminum Numerical Tags 1-20", cost:"15"},
       {name:"FDEC Information Sticker", cost:"5"},
       {name:"FDEC Spare Cabinet Sticker", cost:"5"},
     ]},
-    {name:"Valve Locks and Chain", items:[
+    {name:"Valve Locks & Chain", items:[
       {name:"Master Lock Keyed Alike (197)", cost:"14.74"},
       {name:"Argco Keyed Alike", cost:"8.14"},
       {name:"Valve Chain Per Foot", cost:"1.5"},
     ]},
-    {name:"Check Valves", items:[
-      {name:"4\" Grooved Check Valve Argco", cost:"124.44"},
-      {name:"4\" Grooved Check Valve Tyco"},
-      {name:"1/2\" Threaded Check Valve", cost:"14.24"},
-      {name:"3/4\" Threaded Check Valve", cost:"17.42"},
-      {name:"1\" Threaded Check Valve", cost:"21.77"},
-      {name:"2\" Threaded Check Valve", cost:"66.55"},
+  ]},
+  {name:"Hangers & Hardware", subs:[
+    {name:"All-Thread Rod (ATR)", items:[
+      {name:"3/4\" All-Thread Rod (ATR)"},
+      {name:"5/8\" All-Thread Rod (ATR)"},
+      {name:"1/2\" All-Thread Rod (ATR)"},
+      {name:"3/8\" All-Thread Rod (ATR)"},
     ]},
-    {name:"Control Valves", items:[
-      {name:"4\" BVG W/Tamper", cost:"168.86"},
-      {name:"6\" BVG W/Tamper", cost:"229.92"},
-      {name:"2\" Angle Main Drain Valve", cost:"98.17"},
-    ]},
-    {name:"Ball Valves And ITV's", items:[
-      {name:"1\" Test and Drain", cost:"94.48"},
-      {name:"1\" Test and Drain Angle"},
-      {name:"1\" FP Ball Valve", cost:"24.99"},
-      {name:"3/4\" FP Ball Valve", cost:"17.24"},
-      {name:"1/2\" FP Ball Valve", cost:"10.64"},
-      {name:"1/4\" FP Ball Valve", cost:"10.42"},
-      {name:"1\" ITV Sight Glass K=5.6", cost:"27.58"},
-      {name:"1\" Sight Glass", cost:"26.58"},
-      {name:"1\" Drum Drip Assembly", cost:"109.75"},
+    {name:"Fasteners & Anchors", items:[
+      {name:"3/8\" Hex Nut"},
+      {name:"3/8\" Hex Bolt"},
+      {name:"3/8\" Flat Washer"},
+      {name:"3/8\" Lock Washer"},
+      {name:"3/8\" Toggle Wing"},
     ]},
   ]},
 ];
@@ -1875,6 +1912,7 @@ function hasCopyableExtras(){
   if ($('hotelCost') && num($('hotelCost')) > 0) return true;
   const sel = collectSelected();
   if (sel.mats.length || sel.equip.length) return true;
+  if ([...document.querySelectorAll('#vendorQuotes .listrow .moneyval')].some(el => num(el) > 0)) return true;
   return false;
 }
 
@@ -1888,7 +1926,7 @@ function buildManpowerText(){
 
   /* ---- Manpower / Tasks ---- */
   const taskLines = [];
-  let totHours = 0, totTrips = 0;
+  let totHours = 0;
   document.querySelectorAll('#mpRows tr').forEach(tr => {
     const task = (tr.querySelector('.mp-task').value || '').trim();
     const tech = num(tr.querySelector('.mp-tech'));
@@ -1896,43 +1934,15 @@ function buildManpowerText(){
     const hours = tech * hrsEach;
     if (!task && !hours) return;
     const dept = MP_DEPT_NAMES[tr.querySelector('.mp-dept').value] || tr.querySelector('.mp-dept').value;
-    const cls = MP_CLASS_NAMES[tr.querySelector('.mp-class').value] || tr.querySelector('.mp-class').value;
-    const rTrips = rowTrips(tr);
-    totHours += hours; totTrips += rTrips;
+    totHours += hours;
     const techWord = tech === 1 ? 'tech' : 'techs';
-    const tripWord = rTrips === 1 ? 'trip' : 'trips';
-    taskLines.push(`\u2022 ${task || '(untitled task)'} \u2014 ${dept}, ${tech} ${techWord} \u00d7 ${hrsEach} hrs, ${cls} (${hours} hrs, ${rTrips} ${tripWord})`);
+    taskLines.push(`\u2022 ${task || '(untitled task)'} \u2014 ${dept}, ${tech} ${techWord} \u00d7 ${hrsEach} hrs each`);
   });
   if (taskLines.length){
     any = true;
     out.push('MANPOWER / TASKS', '');
     out.push(...taskLines);
-    out.push('', `Total: ${totHours} hours, ${totTrips} trips`);
-  }
-
-  /* ---- Labor (hours entered on the Labor tables) ---- */
-  const laborLines = [];
-  const laborGroups = [
-    ['sp',   'Sprinkler',        [['ST','Straight Time'],['OT','Overtime'],['DT','Double Time'],['AD','Admin']]],
-    ['shop', 'Associated Shop',  [['ST','Straight Time'],['OT','Overtime'],['DT','Double Time']]],
-    ['fa',   'Fire Alarm',       [['ST','Straight Time'],['OT','Overtime'],['DT','Double Time']]]
-  ];
-  laborGroups.forEach(([prefix, label, classes]) => {
-    classes.forEach(([cls, clsName]) => {
-      const hrsEl = $(prefix + cls);
-      const hrs = hrsEl ? num(hrsEl) : 0;
-      if (!hrs) return;
-      const lvlEl = $(prefix + cls + 'Lvl');
-      const lvl = lvlEl ? lvlEl.value : '2';
-      const hrWord = hrs === 1 ? 'hr' : 'hrs';
-      laborLines.push(`\u2022 ${label} \u2014 ${clsName} (Lvl ${lvl}): ${hrs} ${hrWord}`);
-    });
-  });
-  if (laborLines.length){
-    if (any) out.push('');
-    any = true;
-    out.push('LABOR', '');
-    out.push(...laborLines);
+    out.push('', `Total: ${totHours} hours`);
   }
 
   /* ---- Trucks ---- */
@@ -1941,8 +1951,7 @@ function buildManpowerText(){
     const qtyEl = document.querySelector(`input[data-g="trucks"][data-i="${i}"][data-f="qty"]`);
     const q = qtyEl ? num(qtyEl) : 0;
     if (!q) return;
-    const tripWord = q === 1 ? 'trip' : 'trips';
-    truckLines.push(`\u2022 ${t[0]}: ${q} ${tripWord}`);
+    truckLines.push(`\u2022 ${t[0]}: ${q}`);
   });
   if (truckLines.length){
     if (any) out.push('');
@@ -1989,6 +1998,21 @@ function buildManpowerText(){
     any = true;
     out.push('EQUIPMENT', '');
     sel.equip.forEach(m => out.push(`\u2022 (${m[1]}) ${m[0]}`));
+  }
+
+  /* ---- Vendor Orders (any vendor quote with a price entered) ---- */
+  const vendorLines = [];
+  document.querySelectorAll('#vendorQuotes .listrow').forEach(row => {
+    const val = num(row.querySelector('.moneyval'));
+    if (!val) return;
+    const name = (row.querySelector('.moneyname').value || '').trim();
+    vendorLines.push(`\u2022 ${name || 'Vendor'} Order PO`);
+  });
+  if (vendorLines.length){
+    if (any) out.push('');
+    any = true;
+    out.push('VENDOR ORDERS', '');
+    out.push(...vendorLines);
   }
 
   return any ? out.join('\n') : '';
