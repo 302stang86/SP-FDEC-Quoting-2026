@@ -547,7 +547,7 @@
           </thead><tbody id="rateTableFA"></tbody></table>
         </div>
       </div>
-      <p class="hint" style="margin-bottom:14px">Labor lines start at Level 2 (book rates). Sprinkler and Fire Alarm rates are independent — every rate is editable.</p>
+      <p class="hint" style="margin-bottom:14px">Labor lines default to Level 2 (book rates). The Level 3 rate is treated as our cost basis, so billing above Level 3 shows up as labor profit in Potential Profit. Sprinkler and Fire Alarm rates are independent — every rate is editable.</p>
       <h3 class="sub">Markups</h3>
       <div class="mkgrid">
         <div class="mk-item"><label>Vendor-quoted material markup</label><input class="qty mk" data-key="material" type="number" min="0" step="1" value="110">%</div>
@@ -686,9 +686,10 @@
   <details class="card" id="sec-eqfees">
     <summary>FDEC Equipment Fees <span class="sect-total" data-sect="eqfees"></span></summary>
     <div class="body">
-      <table><thead><tr><th>Equipment</th><th class="num">Fee</th><th class="num">Qty</th><th class="num">Total</th></tr></thead>
+      <table><thead><tr><th>Equipment</th><th class="num">Fee</th><th class="num">Qty</th><th class="num">Total</th><th class="noprint"></th></tr></thead>
         <tbody id="eqFees"></tbody></table>
-      <p class="hint">Customer price = cost plus the equipment fee markup.</p>
+      <button class="small noprint" style="margin-top:8px" type="button" onclick="addEqFee()">+ Add equipment</button>
+      <p class="hint">Customer price = cost plus the equipment fee markup. Add, edit, or remove equipment as needed.</p>
     </div>
   </details>
 
@@ -877,6 +878,36 @@ function buildQtyTable(tbodyId, group, items, rateEditable){
     const [name, rate] = Array.isArray(it) ? it : [it, ITM_DEFAULT[it] || ''];
     qtyRow(tb, group, i, name, rate, rateEditable);
   });
+}
+
+/* FDEC Equipment Fees rows are fully editable: name, fee, qty, and can be
+   added or removed. Uses data-g="eqFees" so summing/collecting still works. */
+let _eqSeq = 0;
+function eqFeeRow(name, rate, qty){
+  const tb = $('eqFees');
+  const i = _eqSeq++;
+  const tr = document.createElement('tr');
+  tr.innerHTML =
+    `<td><input class="wide eq-name" data-g="eqFees" data-i="${i}" data-f="name" value="${(name||'').replace(/"/g,'&quot;')}" placeholder="Equipment"></td>` +
+    `<td class="num"><input class="rate" type="number" min="0" step="0.01" data-g="eqFees" data-i="${i}" data-f="rate" value="${rate!=null&&rate!==''?rate:''}" placeholder="fee"></td>` +
+    `<td class="num"><input class="qty" type="number" min="0" step="1" data-g="eqFees" data-i="${i}" data-f="qty" value="${qty!=null&&qty!==''?qty:''}"></td>` +
+    `<td class="num rowtot">$0.00</td>` +
+    `<td class="num noprint"><button class="small" type="button" title="Remove" onclick="this.closest('tr').remove(); recalc()">&times;</button></td>`;
+  tb.appendChild(tr);
+}
+function buildEqFees(items){
+  const tb = $('eqFees'); tb.innerHTML = ''; _eqSeq = 0;
+  (items || EQ_FEES).forEach(it => {
+    const [name, rate] = Array.isArray(it) ? it : [it, ''];
+    eqFeeRow(name, rate, (it && it.qty) || '');
+  });
+}
+function addEqFee(){
+  eqFeeRow('', '', '');
+  const tb = $('eqFees');
+  const last = tb.lastElementChild;
+  const ni = last && last.querySelector('.eq-name'); if (ni) ni.focus();
+  recalc();
 }
 
 function addMoneyRow(containerId, placeholder, name, val){
@@ -1544,7 +1575,7 @@ function applyMaterialCatalog(saved){
 buildQtyTable('trucks','trucks',TRUCKS,true);
 buildQtyTable('perdiem','perdiem',PERDIEM,true);
 buildQtyTable('fdecRental','fdecRental',FDEC_RENTAL,true);
-buildQtyTable('eqFees','eqFees',EQ_FEES,true);
+buildEqFees();
 buildQtyTable('itmSP','itmSP',ITM_SP,true);
 buildQtyTable('itmAL','itmAL',ITM,true);
 buildQtyTable('backflow','backflow',BACKFLOW,true);
@@ -1618,18 +1649,27 @@ function recalc(ev){
     syncTrucksFromMp();
   }
   /* labor */
+  /* Labor: the customer is billed at the selected level's rate, but our COST
+     basis is the Level 3 rate (the lowest tier). Billing above Level 3 yields
+     labor profit, which flows into Potential Profit via grandCust - grandCost.
+     Returns { cust, cost } per line. */
   const laborLine = (id, key, dept) => {
     const inp = $(id);
     const tr = inp.closest('tr');
-    const rate = rateFor($(id + 'Lvl').value, key, dept || 'sp');
+    const lvl = $(id + 'Lvl').value;
+    const rate = rateFor(lvl, key, dept || 'sp');
+    const costRate = rateFor('3', key, dept || 'sp');   // Level 3 = cost basis
     tr.querySelector('.ratecell').textContent = money(rate);
-    const line = num(inp) * rate;
-    tr.querySelector('.rowtot').textContent = money(line);
-    return line;
+    const hrs = num(inp);
+    const cust = hrs * rate;
+    const cost = hrs * costRate;
+    tr.querySelector('.rowtot').textContent = money(cust);
+    return { cust: cust, cost: cost };
   };
-  const spST = laborLine('spST','ST','sp') + laborLine('shopST','ST','sp') + laborLine('spAD','AD','sp');
-  const spOT = laborLine('spOT','OT','sp') + laborLine('shopOT','OT','sp');
-  const spDT = laborLine('spDT','DT','sp') + laborLine('shopDT','DT','sp');
+  const addLabor = (...rows) => rows.reduce((a, r) => ({ cust: a.cust + r.cust, cost: a.cost + r.cost }), { cust:0, cost:0 });
+  const spST = addLabor(laborLine('spST','ST','sp'), laborLine('shopST','ST','sp'), laborLine('spAD','AD','sp'));
+  const spOT = addLabor(laborLine('spOT','OT','sp'), laborLine('shopOT','OT','sp'));
+  const spDT = addLabor(laborLine('spDT','DT','sp'), laborLine('shopDT','DT','sp'));
   const faST = laborLine('faST','ST','fa'), faOT = laborLine('faOT','OT','fa'), faDT = laborLine('faDT','DT','fa');
 
   /* qty groups */
@@ -1666,12 +1706,12 @@ function recalc(ev){
 
   /* summary lines: [label, cost, markup, customer] */
   const lines = [
-    ['(SP) ST labor', spST, null, spST],
-    ['(SP) OT labor', spOT, null, spOT],
-    ['(SP) DT labor', spDT, null, spDT],
-    ['(FA) ST labor', faST, null, faST],
-    ['(FA) OT labor', faOT, null, faOT],
-    ['(FA) DT labor', faDT, null, faDT],
+    ['(SP) ST labor', spST.cost, null, spST.cust],
+    ['(SP) OT labor', spOT.cost, null, spOT.cust],
+    ['(SP) DT labor', spDT.cost, null, spDT.cust],
+    ['(FA) ST labor', faST.cost, null, faST.cust],
+    ['(FA) OT labor', faOT.cost, null, faOT.cust],
+    ['(FA) DT labor', faDT.cost, null, faDT.cust],
     ['Subcontractor testing (samples)', sampleCost, fmtPct(P.samples), sampleCost*(1+P.samples)],
     ['Subcontractor quotes', subQuoteCost, fmtPct(P.subq), subQuoteCost*(1+P.subq)],
     ['Equipment rental (outside)', rentalQuoteCost, fmtPct(P.rentalq), rentalQuoteCost*(1+P.rentalq)],
@@ -1742,7 +1782,7 @@ function recalc(ev){
 
   /* section subtotals (customer) */
   const sect = {
-    labor: spST+spOT+spDT+faST+faOT+faDT,
+    labor: spST.cust+spOT.cust+spDT.cust+faST.cust+faOT.cust+faDT.cust,
     transport: (truckCosts[0]||0)+(truckCosts[1]||0)+(truckCosts[2]||0)+perdiemCost+hotelCost*(1+P.hotel),
     rental: fdecRentalCost + rentalQuoteCost*(1+P.rentalq),
     material: matItemCost*(1+P.miscmat) + vendorCost*(1+P.material),
@@ -1778,7 +1818,7 @@ function recalc(ev){
   renderSanityFlags({
     grandCost, grandCust, profit,
     matCost: matItemCost + vendorCost,
-    laborCost: spST + spOT + spDT + faST + faOT + faDT,
+    laborCost: spST.cust + spOT.cust + spDT.cust + faST.cust + faOT.cust + faDT.cust,
     mpHours: mp.ST + mp.OT + mp.DT + mp.AD,
     trips: (trips.SP || 0) + (trips.FA || 0),
     hotel: hotelCost, perdiem: perdiemCost,
@@ -2042,8 +2082,12 @@ function collectSelected(){
     const q = num(tr.querySelector('.mi-qty')), n = (tr.querySelector('.mi-name').value || '').trim();
     if (q && n) mats.push([n, q]);
   });
-  document.querySelectorAll('input[data-g="eqFees"][data-f="qty"]').forEach(inp => {
-    const q = num(inp); if (q) equip.push([EQ_FEES[inp.dataset.i][0], q]);
+  document.querySelectorAll('#eqFees input[data-g="eqFees"][data-f="qty"]').forEach(inp => {
+    const q = num(inp); if (!q) return;
+    const tr = inp.closest('tr');
+    const nameInp = tr.querySelector('.eq-name');
+    const name = nameInp ? (nameInp.value || '').trim() : '';
+    if (name) equip.push([name, q]);
   });
   document.querySelectorAll('input[data-g="fdecRental"][data-f="qty"]').forEach(inp => {
     const q = num(inp); if (q) equip.push(['FDEC ' + FDEC_RENTAL[inp.dataset.i][0].toLowerCase(), q]);
@@ -2123,14 +2167,14 @@ function savePDF(){
 
 function collectDraft(){
   const d = { meta:{ app:'FDEC Quoting Template', author:'Mitch Peebles', version:'V4.0', savedAt:new Date().toISOString() },
-              fields:{}, dynamic:{ materialCatalog:[], vendorQuotes:[], rentalQuotes:[], subQuotes:[], po:[], mp:[] } };
+              fields:{}, dynamic:{ materialCatalog:[], vendorQuotes:[], rentalQuotes:[], subQuotes:[], eqFees:[], po:[], mp:[] } };
 
   /* All simple inputs & selects that carry a value, keyed where possible. */
   document.querySelectorAll('input, select, textarea').forEach(el => {
     if (el.type === 'file' || el.type === 'button') return;
     /* Skip dynamic-row controls — captured separately below. */
     if (el.closest('#materialItems') || el.closest('#vendorQuotes') || el.closest('#rentalQuotes') ||
-        el.closest('#subQuotes') || el.closest('#poRows') || el.closest('#mpRows')) return;
+        el.closest('#subQuotes') || el.closest('#poRows') || el.closest('#mpRows') || el.closest('#eqFees')) return;
     const key = el.id ||
       (el.dataset && el.dataset.g != null ? `g:${el.dataset.g}:${el.dataset.i}:${el.dataset.f}` : '') ||
       (el.dataset && el.dataset.key ? `mk:${el.dataset.key}` : '') ||
@@ -2148,6 +2192,12 @@ function collectDraft(){
   d.dynamic.vendorQuotes = grabMoney('vendorQuotes');
   d.dynamic.rentalQuotes = grabMoney('rentalQuotes');
   d.dynamic.subQuotes   = grabMoney('subQuotes');
+  /* FDEC equipment fees (editable rows) */
+  d.dynamic.eqFees = [...document.querySelectorAll('#eqFees tr')].map(tr => ({
+    name: (tr.querySelector('.eq-name')||{}).value || '',
+    rate: (tr.querySelector('input[data-f="rate"]')||{}).value || '',
+    qty:  (tr.querySelector('input[data-f="qty"]')||{}).value || ''
+  })).filter(r => r.name || r.rate || r.qty);
   /* Manpower rows */
   document.querySelectorAll('#mpRows tr').forEach(tr => {
     d.dynamic.mp.push({
@@ -2176,6 +2226,34 @@ function applyDraft(d){
   clear('#subQuotes');
   (d.dynamic.subQuotes || []).forEach(v => addMoneyRow('subQuotes','Subcontractor', v.name, v.val));
 
+  /* FDEC equipment fees: rebuild from saved rows, or defaults if absent. */
+  if (d.dynamic.eqFees && d.dynamic.eqFees.length){
+    const tb = $('eqFees'); tb.innerHTML = ''; _eqSeq = 0;
+    d.dynamic.eqFees.forEach(r => eqFeeRow(r.name, r.rate, r.qty));
+  } else {
+    buildEqFees();
+    /* Backward compatibility: older drafts (saved before equipment became
+       editable) stored quantities/fees by position as g:eqFees:N:qty and
+       g:eqFees:N:rate in d.fields. Map those onto the default rows by index.
+       This assumes the old list order matches the current default order. */
+    const rows = [...document.querySelectorAll('#eqFees tr')];
+    let recovered = 0;
+    rows.forEach((tr, idx) => {
+      const qKey = `g:eqFees:${idx}:qty`, rKey = `g:eqFees:${idx}:rate`;
+      if (qKey in d.fields && d.fields[qKey] !== ''){
+        const qEl = tr.querySelector('input[data-f="qty"]');
+        if (qEl){ qEl.value = d.fields[qKey]; recovered++; }
+      }
+      if (rKey in d.fields && d.fields[rKey] !== ''){
+        const rEl = tr.querySelector('input[data-f="rate"]');
+        if (rEl) rEl.value = d.fields[rKey];
+      }
+    });
+    if (recovered) setTimeout(() => setStatus(
+      'Draft loaded. Recovered ' + recovered + ' equipment quantit' + (recovered===1?'y':'ies') +
+      ' from an older draft — please verify the FDEC Equipment Fees section.'), 60);
+  }
+
   clear('#mpRows');
   (d.dynamic.mp || []).forEach(m => addMpRow(m));
   if (!d.dynamic.mp || !d.dynamic.mp.length) for (let i=0;i<3;i++) addMpRow();
@@ -2184,7 +2262,7 @@ function applyDraft(d){
   document.querySelectorAll('input, select, textarea').forEach(el => {
     if (el.type === 'file' || el.type === 'button') return;
     if (el.closest('#materialItems') || el.closest('#vendorQuotes') || el.closest('#rentalQuotes') ||
-        el.closest('#subQuotes') || el.closest('#poRows') || el.closest('#mpRows')) return;
+        el.closest('#subQuotes') || el.closest('#poRows') || el.closest('#mpRows') || el.closest('#eqFees')) return;
     const key = el.id ||
       (el.dataset && el.dataset.g != null ? `g:${el.dataset.g}:${el.dataset.i}:${el.dataset.f}` : '') ||
       (el.dataset && el.dataset.key ? `mk:${el.dataset.key}` : '') ||
@@ -2368,6 +2446,45 @@ window.addEventListener('message', function(e){
 });
 <\/script>
 
+
+<button id="backToTop" type="button" class="noprint" title="Back to top" aria-label="Back to top" onclick="scrollToTop()">
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 5l-7 7h4v7h6v-7h4z" fill="currentColor"/></svg>
+</button>
+<style>
+  #backToTop{
+    position:fixed; z-index:120;
+    right:18px; right:max(18px, env(safe-area-inset-right));
+    bottom:96px; bottom:calc(96px + env(safe-area-inset-bottom));
+    width:46px; height:46px; border-radius:50%;
+    background:#010039; color:#fff; border:2px solid #3281b9;
+    box-shadow:0 6px 18px rgba(0,0,0,.28); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; visibility:hidden; transform:translateY(8px);
+    transition:opacity .2s, transform .2s, visibility .2s;
+  }
+  #backToTop.show{opacity:.92; visibility:visible; transform:translateY(0)}
+  #backToTop:hover{opacity:1; background:#12245c}
+  #backToTop:active{transform:translateY(1px)}
+  @media print{#backToTop{display:none}}
+</style>
+<script>
+(function(){
+  var btn = document.getElementById('backToTop');
+  if (!btn) return;
+  // Scroll happens on the window (document scrolls in this app).
+  function onScroll(){
+    var y = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    if (y > 300) btn.classList.add('show'); else btn.classList.remove('show');
+  }
+  window.scrollToTop = function(){
+    try { window.scrollTo({ top:0, behavior:'smooth' }); }
+    catch(_){ window.scrollTo(0,0); }
+  };
+  window.addEventListener('scroll', onScroll, { passive:true });
+  document.addEventListener('scroll', onScroll, { passive:true, capture:true });
+  onScroll();
+})();
+<\/script>
 
 </body></html></script>
 <script type="text/html" id="src-proposal"><!DOCTYPE html>
@@ -3744,6 +3861,45 @@ if (_btnSave) _btnSave.addEventListener("click", () => {
 <\/script>
 
 
+<button id="backToTop" type="button" class="noprint" title="Back to top" aria-label="Back to top" onclick="scrollToTop()">
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 5l-7 7h4v7h6v-7h4z" fill="currentColor"/></svg>
+</button>
+<style>
+  #backToTop{
+    position:fixed; z-index:120;
+    right:18px; right:max(18px, env(safe-area-inset-right));
+    bottom:78px; bottom:calc(78px + env(safe-area-inset-bottom));
+    width:46px; height:46px; border-radius:50%;
+    background:#010039; color:#fff; border:2px solid #3281b9;
+    box-shadow:0 6px 18px rgba(0,0,0,.28); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; visibility:hidden; transform:translateY(8px);
+    transition:opacity .2s, transform .2s, visibility .2s;
+  }
+  #backToTop.show{opacity:.92; visibility:visible; transform:translateY(0)}
+  #backToTop:hover{opacity:1; background:#12245c}
+  #backToTop:active{transform:translateY(1px)}
+  @media print{#backToTop{display:none}}
+</style>
+<script>
+(function(){
+  var btn = document.getElementById('backToTop');
+  if (!btn) return;
+  // Scroll happens on the window (document scrolls in this app).
+  function onScroll(){
+    var y = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    if (y > 300) btn.classList.add('show'); else btn.classList.remove('show');
+  }
+  window.scrollToTop = function(){
+    try { window.scrollTo({ top:0, behavior:'smooth' }); }
+    catch(_){ window.scrollTo(0,0); }
+  };
+  window.addEventListener('scroll', onScroll, { passive:true });
+  document.addEventListener('scroll', onScroll, { passive:true, capture:true });
+  onScroll();
+})();
+<\/script>
+
 </body></html></script>
 <script type="text/html" id="src-annual"><!DOCTYPE html>
 <html lang="en"><head>
@@ -5102,6 +5258,45 @@ if (_btnSave) _btnSave.addEventListener("click", () => {
 <\/script>
 
 
+<button id="backToTop" type="button" class="noprint" title="Back to top" aria-label="Back to top" onclick="scrollToTop()">
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 5l-7 7h4v7h6v-7h4z" fill="currentColor"/></svg>
+</button>
+<style>
+  #backToTop{
+    position:fixed; z-index:120;
+    right:18px; right:max(18px, env(safe-area-inset-right));
+    bottom:78px; bottom:calc(78px + env(safe-area-inset-bottom));
+    width:46px; height:46px; border-radius:50%;
+    background:#010039; color:#fff; border:2px solid #3281b9;
+    box-shadow:0 6px 18px rgba(0,0,0,.28); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; visibility:hidden; transform:translateY(8px);
+    transition:opacity .2s, transform .2s, visibility .2s;
+  }
+  #backToTop.show{opacity:.92; visibility:visible; transform:translateY(0)}
+  #backToTop:hover{opacity:1; background:#12245c}
+  #backToTop:active{transform:translateY(1px)}
+  @media print{#backToTop{display:none}}
+</style>
+<script>
+(function(){
+  var btn = document.getElementById('backToTop');
+  if (!btn) return;
+  // Scroll happens on the window (document scrolls in this app).
+  function onScroll(){
+    var y = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    if (y > 300) btn.classList.add('show'); else btn.classList.remove('show');
+  }
+  window.scrollToTop = function(){
+    try { window.scrollTo({ top:0, behavior:'smooth' }); }
+    catch(_){ window.scrollTo(0,0); }
+  };
+  window.addEventListener('scroll', onScroll, { passive:true });
+  document.addEventListener('scroll', onScroll, { passive:true, capture:true });
+  onScroll();
+})();
+<\/script>
+
 </body></html></script>
 <script type="text/html" id="src-install"><!DOCTYPE html>
 <html lang="en"><head>
@@ -6437,6 +6632,45 @@ if (_btnSave) _btnSave.addEventListener("click", () => {
 })();
 <\/script>
 
+
+<button id="backToTop" type="button" class="noprint" title="Back to top" aria-label="Back to top" onclick="scrollToTop()">
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 5l-7 7h4v7h6v-7h4z" fill="currentColor"/></svg>
+</button>
+<style>
+  #backToTop{
+    position:fixed; z-index:120;
+    right:18px; right:max(18px, env(safe-area-inset-right));
+    bottom:78px; bottom:calc(78px + env(safe-area-inset-bottom));
+    width:46px; height:46px; border-radius:50%;
+    background:#010039; color:#fff; border:2px solid #3281b9;
+    box-shadow:0 6px 18px rgba(0,0,0,.28); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; visibility:hidden; transform:translateY(8px);
+    transition:opacity .2s, transform .2s, visibility .2s;
+  }
+  #backToTop.show{opacity:.92; visibility:visible; transform:translateY(0)}
+  #backToTop:hover{opacity:1; background:#12245c}
+  #backToTop:active{transform:translateY(1px)}
+  @media print{#backToTop{display:none}}
+</style>
+<script>
+(function(){
+  var btn = document.getElementById('backToTop');
+  if (!btn) return;
+  // Scroll happens on the window (document scrolls in this app).
+  function onScroll(){
+    var y = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    if (y > 300) btn.classList.add('show'); else btn.classList.remove('show');
+  }
+  window.scrollToTop = function(){
+    try { window.scrollTo({ top:0, behavior:'smooth' }); }
+    catch(_){ window.scrollTo(0,0); }
+  };
+  window.addEventListener('scroll', onScroll, { passive:true });
+  document.addEventListener('scroll', onScroll, { passive:true, capture:true });
+  onScroll();
+})();
+<\/script>
 
 </body></html></script>
 
