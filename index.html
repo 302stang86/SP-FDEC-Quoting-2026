@@ -457,6 +457,48 @@
   #materialCatalog:not(.structure-locked) input.sub-name{background:#fff; border-color:var(--line)}
   button#matEditToggle.editing{background:var(--red); color:#fff; border-color:var(--red)}
 
+  /* ---- Two-pane catalog: category rail (left) + items (right) ---- */
+  .mat-twopane{display:flex; border:1px solid var(--line); border-radius:9px; overflow:hidden; background:#fff; min-height:280px}
+  .mat-nav{
+    width:210px; flex:none; background:var(--soft); border-right:1px solid var(--line);
+    overflow-y:auto; max-height:560px;
+  }
+  .mat-nav .mn-item{
+    display:flex; align-items:center; gap:8px; padding:11px 13px; cursor:pointer;
+    font-size:13.5px; border-bottom:1px solid var(--line); color:var(--ink); user-select:none;
+  }
+  .mat-nav .mn-item:hover{background:var(--lightblue)}
+  .mat-nav .mn-item.active{background:var(--navy); color:#fff; font-weight:600}
+  .mat-nav .mn-name{flex:1; line-height:1.25}
+  .mat-nav .mn-count{
+    font-size:10.5px; font-weight:700; color:#fff; background:var(--good);
+    border-radius:999px; padding:1px 7px; min-width:18px; text-align:center;
+  }
+  .mat-nav .mn-item:not(.active) .mn-count{background:#9fb3c6}
+  .mat-nav .mn-item.active .mn-count{background:#0190a0}
+  .mat-nav .mn-count.zero{display:none}
+  .mat-pane{flex:1; min-width:0; overflow-x:auto; padding:10px 12px; max-height:560px; overflow-y:auto}
+
+  /* In two-pane mode the category header/collapse is replaced by the rail:
+     hide the per-category head bar, always show the body, and show only the
+     active category. */
+  .mat-twopane .mat-cat{border:none; border-radius:0; margin:0}
+  .mat-twopane .mat-cat > .mat-cat-head{display:none}
+  .mat-twopane .mat-cat > .mat-cat-body{display:block !important}
+  .mat-twopane .mat-cat:not(.pane-active){display:none}
+  /* Subcategories stay as labelled groups, always open, no collapse chrome. */
+  .mat-twopane .mat-sub{border:none; margin:4px 0 12px}
+  .mat-twopane .mat-sub > .mat-sub-head{background:transparent; border-left:3px solid var(--red); cursor:default; padding-left:9px}
+  .mat-twopane .mat-sub > .mat-sub-head .tw{display:none}
+  .mat-twopane .mat-sub > .mat-sub-body{display:block !important}
+  /* When editing structure, reveal the category head inside the pane so names
+     can be changed and categories deleted. */
+  #materialCatalog:not(.structure-locked) .mat-cat.pane-active > .mat-cat-head{display:flex; background:var(--navy)}
+
+  @media(max-width:640px){
+    .mat-nav{width:150px}
+  }
+
   /* ---- Quick Add search ---- */
   .quickadd{position:relative; margin-bottom:10px; max-width:560px}
   .qa-box{display:flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:8px; background:#fff; padding:2px 10px}
@@ -582,7 +624,7 @@
         <button class="small noprint apply-mp" type="button" onclick="applyManpower()">Apply to Labor &amp; Transportation</button>
       </div>
       <div style="margin-top:6px">
-        <span class="hint">Trips = technicians × (hours each ÷ 8, rounded up) — one truck per technician per day. Sprinkler tasks book the SP truck, fire alarm tasks the AL truck; admin hours generate no trips. Editing manpower updates the transportation quantities automatically; you can still adjust them by hand afterward.</span>
+        <span class="hint">Trips = technicians × (hours each ÷ 8, rounded up) — one truck per technician per day. Sprinkler tasks book the SP truck, fire alarm tasks the AL truck; admin hours generate no trips. Hours over 8 each are split automatically: the first 8 hrs per tech bill as straight time and the rest as overtime (no extra truck charges). Editing manpower updates the transportation quantities automatically; you can still adjust them by hand afterward.</span>
       </div>
     </div>
   </details>
@@ -665,7 +707,7 @@
       <div class="quickadd noprint" id="quickAdd">
         <div class="qa-box">
           <span class="qa-ico">&#128269;</span>
-          <input type="text" id="qaSearch" autocomplete="off" placeholder="Quick add \u2014 search materials (e.g. 4&quot; coupling, FDC, riser)\u2026"
+          <input type="text" id="qaSearch" autocomplete="off" placeholder="Quick add &mdash; search materials (e.g. 4&quot; coupling, FDC, riser)&hellip;"
                  oninput="qaSearchInput()" onkeydown="qaKeydown(event)" onfocus="qaSearchInput()">
           <button type="button" class="qa-clear" id="qaClear" onclick="qaClearSearch()" title="Clear" style="display:none">&times;</button>
         </div>
@@ -675,7 +717,10 @@
         <button id="matEditToggle" class="small noprint" type="button" onclick="toggleMatEdit()">Edit categories</button>
         <span id="matEditHint" class="hint" style="margin:0">Editing categories is locked. Item costs and quantities are always editable.</span>
       </div>
-      <div id="materialCatalog" class="structure-locked"></div>
+      <div class="mat-twopane" id="matTwoPane">
+        <div class="mat-nav" id="matNav"></div>
+        <div class="mat-pane structure-locked" id="materialCatalog"></div>
+      </div>
       <button id="matAddCatBtn" class="small noprint" style="margin-top:10px; display:none" type="button" onclick="addMatCategory()">+ Add category</button>
       <p class="hint">Enter a unit cost and quantity on any line to include it. Sales tax calculates on the customer material total.</p>
       <table style="display:none"><tbody id="materialItems"></tbody></table>
@@ -962,7 +1007,7 @@ const MATERIAL_CATALOG = [
   {name:"Grooved Couplings", subs:[
     {name:"Couplings", items:[
       {name:"8\" Grooved Coupling", cost:"28.73"},
-      {name:"6\" Grooved Coupling", cost:"16.25"},
+      {name:"6\" Grooved Coupling", cost:"16.03"},
       {name:"4\" Grooved Coupling", cost:"10.12"},
       {name:"3\" Grooved Coupling", cost:"7.99"},
       {name:"2-1/2\" Grooved Coupling", cost:"6.95"},
@@ -1094,12 +1139,12 @@ const MATERIAL_CATALOG = [
       {name:"6 Count Spare Head Cabinet Tall", cost:"16.81"},
     ]},
     {name:"Brass Nipple Extensions \"Length x NPT\"", items:[
-      {name:"1/2\" x 1/2\" Brass Nipple Extension", cost:"3.77"},
-      {name:"3/4\" x 1/2\" Brass Nipple Extension", cost:"3.35"},
-      {name:"1\" x 1/2\" Brass Nipple Extension", cost:"4.32"},
-      {name:"1/2\" x 3/4\" Brass Nipple Extension", cost:"3.47"},
-      {name:"3/4\" x 3/4\" Brass Nipple Extension", cost:"4.62"},
-      {name:"3/4\" x 3/4\" Brass Nipple Extension", cost:"5.56"},
+      {name:"1/2\" x 1/2\" Brass Nipple Extension", cost:"5.77"},
+      {name:"3/4\" x 1/2\" Brass Nipple Extension", cost:"5.35"},
+      {name:"1\" x 1/2\" Brass Nipple Extension", cost:"6.32"},
+      {name:"1/2\" x 3/4\" Brass Nipple Extension", cost:"5.47"},
+      {name:"3/4\" x 3/4\" Brass Nipple Extension", cost:"6.62"},
+      {name:"3/4\" x 3/4\" Brass Nipple Extension", cost:"7.56"},
     ]},
   ]},
   {name:"Gauges", subs:[
@@ -1143,17 +1188,65 @@ const MATERIAL_CATALOG = [
   ]},
   {name:"Hangers & Hardware", subs:[
     {name:"All-Thread Rod (ATR)", items:[
-      {name:"3/4\" All-Thread Rod (ATR)"},
-      {name:"5/8\" All-Thread Rod (ATR)"},
-      {name:"1/2\" All-Thread Rod (ATR)"},
-      {name:"3/8\" All-Thread Rod (ATR)"},
+      {name:"3/4\" All-Thread Rod (ATR)", cost:"19.01"},
+      {name:"5/8\" All-Thread Rod (ATR)", cost:"15.56"},
+      {name:"1/2\" All-Thread Rod (ATR)", cost:"9.85"},
+      {name:"3/8\" All-Thread Rod (ATR)", cost:"5.41"},
     ]},
     {name:"Fasteners & Anchors", items:[
-      {name:"3/8\" Hex Nut"},
-      {name:"3/8\" Hex Bolt"},
-      {name:"3/8\" Flat Washer"},
-      {name:"3/8\" Lock Washer"},
-      {name:"3/8\" Toggle Wing"},
+      {name:"3/8\" Hex Nut", cost:".013"},
+      {name:"3/8\" x 1-1/4\" Hex Bolt", cost:".25"},
+      {name:"3/8\" Flat Washer", cost:".05"},
+      {name:"3/8\" Lock Washer", cost:".09"},
+      {name:"3/8\" Toggle Wing", cost:".98"},
+    ]},
+  ]},
+  {name:"5-Year Common", subs:[
+    {name:"Wet and Dry", items:[
+      {name:"Water Gauge", cost:"36"},
+      {name:"Air Gauge", cost:"36"},
+      {name:"3-Way Valve", cost:"22"},
+      {name:"1/2\" Ball Valve", cost:"10.64"},
+      {name:"1\" Ball Valve", cost:"24.99"},
+      {name:"2\" Groove Coupling", cost:"6.58"},
+      {name:"3\" Groove Coupling", cost:"7.99"},
+      {name:"Misc Sprinkler", cost:"9.00"},
+      {name:"FDEC Spare Head Box Sticker", cost:"5.0"},
+    ]},
+    {name:"FDC", items:[
+      {name:"1/2\" Automatic Ball Drip", cost:"20.17"},
+      {name:"2-1/2\" Red Aluminum Breakaway FDC Caps", cost:"6.64"},
+      {name:"4\" Groove Coupling", cost:"10.12"},
+      {name:"5/8\" ATR x 12'", cost:"7.78"},
+      {name:"5/8 HD Hex Nuts Each", cost:".60"},
+      {name:"4\" NBG Kit", cost:"16.14"},
+      {name:"4\" Grooved Flange Adapter", cost:"25.23"},
+    ]},
+  ]},
+  {name:"Threaded Fittings", subs:[
+    {name:"1\" Threaded Fittings", items:[
+      {name:"1\"  90 Elbow", cost:"5.82"},
+      {name:"1\" 45 Elbow", cost:"6.94"},
+      {name:"1\" Coupling", cost:"6.39"},
+      {name:"1\" Tee", cost:"8.91"},
+      {name:"1\" Union", cost:"18.20"},
+      {name:"1\" x 3/4\" RC Coupling", cost:"9.92"},
+      {name:"1\" x 1/2\" RC Coupling", cost:"7.19"},
+      {name:"1\" plug", cost:"3.15"},
+    ]},
+    {name:"Bushings", items:[
+      {name:"1\" x 3/4\" Galvanized Bushing"},
+      {name:"1\" x 1/2\" Galvanized Bushing"},
+      {name:"1\" x 1/4\" Galvanized Bushing"},
+      {name:"3/4\" x 1/2\" Galvanized Bushing", cost:"1.92"},
+      {name:"3/4\" x 1/4\" Galvanized Bushing", cost:"1.92"},
+      {name:"1/2\" x 1/4\" Galvanized Bushing", cost:"1.18"},
+    ]},
+    {name:"Nipples", items:[
+      {name:"1\" x 12\" Nipple", cost:"14.10"},
+      {name:"1-1/4\" x 12\" Nipple", cost:"17.93"},
+      {name:"1-1/2\" x 12\" Nipple", cost:"20.38"},
+      {name:"2\" x 12\" Nipple", cost:"29.08"},
     ]},
   ]},
 ];
@@ -1171,6 +1264,55 @@ function buildMaterialCatalog(data){
   (data || MATERIAL_CATALOG).forEach(cat => host.appendChild(renderMatCategory(cat)));
   // Re-apply the current lock state to the freshly-rendered name inputs.
   syncMatLock(!host.classList.contains('structure-locked'));
+  buildMatNav();
+}
+
+/* Build the left-hand category rail for the two-pane layout, and show the
+   first category. Called after any structural change (build, add, delete). */
+let _matActiveCat = 0;
+function buildMatNav(){
+  const nav = $('matNav'); const host = $('materialCatalog');
+  if (!nav || !host) return;
+  const cats = [...host.querySelectorAll('.mat-cat')];
+  nav.innerHTML = '';
+  if (_matActiveCat >= cats.length) _matActiveCat = Math.max(0, cats.length - 1);
+  cats.forEach((catEl, i) => {
+    const name = (catEl.querySelector('.cat-name') || {}).value || 'Untitled';
+    const filled = catEl.querySelectorAll('.mat-item.filled').length;
+    const el = document.createElement('div');
+    el.className = 'mn-item' + (i === _matActiveCat ? ' active' : '');
+    el.innerHTML = `<span class="mn-name">${matEsc(name)}</span>` +
+      `<span class="mn-count${filled ? '' : ' zero'}">${filled}</span>`;
+    el.addEventListener('click', () => setActiveCat(i));
+    nav.appendChild(el);
+  });
+  applyActiveCat();
+}
+
+function setActiveCat(i){
+  _matActiveCat = i;
+  const nav = $('matNav');
+  [...nav.children].forEach((el, idx) => el.classList.toggle('active', idx === i));
+  applyActiveCat();
+}
+
+function applyActiveCat(){
+  const cats = [...$('materialCatalog').querySelectorAll('.mat-cat')];
+  cats.forEach((c, idx) => c.classList.toggle('pane-active', idx === _matActiveCat));
+  const pane = $('materialCatalog'); if (pane) pane.scrollTop = 0;
+}
+
+/* Refresh only the rail's selected-counts (called from recalc, cheap). */
+function updateMatNavCounts(){
+  const nav = $('matNav'); const host = $('materialCatalog');
+  if (!nav || !host) return;
+  const cats = [...host.querySelectorAll('.mat-cat')];
+  [...nav.children].forEach((el, i) => {
+    if (!cats[i]) return;
+    const filled = cats[i].querySelectorAll('.mat-item.filled').length;
+    const badge = el.querySelector('.mn-count');
+    if (badge){ badge.textContent = filled; badge.classList.toggle('zero', !filled); }
+  });
 }
 
 function renderMatCategory(cat){
@@ -1191,9 +1333,9 @@ function renderMatCategory(cat){
     if (e.target.closest('input') || e.target.closest('.mat-del')) return;
     wrap.classList.toggle('collapsed');
   });
-  head.querySelector('.cat-name').addEventListener('input', e => { cat.name = e.target.value; });
+  head.querySelector('.cat-name').addEventListener('input', e => { cat.name = e.target.value; buildMatNav(); });
   head.querySelector('.mat-del').addEventListener('click', () => {
-    if (confirm('Remove this entire category and all its items?')){ wrap.remove(); recalc(); }
+    if (confirm('Remove this entire category and all its items?')){ wrap.remove(); buildMatNav(); recalc(); }
   });
   wrap.appendChild(head);
 
@@ -1286,8 +1428,11 @@ function addMatCategory(){
   const el = renderMatCategory(cat);
   host.appendChild(el);
   el.classList.remove('collapsed');
-  const ni = el.querySelector('.cat-name'); if (ni) ni.focus();
   updateMatCounts();
+  // Rebuild the rail and jump to the new category so it's visible for editing.
+  _matActiveCat = host.querySelectorAll('.mat-cat').length - 1;
+  buildMatNav();
+  const ni = el.querySelector('.cat-name'); if (ni) ni.focus();
 }
 
 /* ==================== QUICK ADD (search + add a line) ====================
@@ -1378,9 +1523,11 @@ function qaSelect(i){
   var it = _qaMatches[i];
   if (!it || !it.row) return;
   var tr = it.row;
-  // Expand the containing subcategory and category.
+  // Expand the containing subcategory and category (accordion mode).
   var sub = tr.closest('.mat-sub'); if (sub) sub.classList.remove('collapsed');
   var cat = tr.closest('.mat-cat'); if (cat) cat.classList.remove('collapsed');
+  // Two-pane mode: switch the rail to the item's category so it's visible.
+  qaActivatePaneFor(tr);
   // Ensure a quantity so it counts toward the quote.
   var qtyEl = tr.querySelector('.mi-qty');
   if (qtyEl && !(num(qtyEl) > 0)) qtyEl.value = '1';
@@ -1391,6 +1538,14 @@ function qaSelect(i){
   qaScrollTo(tr);
   // Return to the search bar, ready for the next item.
   var sb = $('qaSearch'); if (sb) sb.focus();
+}
+
+/* Switch the two-pane rail to whichever category contains this row. */
+function qaActivatePaneFor(tr){
+  var cat = tr.closest('.mat-cat'); if (!cat) return;
+  var cats = [...$('materialCatalog').querySelectorAll('.mat-cat')];
+  var idx = cats.indexOf(cat);
+  if (idx >= 0) setActiveCat(idx);
 }
 
 /* Scroll a row into view, tolerating environments without scrollIntoView. */
@@ -1414,6 +1569,7 @@ function qaAddNew(name){
   if (!target){
     target = renderMatCategory({ name:'Quick Add', subs:[{ name:'', items:[] }] });
     host.appendChild(target);
+    buildMatNav();
   }
   target.classList.remove('collapsed');
   var sub = target.querySelector('.mat-sub');
@@ -1422,6 +1578,7 @@ function qaAddNew(name){
   if (!tbody) return;
   var tr = matItemRow({ name:name, qty:'1' });
   tbody.appendChild(tr);
+  qaActivatePaneFor(tr);
   recalc();
   qaClearSearch();
   tr.classList.add('qa-pulse');
@@ -1504,6 +1661,7 @@ function sumMaterialCatalog(){
     total += line;
   });
   updateMatCounts();
+  updateMatNavCounts();
   return total;
 }
 
@@ -1800,10 +1958,19 @@ function recalc(ev){
   const mp = {ST:0, OT:0, DT:0, AD:0};
   const trips = mpTrips();
   document.querySelectorAll('#mpRows tr').forEach(tr => {
-    const hrs = num(tr.querySelector('.mp-tech')) * num(tr.querySelector('.mp-hrs'));
-    tr.querySelector('.mp-total').textContent = hrs || 0;
+    const techs = num(tr.querySelector('.mp-tech'));
+    const hrsEach = num(tr.querySelector('.mp-hrs'));
+    const total = techs * hrsEach;
+    tr.querySelector('.mp-total').textContent = total || 0;
     tr.querySelector('.mp-trips').textContent = rowTrips(tr);
-    mp[tr.querySelector('.mp-class').value] += hrs;
+    const cls = tr.querySelector('.mp-class').value;
+    /* Same over-8 split as applyManpower so the breakdown matches the labor. */
+    if ((cls === 'ST' || cls === 'OT') && hrsEach > 8 && techs){
+      mp.ST += techs * 8;
+      mp.OT += techs * (hrsEach - 8);
+    } else {
+      mp[cls] += total;
+    }
   });
   $('mpST').textContent = mp.ST; $('mpOT').textContent = mp.OT;
   $('mpDT').textContent = mp.DT; $('mpAD').textContent = mp.AD;
@@ -2139,8 +2306,22 @@ function mpChanged(){ syncTrucksFromMp(); recalc(); }
 function applyManpower(){
   const mp = { SP:{ST:0,OT:0,DT:0,AD:0}, FA:{ST:0,OT:0,DT:0,AD:0} };
   document.querySelectorAll('#mpRows tr').forEach(tr => {
-    const hrs = num(tr.querySelector('.mp-tech')) * num(tr.querySelector('.mp-hrs'));
-    mp[tr.querySelector('.mp-dept').value][tr.querySelector('.mp-class').value] += hrs;
+    const techs = num(tr.querySelector('.mp-tech'));
+    const hrsEach = num(tr.querySelector('.mp-hrs'));
+    const dept = tr.querySelector('.mp-dept').value;
+    const cls = tr.querySelector('.mp-class').value;
+    if (!techs || !hrsEach) return;
+    /* Admin and Double Time are not auto-split. For Straight Time and
+       Overtime rows, anything over 8 hrs each becomes overtime: the first
+       8 hrs per tech are straight time, the remainder is overtime. */
+    if ((cls === 'ST' || cls === 'OT') && hrsEach > 8){
+      const stEach = 8;
+      const otEach = hrsEach - 8;
+      mp[dept].ST += techs * stEach;
+      mp[dept].OT += techs * otEach;
+    } else {
+      mp[dept][cls] += techs * hrsEach;
+    }
   });
   $('spST').value = mp.SP.ST || ''; $('spOT').value = mp.SP.OT || '';
   $('spDT').value = mp.SP.DT || '';
