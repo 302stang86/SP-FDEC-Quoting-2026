@@ -2660,11 +2660,12 @@ window.addEventListener('message', function(e){
       });
       // Remove interactive-only elements from the clone.
       wrap.querySelectorAll('.noprint, button, .totbar').forEach(el => el.remove());
-      // For the exported PDF, keep ONLY the Quote Summary section (which now
-      // contains the Manpower/Tasks, Selected Materials & Equipment, and
-      // Totals). Remove all other collapsible sections so their titles don't
-      // clutter the printout, and force the kept one open.
-      var KEEP = { 'sec-summary':1 };
+      // For the exported PDF, keep the Labor, Transportation & Travel, and
+      // Quote Summary sections (the summary contains Manpower/Tasks, Selected
+      // Materials & Equipment, and Totals). Remove all other collapsible
+      // sections so their titles don't clutter the printout, and force the
+      // kept ones open.
+      var KEEP = { 'sec-labor':1, 'sec-transport':1, 'sec-summary':1 };
       wrap.querySelectorAll('details').forEach(function(el){
         if (KEEP[el.id]){ el.setAttribute('open','open'); }
         else { el.remove(); }
