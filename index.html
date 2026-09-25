@@ -852,14 +852,14 @@ const RATE_DEFAULTS = {
   ST: {1:150.00, 2:135.00, 3:120.00},
   OT: {1:195.00, 2:175.00, 3:155.00},
   DT: {1:245.00, 2:220.00, 3:195.00},
-  AD: {1:130.00, 2:130.00, 3:130.00}
+  AD: {1:135.00, 2:135.00, 3:135.00}
 };
 /* Fire Alarm technician rates — independently editable; same starting values. */
 const RATE_DEFAULTS_FA = {
   ST: {1:150.00, 2:135.00, 3:120.00},
   OT: {1:195.00, 2:175.00, 3:155.00},
   DT: {1:245.00, 2:220.00, 3:195.00},
-  AD: {1:130.00, 2:130.00, 3:130.00}
+  AD: {1:135.00, 2:135.00, 3:135.00}
 };
 const RATE_TABLES = { sp: RATE_DEFAULTS, fa: RATE_DEFAULTS_FA };
 const CLASS_NAMES = { ST:'Straight time', OT:'Overtime', DT:'Double time', AD:'Admin' };
@@ -2172,6 +2172,20 @@ function buildManpowerText(){
     any = true;
     out.push('HOURLY RATES', '');
     out.push(...rateLines);
+  }
+
+  /* ---- Admin (hours and cost) ---- */
+  const adEl = $('spAD');
+  const adHrs = adEl ? num(adEl) : 0;
+  if (adHrs > 0){
+    const adLvl = $('spADLvl') ? $('spADLvl').value : '2';
+    const adRate = rateFor(adLvl, 'AD', 'sp');
+    const adCost = adHrs * adRate;
+    const hrWord = adHrs === 1 ? 'hour' : 'hours';
+    if (any) out.push('');
+    any = true;
+    out.push('ADMIN', '');
+    out.push(`\u2022 ${adHrs} ${hrWord} \u00d7 ${money(adRate)}/hr = ${money(adCost)}`);
   }
 
   /* ---- Trucks ---- */
