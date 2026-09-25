@@ -2152,6 +2152,28 @@ function buildManpowerText(){
     out.push('', `Total: ${totHours} hours`);
   }
 
+  /* ---- Hourly Rates (billed rate per class, only where hours are entered) ---- */
+  const rateLines = [];
+  const rateGroups = [
+    ['Sprinkler', 'sp', [['spST','ST','Straight Time'],['spOT','OT','Overtime'],['spDT','DT','Double Time'],['spAD','AD','Admin']]],
+    ['Fire Alarm', 'fa', [['faST','ST','Straight Time'],['faOT','OT','Overtime'],['faDT','DT','Double Time']]]
+  ];
+  rateGroups.forEach(([label, dept, classes]) => {
+    classes.forEach(([id, key, clsName]) => {
+      const el = $(id);
+      if (!el || !(num(el) > 0)) return;
+      const lvl = $(id + 'Lvl') ? $(id + 'Lvl').value : '2';
+      const rate = rateFor(lvl, key, dept);
+      rateLines.push(`\u2022 ${label} ${clsName}: ${money(rate)}/hr`);
+    });
+  });
+  if (rateLines.length){
+    if (any) out.push('');
+    any = true;
+    out.push('HOURLY RATES', '');
+    out.push(...rateLines);
+  }
+
   /* ---- Trucks ---- */
   const truckLines = [];
   TRUCKS.forEach((t, i) => {
@@ -2220,6 +2242,23 @@ function buildManpowerText(){
     any = true;
     out.push('VENDOR ORDERS', '');
     out.push(...vendorLines);
+  }
+
+  /* ---- Cost Totals (customer-billed material and equipment) ---- */
+  const costLines = [];
+  const P = markups();
+  const matItemCost = sumMaterialCatalog();
+  const vendorCost = sumMoneyRows('vendorQuotes');
+  const custMaterial = matItemCost*(1+P.miscmat) + vendorCost*(1+P.material);
+  const eqFeesCost = sumGroup('eqFees', EQ_FEES);
+  const custEquip = eqFeesCost*(1+P.eqfees);
+  if (custMaterial > 0) costLines.push(`\u2022 Material total: ${money(custMaterial)}`);
+  if (custEquip > 0) costLines.push(`\u2022 Equipment total: ${money(custEquip)}`);
+  if (costLines.length){
+    if (any) out.push('');
+    any = true;
+    out.push('COST TOTALS', '');
+    out.push(...costLines);
   }
 
   return any ? out.join('\n') : '';
