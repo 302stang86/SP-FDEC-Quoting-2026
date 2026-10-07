@@ -742,14 +742,13 @@
   <details class="card" id="sec-itm">
     <summary>ITM Materials <span class="sect-total" data-sect="itm"></span></summary>
     <div class="body">
+      <h3 class="sub">Sprinkler ITM</h3>
       <div class="cols2">
         <div>
-          <h3 class="sub">Sprinkler ITM</h3>
           <table><thead><tr><th>Item</th><th class="num">Rate</th><th class="num">Qty</th><th class="num">Total</th></tr></thead>
             <tbody id="itmSP"></tbody></table>
         </div>
         <div>
-          <h3 class="sub">Alarm ITM</h3>
           <table><thead><tr><th>Item</th><th class="num">Rate</th><th class="num">Qty</th><th class="num">Total</th></tr></thead>
             <tbody id="itmAL"></tbody></table>
         </div>
@@ -887,10 +886,13 @@ const EQ_FEES = [
 const TRUCKS = [['SP truck',85],['AL truck',85],['Box truck',175]];
 const PERDIEM = [['Per diem — drive',64],['Per diem — day',74]];
 const FDEC_RENTAL = [['Lift rental',600],['Daily',200],['Weekly (5 day)',1000]];
-const ITM = ['Annual wet','Annual dry','Annual antifreeze','Annual preaction','Annual deluge',
-  'Annual foam','Annual standpipe','Annual pit','Annual water storage tank'];
-const ITM_SP = ITM.concat(['IROL']);
-const ITM_DEFAULT = {'Annual wet':20.7,'Annual dry':20.7,'IROL':33.12};
+/* Sprinkler ITM — one list split across two columns (down-then-across),
+   matching the screenshot layout. */
+const ITM_LEFT  = ['Annual wet','Annual dry','Annual deluge','Annual standpipe','IROL'];
+const ITM_RIGHT = ['Annual antifreeze','Annual preaction','Annual foam','Annual pit','Annual water storage tank'];
+const ITM = ITM_LEFT.concat(ITM_RIGHT);   /* full set (used by summing/collectors) */
+const ITM_SP = ITM;
+const ITM_DEFAULT = {'Annual wet':20.7,'Annual dry':20.7,'Annual antifreeze':20.7,'Annual preaction':20.7,'IROL':33.12};
 const BACKFLOW = [['1st backflow',150],['Additional backflow',110]];
 const FIREPUMP = [
   ['Weekly/monthly churn test',240],['Annual fire pump test (1 technician)',370],
@@ -1734,12 +1736,39 @@ buildQtyTable('trucks','trucks',TRUCKS,true);
 buildQtyTable('perdiem','perdiem',PERDIEM,true);
 buildQtyTable('fdecRental','fdecRental',FDEC_RENTAL,true);
 buildEqFees();
-buildQtyTable('itmSP','itmSP',ITM_SP,true);
-buildQtyTable('itmAL','itmAL',ITM,true);
+buildQtyTable('itmSP','itmSP',ITM_LEFT,true);
+buildQtyTable('itmAL','itmAL',ITM_RIGHT,true);
 buildQtyTable('backflow','backflow',BACKFLOW,true);
 buildQtyTable('firePump','firePump',FIREPUMP,true);
 buildQtyTable('sampleTest','sampleTest',SAMPLES,true);
 buildMaterialCatalog();
+setupMatScrollLock();
+
+/* Scroll lock: while the pointer is inside a scrolling material window
+   (the category rail or the item pane), the mouse wheel scrolls only that
+   window. The page behind it does not scroll — not even when the pane has
+   reached its top or bottom. */
+function setupMatScrollLock(){
+  ['matNav', 'materialCatalog'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (!el || el._scrollLock) return;
+    el._scrollLock = true;
+    el.addEventListener('wheel', function(e){
+      // Only lock when the pane actually has something to scroll.
+      if (el.scrollHeight <= el.clientHeight) return;
+      var atTop = el.scrollTop <= 0;
+      var atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+      var up = e.deltaY < 0;
+      var down = e.deltaY > 0;
+      // At an edge and pushing further that way: keep the page from scrolling.
+      if ((atTop && up) || (atBottom && down)){
+        e.preventDefault();
+      }
+      // Within bounds: let the pane scroll but stop it reaching the page.
+      e.stopPropagation();
+    }, { passive: false });
+  });
+}
 
 function laborRows(tbodyId, prefix, classes, dept){
   dept = dept || 'sp';
@@ -3140,7 +3169,18 @@ const LIBRARY = {
         "Includes wiring of the new waterflow switch.",
         "Includes adjusting time delay between 60-90 seconds for activation.",
         "Includes testing the proper activation of the new waterflow switch. (Alarms will activate)"
-      ] }
+      ] },
+    "Furnish and install one (1) new system pressure gauge(s) and associated 3-way valves.",
+    "Clean and survey lightly loaded sprinklers throughout.",
+    "Replace approximately (50) obsolete concealed sprinklers due to missing cover plates, painted cover plates, and loading identified on the concealed sprinklers.",
+    "Perform 10-Year sample testing on four (4) dry barrel sprinklers, including replacement of the four (4) sample sprinklers with new sprinklers, per NFPA 25. Where one sprinkler within a representative sample fails to meet the test requirement, all sprinklers within the area represented by that sample shall be replaced.",
+    "Replace (1) dry barrel sprinklers in lieu of 10-Year sample testing, per NFPA 25. Replacement is more cost-effective than testing.",
+    { text: "Complete an internal video inspection of the underground lead-in piping.",
+      subs: [
+        "Perform a video pipe inspection of the underground fire service main, run from the base of the riser to the city main control valve, to determine whether the piping has been compromised, damaged, or obstructed by foreign objects, debris accumulation, or a partially closed valve along the full length of the run. If the findings require further action, a separate proposal will be issued for the necessary repairs."
+      ] },
+    "Perform the 50-Year sample testing on four (4) 50-year-old sprinklers, including replacement of the four (4) sample sprinklers with new sprinklers, per NFPA 25. Where one sprinkler within a representative sample fails to meet the test requirement, all sprinklers within the area represented by that sample shall be replaced.",
+    "Replace approximately one (1) quick-response sprinkler in lieu of performing the 20-Year sample testing, per NFPA 25. Replacement is more cost-effective than testing."
   ],
   notes: [
     "When replacing sprinklers in drywall or decorative ceilings, access holes may need to be cut in the ceiling. Patching of any access holes is the customer's responsibility and is not included in this quotation.",
@@ -3157,13 +3197,16 @@ const LIBRARY = {
     "The FDC Hydrostatic Test may only be performed when the outside temperature is consistently above 40°F and will be scheduled accordingly.",
     "This work has been quoted as subcontracted to Guardian Automatic Sprinkler Corporation under the direct supervision of Fire Defense Equipment Co.",
     "A down payment of $____________ is required prior to scheduling or commencing work.",
-    "Due to fluctuating material costs and delivery lead times, materials will be ordered upon approval of this quotation and invoiced upon receipt."
+    "Due to fluctuating material costs and delivery lead times, materials will be ordered upon approval of this quotation and invoiced upon receipt.",
+    "This work requires a city water supply shutdown to the fire protection system. Depending on the configuration of the service, this may also interrupt the building's domestic water supply for the duration of the work. Anticipate a four (4) to six (6) hour shutdown window.",
+    "This work includes surveys and investigations that may prompt additional proposals based on the findings."
   ],
   quals: [
     "Unless otherwise noted, all work will be performed during normal business hours (Monday\u2013Friday, 7:00 a.m. to 5:00 p.m.), excluding holidays.",
     "This quotation is not a design review to determine whether the building or equipment is properly protected or whether the system was installed correctly. If verification of proper protection or installation is required, a complete building and system survey can be performed at an additional cost.",
     "During hydrostatic testing, Fire Defense Equipment Co. is not responsible for any damages resulting from leaking or burst pipe or fittings on existing system components. Any required repair or replacement will be invoiced at additional cost.",
-    "Existing fittings must be disassembled to perform the 5-year internal pipe inspection. Fire Defense Equipment Co. is not responsible for, and this quotation does not include, replacement of existing pipe or fittings that leak following reassembly due to age or condition."
+    "Existing fittings must be disassembled to perform the 5-year internal pipe inspection. Fire Defense Equipment Co. is not responsible for, and this quotation does not include, replacement of existing pipe or fittings that leak following reassembly due to age or condition.",
+    "During the underground pipe investigation, Fire Defense Equipment Co. is not responsible for any damage, leaks, or burst pipe or fittings found on existing underground system components. Any required repair or replacement will be quoted separately."
   ],
   resp: [
     "Ensuring all areas of fire protection work are accessible and clear of stock, furniture, or any materials that may hinder installation",
@@ -3404,6 +3447,34 @@ document.querySelectorAll("[data-filter]").forEach(inp => {
 document.getElementById("metaLine").textContent = "V" + APP_META.version + " \u00b7 " + APP_META.author;
 document.title = "FDEC Proposal Builder V" + APP_META.version;
 
+/* Merge any newer LIBRARY items into a restored section so additions made
+   after a draft was saved are never hidden. Saved items keep their text,
+   checked state, and sub-items; library items not present in the saved list
+   are appended (unchecked). Scope library entries may be strings or objects
+   with subs[]. Matching is by normalized text. */
+function mergeLibraryInto(key, savedArr){
+  const norm = t => String(t || "").replace(/\s+/g, " ").trim().toLowerCase();
+  const out = Array.isArray(savedArr) ? savedArr.slice() : [];
+  const seen = new Set(out.map(it => norm(it && it.text)));
+  (LIBRARY[key] || []).forEach(entry => {
+    if (key === "incexc"){
+      const text = entry.text;
+      if (!seen.has(norm(text))){ out.push({ text: text, mode: entry.mode }); seen.add(norm(text)); }
+      return;
+    }
+    const obj = (typeof entry === "string") ? { text: entry, subs: [] } : entry;
+    if (!seen.has(norm(obj.text))){
+      out.push({
+        text: obj.text,
+        checked: false,
+        subs: (obj.subs || []).map(s => ({ text: s, checked: false }))
+      });
+      seen.add(norm(obj.text));
+    }
+  });
+  return out;
+}
+
 let restoredMsg = "";
 (function hydrate(){
   const el = document.getElementById("savedState");
@@ -3420,7 +3491,7 @@ let restoredMsg = "";
     }
     if (saved.sections){
       for (const key of ["scope","notes","quals","resp","billing","closing","incexc"]){
-        if (Array.isArray(saved.sections[key])) state[key] = saved.sections[key];
+        if (Array.isArray(saved.sections[key])) state[key] = mergeLibraryInto(key, saved.sections[key]);
       }
       // guarantee scope items have a subs array
       state.scope.forEach(i => { if (!Array.isArray(i.subs)) i.subs = []; });
@@ -4002,7 +4073,7 @@ function applySuiteDraft(saved){
     }
     if (saved.sections){
       for (const key of ["scope","notes","quals","resp","billing","closing","incexc"]){
-        if (Array.isArray(saved.sections[key])) state[key] = saved.sections[key];
+        if (Array.isArray(saved.sections[key])) state[key] = mergeLibraryInto(key, saved.sections[key]);
       }
       state.scope.forEach(i => { if (!Array.isArray(i.subs)) i.subs = []; });
     }
@@ -4801,6 +4872,34 @@ document.querySelectorAll("[data-filter]").forEach(inp => {
 document.getElementById("metaLine").textContent = "V" + APP_META.version + " \u00b7 " + APP_META.author;
 document.title = "FDEC Annual Inspection" + " V" + APP_META.version;
 
+/* Merge any newer LIBRARY items into a restored section so additions made
+   after a draft was saved are never hidden. Saved items keep their text,
+   checked state, and sub-items; library items not present in the saved list
+   are appended (unchecked). Scope library entries may be strings or objects
+   with subs[]. Matching is by normalized text. */
+function mergeLibraryInto(key, savedArr){
+  const norm = t => String(t || "").replace(/\s+/g, " ").trim().toLowerCase();
+  const out = Array.isArray(savedArr) ? savedArr.slice() : [];
+  const seen = new Set(out.map(it => norm(it && it.text)));
+  (LIBRARY[key] || []).forEach(entry => {
+    if (key === "incexc"){
+      const text = entry.text;
+      if (!seen.has(norm(text))){ out.push({ text: text, mode: entry.mode }); seen.add(norm(text)); }
+      return;
+    }
+    const obj = (typeof entry === "string") ? { text: entry, subs: [] } : entry;
+    if (!seen.has(norm(obj.text))){
+      out.push({
+        text: obj.text,
+        checked: false,
+        subs: (obj.subs || []).map(s => ({ text: s, checked: false }))
+      });
+      seen.add(norm(obj.text));
+    }
+  });
+  return out;
+}
+
 let restoredMsg = "";
 (function hydrate(){
   const el = document.getElementById("savedState");
@@ -4817,7 +4916,7 @@ let restoredMsg = "";
     }
     if (saved.sections){
       for (const key of ["scope","notes","quals","resp","billing","closing","incexc"]){
-        if (Array.isArray(saved.sections[key])) state[key] = saved.sections[key];
+        if (Array.isArray(saved.sections[key])) state[key] = mergeLibraryInto(key, saved.sections[key]);
       }
       // guarantee scope items have a subs array
       state.scope.forEach(i => { if (!Array.isArray(i.subs)) i.subs = []; });
@@ -5399,7 +5498,7 @@ function applySuiteDraft(saved){
     }
     if (saved.sections){
       for (const key of ["scope","notes","quals","resp","billing","closing","incexc"]){
-        if (Array.isArray(saved.sections[key])) state[key] = saved.sections[key];
+        if (Array.isArray(saved.sections[key])) state[key] = mergeLibraryInto(key, saved.sections[key]);
       }
       state.scope.forEach(i => { if (!Array.isArray(i.subs)) i.subs = []; });
     }
@@ -6176,6 +6275,34 @@ document.querySelectorAll("[data-filter]").forEach(inp => {
 document.getElementById("metaLine").textContent = "V" + APP_META.version + " \u00b7 " + APP_META.author;
 document.title = "FDEC New Install" + " V" + APP_META.version;
 
+/* Merge any newer LIBRARY items into a restored section so additions made
+   after a draft was saved are never hidden. Saved items keep their text,
+   checked state, and sub-items; library items not present in the saved list
+   are appended (unchecked). Scope library entries may be strings or objects
+   with subs[]. Matching is by normalized text. */
+function mergeLibraryInto(key, savedArr){
+  const norm = t => String(t || "").replace(/\s+/g, " ").trim().toLowerCase();
+  const out = Array.isArray(savedArr) ? savedArr.slice() : [];
+  const seen = new Set(out.map(it => norm(it && it.text)));
+  (LIBRARY[key] || []).forEach(entry => {
+    if (key === "incexc"){
+      const text = entry.text;
+      if (!seen.has(norm(text))){ out.push({ text: text, mode: entry.mode }); seen.add(norm(text)); }
+      return;
+    }
+    const obj = (typeof entry === "string") ? { text: entry, subs: [] } : entry;
+    if (!seen.has(norm(obj.text))){
+      out.push({
+        text: obj.text,
+        checked: false,
+        subs: (obj.subs || []).map(s => ({ text: s, checked: false }))
+      });
+      seen.add(norm(obj.text));
+    }
+  });
+  return out;
+}
+
 let restoredMsg = "";
 (function hydrate(){
   const el = document.getElementById("savedState");
@@ -6192,7 +6319,7 @@ let restoredMsg = "";
     }
     if (saved.sections){
       for (const key of ["scope","notes","quals","resp","billing","closing","incexc"]){
-        if (Array.isArray(saved.sections[key])) state[key] = saved.sections[key];
+        if (Array.isArray(saved.sections[key])) state[key] = mergeLibraryInto(key, saved.sections[key]);
       }
       // guarantee scope items have a subs array
       state.scope.forEach(i => { if (!Array.isArray(i.subs)) i.subs = []; });
@@ -6774,7 +6901,7 @@ function applySuiteDraft(saved){
     }
     if (saved.sections){
       for (const key of ["scope","notes","quals","resp","billing","closing","incexc"]){
-        if (Array.isArray(saved.sections[key])) state[key] = saved.sections[key];
+        if (Array.isArray(saved.sections[key])) state[key] = mergeLibraryInto(key, saved.sections[key]);
       }
       state.scope.forEach(i => { if (!Array.isArray(i.subs)) i.subs = []; });
     }
