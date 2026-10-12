@@ -1921,7 +1921,9 @@ function recalc(ev){
   const grandCust = lines.reduce((a,l)=>a+l[3],0);
   const custMaterial = matItemCost*(1+P.miscmat) + vendorCost*(1+P.material);
   const tax = custMaterial*P.tax + itmCost*P.tax;
-  const down = grandCust*P.down;
+  // Round the down payment UP to the nearest $100, regardless of the
+  // down payment percentage, so the quoted figure is always a clean amount.
+  const down = Math.ceil((grandCust*P.down) / 100) * 100;
   const profit = grandCust - grandCost;
 
   const tb = $('summaryBody');
@@ -4194,18 +4196,26 @@ if (_btnSave) _btnSave.addEventListener("click", () => {
   // underscores or a previously auto-filled dollar amount.
   const DP_RE = /(A down payment of\s+)(\$[\d,]+(?:\.\d{2})?|\$?_+)(\s+is required)/i;
 
-  function fillDownPayment(display){
+  // Replace the amount inside any down payment line in the given state
+  // array; returns true if at least one line changed.
+  function applyTo(arr, display){
     let touched = false;
-    (state.notes || []).forEach(note => {
-      if (DP_RE.test(note.text)){
+    (arr || []).forEach(item => {
+      if (DP_RE.test(item.text)){
         // Function replacer avoids "$" in the amount being read as a
         // regex backreference (e.g. $1) inside the replacement string.
-        const next = note.text.replace(DP_RE, (m, pre, amt, post) => pre + display + post);
-        if (next !== note.text){ note.text = next; touched = true; }
+        const next = item.text.replace(DP_RE, (m, pre, amt, post) => pre + display + post);
+        if (next !== item.text){ item.text = next; touched = true; }
       }
     });
-    // Re-render notes so the on-screen textarea reflects the new amount.
-    if (touched) render("notes");
+    return touched;
+  }
+
+  function fillDownPayment(display){
+    // Carry the amount into BOTH the Notes line and the
+    // Billing & Payment Terms line so it only has to be entered once.
+    if (applyTo(state.notes, display)) render("notes");
+    if (applyTo(state.billing, display)) render("billing");
   }
 
   window.addEventListener("message", function(e){
